@@ -17,14 +17,14 @@ export default async function DashboardLayout({ children }: { children: React.Re
     const supabase = createClient();
     const { data: { user: authUser } } = await supabase.auth.getUser();
     if (authUser) {
-      user = {
-        email:      authUser.email ?? '',
-        full_name:  authUser.user_metadata?.full_name ?? null,
-        avatar_url: authUser.user_metadata?.avatar_url ?? null,
-      };
       try {
         [profile, projects] = await Promise.all([getProfile(), listProjects()]);
       } catch { /* swallow — keep dashboard accessible */ }
+      user = {
+        email:      authUser.email ?? '',
+        full_name:  profile?.full_name ?? authUser.user_metadata?.full_name ?? null,
+        avatar_url: profile?.avatar_url ?? authUser.user_metadata?.avatar_url ?? null,
+      };
     }
   }
 

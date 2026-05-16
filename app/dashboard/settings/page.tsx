@@ -42,6 +42,7 @@ export default async function SettingsPage() {
         }}
         email={profile?.email ?? 'demo@capduction.app'}
         plan={profile?.plan ?? 'free'}
+        avatarUrl={profile?.avatar_url ?? null}
         isDemoMode={isDemoMode}
       />
     </div>

@@ -1,10 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import Link from 'next/link';
-import { Save, CreditCard, LogOut, Check } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Save, CreditCard, LogOut, Check, Upload, Trash2, Loader2 } from 'lucide-react';
 import { TONES, PLATFORMS, DURATIONS } from '@/types';
 import { updateProfileAction, updateSettingsAction } from '@/app/actions/settings';
+import { uploadAvatarAction, removeAvatarAction } from '@/app/actions/avatar';
 
 interface Defaults {
   full_name:        string;
@@ -16,17 +18,66 @@ interface Defaults {
 }
 
 export function SettingsForm({
-  defaults, email, plan, isDemoMode,
+  defaults, email, plan, avatarUrl, isDemoMode,
 }: {
   defaults: Defaults;
   email: string;
   plan: string;
+  avatarUrl: string | null;
   isDemoMode: boolean;
 }) {
+  const router = useRouter();
   const [d, setD] = useState<Defaults>(defaults);
   const [saving, setSaving] = useState(false);
   const [saved,  setSaved]  = useState(false);
   const [error,  setError]  = useState<string | null>(null);
+  const [avatar, setAvatar] = useState<string | null>(avatarUrl);
+  const [avatarBusy, setAvatarBusy] = useState<'upload' | 'remove' | null>(null);
+  const [avatarErr, setAvatarErr]   = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  async function handleAvatarFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = '';  // allow re-selecting the same file
+    if (!file) return;
+    setAvatarErr(null);
+
+    if (isDemoMode) {
+      // Demo mode — local preview only
+      setAvatarBusy('upload');
+      const reader = new FileReader();
+      reader.onload = () => {
+        setAvatar(reader.result as string);
+        setAvatarBusy(null);
+      };
+      reader.readAsDataURL(file);
+      return;
+    }
+
+    setAvatarBusy('upload');
+    const fd = new FormData();
+    fd.set('avatar', file);
+    const res = await uploadAvatarAction(fd);
+    setAvatarBusy(null);
+    if (res.error) { setAvatarErr(res.error); return; }
+    if (res.url) {
+      setAvatar(res.url);
+      router.refresh();
+    }
+  }
+
+  async function handleAvatarRemove() {
+    setAvatarErr(null);
+    if (isDemoMode) { setAvatar(null); return; }
+    setAvatarBusy('remove');
+    const res = await removeAvatarAction();
+    setAvatarBusy(null);
+    if (res.error) { setAvatarErr(res.error); return; }
+    setAvatar(null);
+    router.refresh();
+  }
+
+  const initial = (d.full_name || email).charAt(0).toUpperCase();
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
@@ -59,6 +110,79 @@ export function SettingsForm({
 
   return (
     <form onSubmit={handleSave} className="flex flex-col gap-6">
+      {/* ── Avatar block ──────────────────────────── */}
+      <Card title="รูปโปรไฟล์">
+        <div className="flex items-center gap-5 flex-wrap">
+          <div className="relative">
+            <div
+              className="w-24 h-24 rounded-full overflow-hidden flex items-center justify-center
+                         bg-gradient-to-br from-pink to-violet text-white font-display
+                         text-[42px] font-bold border-2 border-white/80
+                         shadow-[0_12px_24px_-8px_rgba(124,58,237,0.4)]"
+            >
+              {avatar ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={avatar} alt="Avatar" className="w-full h-full object-cover" />
+              ) : (
+                initial
+              )}
+            </div>
+            {avatarBusy && (
+              <div className="absolute inset-0 rounded-full bg-ink/40 backdrop-blur-sm
+                              flex items-center justify-center">
+                <Loader2 size={20} className="text-white animate-spin" />
+              </div>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-2 flex-1 min-w-[200px]">
+            <div className="flex gap-2 flex-wrap">
+              <button
+                type="button"
+                data-cursor="start"
+                disabled={!!avatarBusy}
+                onClick={() => fileRef.current?.click()}
+                className="hover-target inline-flex items-center gap-2 px-4 py-2.5 rounded-[10px]
+                           btn-grad text-white font-semibold text-[13px] border-0
+                           disabled:opacity-60 lang-th:font-thai"
+              >
+                <Upload size={14} />
+                {avatar ? 'เปลี่ยนรูป' : 'อัปโหลดรูป'}
+              </button>
+              {avatar && (
+                <button
+                  type="button"
+                  data-cursor="start"
+                  disabled={!!avatarBusy}
+                  onClick={handleAvatarRemove}
+                  className="hover-target inline-flex items-center gap-2 px-4 py-2.5 rounded-[10px]
+                             bg-white/65 border border-white/80 text-ink-3 hover:text-rose-600
+                             hover:bg-rose-50/70 hover:border-rose-200 font-semibold text-[13px]
+                             disabled:opacity-60 transition-all lang-th:font-thai"
+                >
+                  <Trash2 size={14} />
+                  ลบรูป
+                </button>
+              )}
+            </div>
+            <p className="text-[11px] text-ink-3 lang-th:font-thai">
+              JPG · PNG · WebP · GIF · ไฟล์ไม่เกิน 2 MB
+            </p>
+            {avatarErr && (
+              <p className="text-[12px] text-rose-600 lang-th:font-thai">{avatarErr}</p>
+            )}
+          </div>
+
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            onChange={handleAvatarFile}
+            className="hidden"
+          />
+        </div>
+      </Card>
+
       {/* ── Account block ─────────────────────────── */}
       <Card title="บัญชี">
         <Field label="อีเมล (อ่านอย่างเดียว)">
