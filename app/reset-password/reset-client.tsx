@@ -34,20 +34,38 @@ export default function ResetClient() {
     async function establish() {
       try {
         const supabase = createClient();
-        const code = search.get('code');
 
-        // 1) PKCE code in the URL → exchange for session
+        // 1) Hash-based recovery (Supabase implicit flow on /verify redirect).
+        //    The PKCE-mode client doesn't auto-detect these, so parse + set
+        //    the session ourselves before clearing the hash.
+        if (typeof window !== 'undefined' && window.location.hash.includes('access_token')) {
+          const hashParams = new URLSearchParams(window.location.hash.slice(1));
+          const access_token  = hashParams.get('access_token');
+          const refresh_token = hashParams.get('refresh_token');
+          if (access_token && refresh_token) {
+            const { error: setErr } = await supabase.auth.setSession({ access_token, refresh_token });
+            if (cancelled) return;
+            if (setErr) { setStage('invalid'); return; }
+            // Strip the tokens from the URL bar (don't leave secrets in history)
+            history.replaceState(null, '', window.location.pathname);
+            setStage('ready');
+            return;
+          }
+        }
+
+        // 2) PKCE code in the query string → exchange for session
+        const code = search.get('code');
         if (code) {
           const { error: exErr } = await supabase.auth.exchangeCodeForSession(code);
           if (cancelled) return;
           if (exErr) { setStage('invalid'); return; }
+          history.replaceState(null, '', window.location.pathname);
           setStage('ready');
           return;
         }
 
-        // 2) No code — maybe session already exists (user clicked an older
-        //    hash-token link that the SDK auto-detected), or they navigated
-        //    here directly while still signed in.
+        // 3) Nothing in the URL — maybe a session already exists (user
+        //    navigated here directly while still signed in).
         const { data: { session } } = await supabase.auth.getSession();
         if (cancelled) return;
         setStage(session ? 'ready' : 'invalid');
