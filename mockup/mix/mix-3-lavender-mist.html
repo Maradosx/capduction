@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Capduction · Lavender Mist — Scripts as Soft as Dreams</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=Geist+Mono:wght@400;500&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --mist:    #E8E0FF;
+    --lilac:   #D5CAFF;
+    --sky:     #C8E0FF;
+    --cyan:    #B5E5F0;
+    --mint:    #C8F0DD;
+    --cloud:   #F0EBFF;
+    --gold:    #FFE4B0;
+    --violet:  #9C8AFF;
+    --indigo:  #5C4CC4;
+    --sky-d:   #4A8BC4;
+    --teal:    #4ABDC4;
+    --ink:     #1F1B3D;
+    --ink-2:   #3D3464;
+    --ink-3:   #5C548A;
+    --slate:   #8A82B0;
+    --bg:      #FAF8FF;
+    --bg-2:    #F5F2FF;
+    --line:    rgba(92,76,196,0.1);
+    --line-2:  rgba(92,76,196,0.16);
+    --font-display: 'Inter', sans-serif;
+    --font-serif:   'Instrument Serif', serif;
+    --font-thai:    'Sarabun', sans-serif;
+    --font-mono:    'Geist Mono', monospace;
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg); color: var(--ink);
+    font-family: var(--font-display); font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden; min-height: 100vh; position: relative;
+    cursor: none;
+  }
+  body[lang="th"] { font-family: var(--font-thai); }
+
+  /* Lavender ethereal mesh */
+  body::before {
+    content: ""; position: fixed; inset: 0; z-index: -2;
+    background:
+      radial-gradient(circle at 12% 18%, var(--lilac) 0%, transparent 42%),
+      radial-gradient(circle at 85% 12%, var(--sky) 0%, transparent 40%),
+      radial-gradient(circle at 50% 50%, var(--mist) 0%, transparent 55%),
+      radial-gradient(circle at 78% 78%, var(--cyan) 0%, transparent 45%),
+      radial-gradient(circle at 18% 82%, var(--lilac) 0%, transparent 38%),
+      radial-gradient(circle at 50% 30%, var(--gold) 0%, transparent 35%);
+    filter: saturate(1.1);
+    animation: drift 42s ease-in-out infinite;
+  }
+  @keyframes drift {
+    0%,100% { transform: scale(1) rotate(0deg); }
+    50% { transform: scale(1.05) rotate(0.3deg); }
+  }
+  body::after {
+    content: ""; position: fixed; inset: 0; z-index: -1;
+    background: rgba(250,248,255,0.5);
+    backdrop-filter: blur(55px);
+  }
+
+  /* Cursor (lavender orb) */
+  .cursor {
+    position: fixed; pointer-events: none; z-index: 10000;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%,
+      white, var(--mist) 30%, var(--violet) 75%, var(--indigo));
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.7),
+      0 4px 16px rgba(156,138,255,0.4),
+      inset 0 -2px 4px rgba(92,76,196,0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.3s var(--ease), height 0.3s var(--ease);
+  }
+  .cursor.target {
+    width: 64px; height: 64px;
+    background: radial-gradient(circle at 35% 30%,
+      white, var(--sky) 25%, var(--violet) 60%, var(--indigo));
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.8),
+      0 12px 36px rgba(156,138,255,0.5);
+  }
+  .cursor .label {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono); font-size: 9px;
+    color: white; letter-spacing: 0.1em;
+    text-transform: uppercase; opacity: 0;
+    transition: opacity 0.2s; font-weight: 600;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  }
+  .cursor.target .label { opacity: 1; }
+  @media (max-width: 768px) { body { cursor: auto; } .cursor { display: none; } }
+  a, button, .hover-target { cursor: none; }
+
+  /* Cosmic wave deco */
+  .hero-wave {
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 75vh; pointer-events: none; z-index: 1;
+    opacity: 0.5;
+  }
+  .hero-wave svg { width: 100%; height: 100%; }
+  /* Faint starfield */
+  .starfield {
+    position: absolute; top: 0; left: 0; right: 0; height: 100vh;
+    pointer-events: none; z-index: 0;
+    background-image:
+      radial-gradient(1px 1px at 8% 14%, rgba(156,138,255,0.6), transparent),
+      radial-gradient(1px 1px at 22% 24%, rgba(156,138,255,0.5), transparent),
+      radial-gradient(1.5px 1.5px at 38% 12%, rgba(255,228,176,0.6), transparent),
+      radial-gradient(1px 1px at 52% 22%, rgba(156,138,255,0.5), transparent),
+      radial-gradient(1px 1px at 68% 14%, rgba(156,138,255,0.6), transparent),
+      radial-gradient(1.5px 1.5px at 82% 32%, rgba(74,189,196,0.7), transparent),
+      radial-gradient(1px 1px at 92% 18%, rgba(156,138,255,0.6), transparent),
+      radial-gradient(1px 1px at 14% 50%, rgba(156,138,255,0.4), transparent),
+      radial-gradient(1px 1px at 88% 56%, rgba(255,228,176,0.5), transparent);
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 20px; left: 20px; right: 20px;
+    z-index: 100;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 14px 12px 22px;
+    background: rgba(255,255,255,0.6);
+    backdrop-filter: blur(30px) saturate(1.6);
+    border: 1px solid rgba(255,255,255,0.85);
+    border-radius: 18px;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.95) inset,
+      0 -1px 0 rgba(92,76,196,0.15) inset,
+      0 14px 40px rgba(92,76,196,0.12);
+  }
+  .brand { display: flex; align-items: center; gap: 12px; color: var(--ink); text-decoration: none; }
+  .brand-icon {
+    width: 36px; height: 36px;
+    border-radius: 11px;
+    background: radial-gradient(circle at 35% 28%,
+      white 0%, var(--mist) 20%, var(--violet) 55%, var(--indigo) 100%);
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.7),
+      0 4px 14px rgba(156,138,255,0.4),
+      inset 0 1px 0 rgba(255,255,255,0.6),
+      inset 0 -2px 4px rgba(92,76,196,0.3);
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+  .brand-icon::after {
+    content: ""; position: absolute;
+    top: 5px; left: 8px; width: 14px; height: 5px;
+    background: rgba(255,255,255,0.75); border-radius: 50%;
+    transform: rotate(-25deg);
+  }
+  .brand-icon svg { width: 18px; height: 18px; color: white;
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.25));
+  }
+  .brand-name { font-weight: 600; font-size: 18px; letter-spacing: -0.012em; }
+  nav .center { display: flex; gap: 8px; align-items: center; }
+  nav .center a {
+    padding: 9px 18px; border-radius: 100px;
+    color: var(--ink-3); text-decoration: none;
+    font-size: 14px; font-weight: 500;
+    transition: all 0.2s;
+  }
+  body[lang="th"] nav .center a { font-family: var(--font-thai); }
+  nav .center a:hover { background: rgba(255,255,255,0.6); color: var(--ink); }
+  nav .center a.active { background: rgba(156,138,255,0.14); color: var(--ink); }
+  nav .right { display: flex; align-items: center; gap: 12px; }
+  .lang-toggle {
+    display: inline-flex; padding: 3px;
+    background: rgba(255,255,255,0.6);
+    border: 1px solid rgba(255,255,255,0.6);
+    border-radius: 100px; gap: 2px;
+  }
+  .lang-toggle button {
+    border: 0; background: transparent;
+    padding: 5px 12px; border-radius: 100px;
+    font-family: var(--font-mono); font-size: 10px;
+    color: var(--ink-3); cursor: none;
+    transition: all 0.25s;
+  }
+  .lang-toggle button.active { background: var(--ink); color: white; }
+  .nav-cta {
+    padding: 10px 20px; border-radius: 100px;
+    background: linear-gradient(135deg, var(--sky-d) 0%, var(--violet) 50%, var(--indigo) 100%);
+    color: white; text-decoration: none;
+    font-size: 14px; font-weight: 600;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.4) inset,
+      0 -1px 0 rgba(92,76,196,0.3) inset,
+      0 4px 14px rgba(156,138,255,0.5);
+    transition: all 0.25s;
+  }
+  body[lang="th"] .nav-cta { font-family: var(--font-thai); }
+  .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 1px 0 rgba(255,255,255,0.4) inset, 0 -1px 0 rgba(92,76,196,0.3) inset, 0 8px 24px rgba(156,138,255,0.6); }
+
+  /* HERO */
+  .hero {
+    min-height: 88vh;
+    padding: 140px 32px 60px;
+    position: relative;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center;
+    z-index: 2;
+  }
+  .app-icon {
+    width: 120px; height: 120px;
+    border-radius: 32px;
+    background: radial-gradient(circle at 30% 25%,
+      white 0%,
+      var(--mist) 15%,
+      var(--lilac) 35%,
+      var(--violet) 65%,
+      var(--indigo) 100%);
+    box-shadow:
+      inset 0 3px 0 rgba(255,255,255,0.6),
+      inset 0 -3px 0 rgba(92,76,196,0.4),
+      0 0 0 1px rgba(255,255,255,0.4),
+      0 28px 60px rgba(156,138,255,0.5),
+      0 0 100px rgba(213,202,255,0.5);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 36px; position: relative;
+    animation: float 4s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  .app-icon svg {
+    width: 54px; height: 54px; color: white;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+  }
+  .app-icon::after {
+    content: ""; position: absolute;
+    top: 18px; left: 26px; width: 38px; height: 14px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.7), transparent);
+    border-radius: 50%; transform: rotate(-25deg);
+  }
+  /* Floating moons + stars */
+  .celestial {
+    position: absolute;
+    filter: drop-shadow(0 0 12px currentColor);
+    animation: floatStar 5s ease-in-out infinite;
+  }
+  @keyframes floatStar {
+    0%,100% { transform: translateY(0); opacity: 0.9; }
+    50% { transform: translateY(-10px); opacity: 0.55; }
+  }
+  .celestial svg { width: 100%; height: 100%; }
+  .c-1 { top: 16%; right: 18%; width: 22px; color: var(--gold); animation-delay: 0s; }
+  .c-2 { top: 60%; right: 14%; width: 18px; color: var(--violet); animation-delay: 1s; }
+  .c-3 { top: 26%; left: 16%; width: 24px; color: var(--sky-d); animation-delay: 2s; }
+  .c-4 { top: 68%; left: 22%; width: 16px; color: var(--teal); animation-delay: 3s; }
+  .c-5 { top: 14%; left: 50%; width: 16px; color: var(--gold); animation-delay: 0.6s; }
+
+  .hero h1 {
+    font-family: var(--font-display);
+    font-size: clamp(48px, 7vw, 100px);
+    line-height: 1; font-weight: 700;
+    letter-spacing: -0.035em;
+    margin-bottom: 20px;
+    color: var(--ink); max-width: 1100px;
+  }
+  body[lang="th"] .hero h1 {
+    font-family: var(--font-thai); font-weight: 700;
+    font-size: clamp(40px, 6vw, 88px); line-height: 1.05;
+  }
+  .hero h1 .iri {
+    background: linear-gradient(135deg, var(--sky-d) 0%, var(--violet) 45%, var(--indigo) 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero h1 .serif {
+    font-family: var(--font-serif); font-style: italic; font-weight: 400;
+    background: linear-gradient(180deg, var(--ink), var(--indigo));
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 1.08em;
+  }
+  body[lang="th"] .hero h1 .serif { font-family: var(--font-thai); font-style: normal; }
+
+  .hero-sub {
+    font-size: 18px; line-height: 1.55;
+    color: var(--ink-3); max-width: 580px;
+    margin: 0 auto 36px;
+  }
+  body[lang="th"] .hero-sub { font-family: var(--font-thai); }
+  .hero-sub strong { color: var(--ink); font-weight: 600; }
+
+  .hero-form {
+    display: inline-flex; align-items: center;
+    padding: 5px 5px 5px 22px;
+    background: rgba(255,255,255,0.6);
+    backdrop-filter: blur(28px) saturate(1.6);
+    border: 1px solid rgba(255,255,255,0.85);
+    border-radius: 14px;
+    min-width: 460px; max-width: 100%;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.95) inset, 0 16px 40px rgba(92,76,196,0.15);
+  }
+  .hero-form input {
+    flex: 1; background: transparent; border: 0;
+    padding: 13px 0;
+    color: var(--ink); font-family: var(--font-display); font-size: 14px;
+    outline: none; min-width: 0;
+  }
+  body[lang="th"] .hero-form input { font-family: var(--font-thai); }
+  .hero-form input::placeholder { color: var(--slate); }
+  .hero-form button {
+    padding: 11px 22px; border-radius: 9px;
+    background: linear-gradient(135deg, var(--sky-d) 0%, var(--violet) 100%);
+    color: white; border: 0;
+    font-family: var(--font-display); font-size: 14px; font-weight: 600;
+    cursor: none;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.4) inset, 0 4px 14px rgba(156,138,255,0.5);
+    transition: all 0.25s; white-space: nowrap;
+  }
+  body[lang="th"] .hero-form button { font-family: var(--font-thai); }
+  .hero-form button:hover { transform: translateY(-1px); box-shadow: 0 1px 0 rgba(255,255,255,0.4) inset, 0 8px 24px rgba(156,138,255,0.7); }
+  .hero-trust {
+    margin-top: 24px;
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--ink-3); letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .hero-trust .avs { display: flex; }
+  .hero-trust .av {
+    width: 20px; height: 20px; border-radius: 50%;
+    border: 2px solid var(--bg); margin-left: -6px;
+  }
+  .hero-trust .av:first-child { margin: 0; }
+  .hero-trust .av:nth-child(1) { background: linear-gradient(135deg, var(--sky-d), var(--violet)); }
+  .hero-trust .av:nth-child(2) { background: linear-gradient(135deg, var(--violet), var(--indigo)); }
+  .hero-trust .av:nth-child(3) { background: linear-gradient(135deg, var(--teal), var(--sky-d)); }
+  .hero-trust strong { color: var(--ink); font-weight: 700; }
+
+  /* DASHBOARD */
+  .dashboard-section { padding: 40px 32px 100px; position: relative; z-index: 2; perspective: 2200px; }
+  .dash-eye {
+    text-align: center; margin-bottom: 28px;
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.22em; color: var(--ink-3);
+    text-transform: uppercase;
+    display: flex; justify-content: center; align-items: center; gap: 14px;
+    max-width: 1500px; margin-left: auto; margin-right: auto;
+  }
+  .dash-eye::before, .dash-eye::after {
+    content: "✧";
+    background: linear-gradient(135deg, var(--sky-d), var(--violet));
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 14px;
+  }
+  .dashboard-wrap {
+    max-width: 1500px; margin: 0 auto;
+    transform: rotateX(6deg); transform-origin: center top;
+  }
+  .dashboard-frame {
+    background: rgba(255,255,255,0.68);
+    backdrop-filter: blur(30px) saturate(1.6);
+    border: 1px solid rgba(255,255,255,0.9);
+    border-radius: 22px; overflow: hidden;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.95) inset,
+      0 50px 100px rgba(92,76,196,0.22),
+      0 0 80px rgba(156,138,255,0.18);
+  }
+  .dash-bar {
+    padding: 14px 22px;
+    border-bottom: 1px solid var(--line);
+    display: flex; align-items: center; gap: 16px;
+    background: rgba(255,255,255,0.4);
+  }
+  .dash-brand-mini { display: flex; align-items: center; gap: 10px; }
+  .dash-brand-mini .icon {
+    width: 30px; height: 30px; border-radius: 9px;
+    background: radial-gradient(circle at 35% 28%, white, var(--violet) 60%, var(--indigo));
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.6), 0 2px 8px rgba(156,138,255,0.4);
+  }
+  .dash-brand-mini .icon svg { width: 14px; height: 14px; color: white; }
+  .dash-brand-mini .label { line-height: 1.1; }
+  .dash-brand-mini .label strong { font-size: 14px; font-weight: 700; color: var(--ink); }
+  .dash-brand-mini .label .beta {
+    display: inline-block; padding: 1px 6px;
+    background: linear-gradient(135deg, var(--sky-d), var(--violet));
+    color: white; border-radius: 4px; font-size: 9px;
+    font-family: var(--font-mono); letter-spacing: 0.08em;
+    margin-left: 4px; vertical-align: middle; font-weight: 600;
+  }
+  .dash-brand-mini .label .sub {
+    font-size: 10px; color: var(--slate);
+    font-family: var(--font-mono); display: block;
+  }
+  .dash-bar .title {
+    font-size: 15px; font-weight: 600; color: var(--ink);
+    padding-left: 16px; border-left: 1px solid var(--line);
+    margin-left: 4px;
+  }
+  body[lang="th"] .dash-bar .title { font-family: var(--font-thai); }
+  .dash-search {
+    flex: 1; max-width: 360px; margin: 0 auto;
+    display: flex; align-items: center; gap: 8px;
+    padding: 9px 14px;
+    background: rgba(255,255,255,0.6);
+    border: 1px solid rgba(255,255,255,0.8);
+    border-radius: 10px;
+    font-family: var(--font-mono); font-size: 12px;
+    color: var(--ink-3);
+  }
+  .dash-search svg { width: 14px; height: 14px; }
+  .dash-search .kbd {
+    margin-left: auto; padding: 2px 6px;
+    background: rgba(92,76,196,0.1);
+    border-radius: 4px; font-size: 10px;
+  }
+  .dash-bar .actions { display: flex; align-items: center; gap: 14px; }
+  .dash-bar .ico-btn {
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ink-3); border-radius: 8px;
+    background: rgba(255,255,255,0.4);
+  }
+  .dash-bar .ico-btn svg { width: 14px; height: 14px; }
+  .dash-bar .avatar-mini {
+    display: flex; align-items: center; gap: 10px;
+    padding-left: 14px; border-left: 1px solid var(--line);
+  }
+  .dash-bar .avatar-mini .av {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--sky-d), var(--violet));
+    box-shadow: 0 2px 8px rgba(156,138,255,0.4);
+  }
+  .dash-bar .avatar-mini .info { line-height: 1.1; }
+  .dash-bar .avatar-mini .info strong { font-size: 13px; font-weight: 600; color: var(--ink); }
+  .dash-bar .avatar-mini .info .sub { font-size: 10px; color: var(--slate); font-family: var(--font-mono); }
+
+  .dash-body { display: grid; grid-template-columns: 220px 1fr; }
+  .dash-side {
+    padding: 18px 12px;
+    border-right: 1px solid var(--line);
+    background: rgba(255,255,255,0.3);
+  }
+  .dash-item {
+    padding: 10px 14px; border-radius: 10px;
+    font-size: 13px; color: var(--ink-3);
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 3px; cursor: none; transition: all 0.2s;
+  }
+  body[lang="th"] .dash-item { font-family: var(--font-thai); }
+  .dash-item:hover { background: rgba(255,255,255,0.55); color: var(--ink); }
+  .dash-item.active {
+    background: linear-gradient(135deg, rgba(74,139,196,0.16), rgba(156,138,255,0.18));
+    color: var(--ink); font-weight: 600;
+    border: 1px solid rgba(156,138,255,0.25);
+  }
+  .dash-item .ico { width: 14px; height: 14px; opacity: 0.7; }
+  .dash-item .arrow { margin-left: auto; opacity: 0.4; }
+  .dash-sep { height: 1px; background: var(--line); margin: 14px 8px; }
+  .dash-side h6 {
+    font-family: var(--font-mono); font-size: 9px;
+    letter-spacing: 0.2em; color: var(--slate);
+    text-transform: uppercase; margin: 0 8px 12px; font-weight: 600;
+  }
+  .dash-item .badge {
+    margin-left: auto; padding: 2px 8px;
+    border-radius: 100px;
+    background: linear-gradient(135deg, var(--sky-d), var(--violet));
+    color: white; font-size: 9px;
+    letter-spacing: 0.08em; font-weight: 600;
+  }
+
+  .dash-main { padding: 28px 32px; }
+  .dash-section-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+  .dash-section-title h4 { font-size: 18px; font-weight: 700; color: var(--ink); }
+  body[lang="th"] .dash-section-title h4 { font-family: var(--font-thai); }
+  .dash-section-title .demo-badge {
+    padding: 5px 12px; border-radius: 100px;
+    background: linear-gradient(135deg, var(--sky-d), var(--violet));
+    color: white;
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.12em; font-weight: 600;
+    display: inline-flex; align-items: center; gap: 6px;
+    box-shadow: 0 4px 14px rgba(156,138,255,0.4);
+  }
+  .dash-section-title .demo-badge::before {
+    content: ""; width: 6px; height: 6px;
+    background: white; border-radius: 50%; animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1;}50%{opacity:.4;} }
+  .dash-tabs {
+    display: flex; gap: 4px; margin-bottom: 24px;
+    padding: 4px;
+    background: rgba(255,255,255,0.55);
+    border: 1px solid rgba(255,255,255,0.7);
+    border-radius: 12px;
+    align-self: flex-start; width: fit-content;
+  }
+  .dash-tab {
+    padding: 8px 16px; border-radius: 8px;
+    font-size: 12px; font-weight: 500; color: var(--ink-3);
+    cursor: none; transition: all 0.2s;
+  }
+  .dash-tab.active {
+    background: white; color: var(--ink); font-weight: 600;
+    box-shadow: 0 2px 6px rgba(92,76,196,0.12);
+  }
+  .dash-content h5 { font-size: 15px; font-weight: 700; color: var(--ink); margin-bottom: 6px; }
+  body[lang="th"] .dash-content h5 { font-family: var(--font-thai); }
+  .dash-content > p { font-size: 13px; color: var(--ink-3); margin-bottom: 18px; }
+  body[lang="th"] .dash-content > p { font-family: var(--font-thai); }
+  .dash-card {
+    background: rgba(255,255,255,0.58);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.8);
+    border-radius: 16px; padding: 20px;
+    display: flex; align-items: center; gap: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 14px rgba(92,76,196,0.08);
+    transition: all 0.25s;
+  }
+  .dash-card:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(92,76,196,0.15); }
+  .dash-card .ico-orb {
+    width: 46px; height: 46px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 28%, white, var(--mist) 30%, var(--violet) 70%, var(--indigo));
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.6), 0 6px 18px rgba(156,138,255,0.45);
+    flex-shrink: 0; position: relative;
+  }
+  .dash-card .ico-orb::after {
+    content: ""; position: absolute;
+    top: 6px; left: 11px; width: 14px; height: 5px;
+    background: rgba(255,255,255,0.7); border-radius: 50%;
+    transform: rotate(-25deg);
+  }
+  .dash-card .info { flex: 1; }
+  .dash-card .info strong { display: block; font-size: 14px; font-weight: 700; color: var(--ink); margin-bottom: 3px; }
+  body[lang="th"] .dash-card .info strong { font-family: var(--font-thai); }
+  .dash-card .info span { font-size: 12px; color: var(--ink-3); }
+  body[lang="th"] .dash-card .info span { font-family: var(--font-thai); }
+  .dash-create-btn {
+    padding: 10px 20px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--sky-d) 0%, var(--violet) 100%);
+    color: white; border: 0;
+    font-family: var(--font-display); font-weight: 600;
+    font-size: 13px; cursor: none;
+    display: inline-flex; align-items: center; gap: 6px;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.4) inset, 0 4px 14px rgba(156,138,255,0.4);
+  }
+  body[lang="th"] .dash-create-btn { font-family: var(--font-thai); }
+  .dash-tags {
+    display: flex; gap: 12px; margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+    font-family: var(--font-mono); font-size: 10px;
+    color: var(--ink-3); letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  /* Pastel beams */
+  .dash-beam {
+    position: absolute; z-index: -1;
+    width: 250px; height: 250px;
+    border-radius: 50%;
+    filter: blur(60px); opacity: 0.55;
+  }
+  .dash-beam-l { bottom: 100px; left: 5%; background: radial-gradient(circle, var(--sky-d), transparent 70%); }
+  .dash-beam-r { bottom: 100px; right: 5%; background: radial-gradient(circle, var(--violet), transparent 70%); }
+  .dash-beam-t { top: 100px; left: 50%; transform: translateX(-50%); background: radial-gradient(circle, var(--teal), transparent 70%); }
+
+  /* STUDIOS */
+  .studios-section { padding: 100px 32px; position: relative; z-index: 2; }
+  .studios-head { max-width: 800px; margin: 0 auto 60px; text-align: center; }
+  .eyebrow {
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--ink-3); margin-bottom: 24px;
+    display: inline-flex; align-items: center; gap: 14px;
+  }
+  .eyebrow::before, .eyebrow::after {
+    content: "✧";
+    background: linear-gradient(135deg, var(--sky-d), var(--violet));
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 14px;
+  }
+  .studios-head h2 {
+    font-family: var(--font-display);
+    font-size: clamp(40px, 5.4vw, 76px);
+    font-weight: 700; letter-spacing: -0.03em;
+    line-height: 1.05; color: var(--ink); margin-bottom: 18px;
+  }
+  body[lang="th"] .studios-head h2 { font-family: var(--font-thai); font-weight: 700; }
+  .studios-head h2 .iri {
+    background: linear-gradient(135deg, var(--sky-d), var(--violet), var(--indigo));
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .studios-head p { color: var(--ink-3); font-size: 17px; line-height: 1.55; }
+  body[lang="th"] .studios-head p { font-family: var(--font-thai); }
+
+  .studios-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    max-width: 1400px; margin: 0 auto;
+  }
+  .studio {
+    padding: 36px 30px;
+    background: rgba(255,255,255,0.58);
+    backdrop-filter: blur(28px) saturate(1.4);
+    border: 1px solid rgba(255,255,255,0.85);
+    border-radius: 22px;
+    transition: all 0.3s;
+    position: relative; overflow: hidden;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.95) inset, 0 10px 30px rgba(92,76,196,0.1);
+  }
+  .studio::before {
+    content: ""; position: absolute;
+    top: -50%; right: -50%; width: 100%; height: 100%;
+    border-radius: 50%;
+    filter: blur(40px); opacity: 0;
+    transition: opacity 0.4s;
+  }
+  .studio:nth-child(1)::before { background: radial-gradient(circle, var(--sky), transparent 70%); }
+  .studio:nth-child(2)::before { background: radial-gradient(circle, var(--lilac), transparent 70%); }
+  .studio:nth-child(3)::before { background: radial-gradient(circle, var(--cyan), transparent 70%); }
+  .studio:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 1px 0 rgba(255,255,255,0.95) inset, 0 28px 56px rgba(92,76,196,0.2);
+  }
+  .studio:hover::before { opacity: 0.7; }
+  .studio > * { position: relative; z-index: 1; }
+  .studio-orb {
+    width: 76px; height: 76px;
+    border-radius: 50%;
+    margin-bottom: 26px; position: relative;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.6), 0 14px 32px rgba(92,76,196,0.28);
+  }
+  .studio:nth-child(1) .studio-orb {
+    background: radial-gradient(circle at 35% 28%, white, var(--sky) 25%, var(--sky-d) 65%, var(--indigo));
+  }
+  .studio:nth-child(2) .studio-orb {
+    background: radial-gradient(circle at 35% 28%, white, var(--lilac) 25%, var(--violet) 65%, var(--indigo));
+  }
+  .studio:nth-child(3) .studio-orb {
+    background: radial-gradient(circle at 35% 28%, white, var(--cyan) 25%, var(--teal) 65%, #2A7B82);
+  }
+  .studio-orb::after {
+    content: ""; position: absolute;
+    top: 9px; left: 18px; width: 24px; height: 10px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.7), transparent);
+    border-radius: 50%; transform: rotate(-25deg);
+  }
+  .studio h3 {
+    font-family: var(--font-display); font-size: 26px;
+    font-weight: 700; letter-spacing: -0.02em;
+    margin-bottom: 6px; color: var(--ink);
+  }
+  body[lang="th"] .studio h3 { font-family: var(--font-thai); }
+  .studio h3 em {
+    font-family: var(--font-serif);
+    font-style: italic; font-weight: 400;
+    color: var(--violet);
+  }
+  body[lang="th"] .studio h3 em { font-family: var(--font-thai); font-style: normal; font-weight: 800; }
+  .studio .sub {
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--ink-3); margin-bottom: 20px; font-weight: 600;
+  }
+  .studio p { font-size: 14px; line-height: 1.65; color: var(--ink-3); }
+  body[lang="th"] .studio p { font-family: var(--font-thai); font-size: 15px; }
+
+  /* BOTTOM CTA */
+  .bottom-cta {
+    padding: 100px 32px; text-align: center;
+    position: relative; z-index: 2;
+    border-top: 1px solid var(--line);
+  }
+  .bottom-cta::before {
+    content: ""; position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 30% 50%, rgba(74,139,196,0.15), transparent 60%),
+      radial-gradient(ellipse 60% 50% at 70% 50%, rgba(156,138,255,0.18), transparent 60%);
+    z-index: -1;
+  }
+  .bottom-cta-inner { max-width: 720px; margin: 0 auto; }
+  .bottom-cta h2 {
+    font-size: clamp(42px, 5.5vw, 72px);
+    font-weight: 700; letter-spacing: -0.03em;
+    line-height: 1.05; color: var(--ink); margin-bottom: 20px;
+  }
+  body[lang="th"] .bottom-cta h2 { font-family: var(--font-thai); }
+  .bottom-cta h2 .iri {
+    background: linear-gradient(135deg, var(--sky-d), var(--violet), var(--indigo));
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .bottom-cta h2 .serif {
+    font-family: var(--font-serif); font-style: italic; font-weight: 400;
+  }
+  body[lang="th"] .bottom-cta h2 .serif { font-family: var(--font-thai); font-style: normal; }
+  .bottom-cta p { color: var(--ink-3); font-size: 17px; margin-bottom: 32px; line-height: 1.55; }
+  body[lang="th"] .bottom-cta p { font-family: var(--font-thai); }
+
+  /* FOOTER */
+  footer {
+    padding: 60px 32px 32px;
+    position: relative; z-index: 2;
+    background: rgba(255,255,255,0.5);
+    backdrop-filter: blur(30px);
+    border-top: 1px solid rgba(255,255,255,0.5);
+  }
+  .footer-grid {
+    max-width: 1400px; margin: 0 auto;
+    display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 48px;
+    padding-bottom: 48px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 24px;
+  }
+  .footer-brand-row {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 16px; color: var(--ink); text-decoration: none;
+  }
+  .footer-brand-row .icon {
+    width: 32px; height: 32px; border-radius: 9px;
+    background: radial-gradient(circle at 35% 28%, white, var(--violet) 60%, var(--indigo));
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 14px rgba(156,138,255,0.4);
+  }
+  .footer-brand-row .icon svg { width: 16px; height: 16px; color: white; }
+  .footer-brand-row .name { font-weight: 700; font-size: 20px; }
+  .footer-tag {
+    font-size: 14px; color: var(--ink-3);
+    max-width: 320px; line-height: 1.55;
+  }
+  body[lang="th"] .footer-tag { font-family: var(--font-thai); }
+  .footer-col h5 {
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    margin-bottom: 20px; font-weight: 600;
+    background: linear-gradient(135deg, var(--sky-d), var(--violet));
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .footer-col a {
+    display: block; color: var(--ink);
+    text-decoration: none; font-size: 14px;
+    padding: 6px 0; transition: color 0.2s;
+  }
+  body[lang="th"] .footer-col a { font-family: var(--font-thai); }
+  .footer-col a:hover {
+    background: linear-gradient(135deg, var(--sky-d), var(--violet));
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .footer-bot {
+    max-width: 1400px; margin: 0 auto;
+    display: flex; justify-content: space-between; align-items: center;
+    padding-top: 24px;
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.14em; color: var(--ink-3);
+    text-transform: uppercase;
+  }
+  .footer-bot .status {
+    background: linear-gradient(135deg, var(--sky-d), var(--violet));
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 600;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .footer-bot .status::before {
+    content: ""; width: 6px; height: 6px;
+    background: radial-gradient(circle, var(--sky-d), var(--violet));
+    border-radius: 50%;
+    box-shadow: 0 0 10px rgba(156,138,255,0.6);
+    animation: pulse 2s infinite;
+  }
+
+  @media (max-width: 1024px) {
+    nav { flex-wrap: wrap; gap: 12px; padding: 10px 14px; }
+    nav .center { order: 3; width: 100%; justify-content: center; flex-wrap: wrap; gap: 6px; }
+    nav .center a { padding: 7px 12px; font-size: 12px; }
+    .hero { padding: 180px 20px 60px; }
+    .app-icon { width: 96px; height: 96px; }
+    .hero-form { min-width: 0; width: 100%; max-width: 460px; }
+    .dashboard-wrap { transform: none; }
+    .dash-body { grid-template-columns: 1fr; }
+    .dash-side { display: none; }
+    .dash-bar .title, .dash-search, .dash-bar .actions .avatar-mini { display: none; }
+    .studios-grid, .footer-grid { grid-template-columns: 1fr; }
+    .studios-section, .bottom-cta { padding: 60px 20px; }
+    body { cursor: auto; }
+  }
+</style>
+</head>
+<body lang="th">
+
+<div class="cursor" id="cursor"><span class="label" id="clabel"></span></div>
+
+<div class="starfield"></div>
+<div class="hero-wave">
+  <svg viewBox="0 0 1440 800" fill="none" preserveAspectRatio="none">
+    <path d="M0,260 Q360,160 720,260 T1440,260" stroke="rgba(156,138,255,0.5)" stroke-width="1" fill="none"/>
+    <path d="M0,310 Q360,210 720,310 T1440,310" stroke="rgba(74,139,196,0.35)" stroke-width="1" fill="none"/>
+    <path d="M0,360 Q360,260 720,360 T1440,360" stroke="rgba(74,189,196,0.3)" stroke-width="1" fill="none"/>
+    <path d="M0,410 Q360,310 720,410 T1440,410" stroke="rgba(156,138,255,0.2)" stroke-width="1" fill="none"/>
+  </svg>
+</div>
+
+<nav>
+  <a href="#" class="brand">
+    <div class="brand-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M6 4l12 8-12 8V4z" fill="currentColor"/></svg></div>
+    <span class="brand-name">Capduction</span>
+  </a>
+  <div class="center">
+    <a href="#" class="active hover-target" data-cursor="go">Home</a>
+    <a href="#" class="hover-target" data-cursor="go">Studios</a>
+    <a href="#" class="hover-target" data-cursor="go">Pricing</a>
+    <a href="#" class="hover-target" data-cursor="go">Showcase</a>
+    <a href="#" class="hover-target" data-cursor="go">FAQ</a>
+  </div>
+  <div class="right">
+    <div class="lang-toggle">
+      <button class="active hover-target" data-lang="th">TH</button>
+      <button class="hover-target" data-lang="en">EN</button>
+    </div>
+    <a href="#" class="nav-cta hover-target" data-cursor="start"><span data-i18n="nav.cta">เริ่มเลย</span></a>
+  </div>
+</nav>
+
+<section class="hero">
+  <span class="celestial c-1"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0l2.4 9.6L24 12l-9.6 2.4L12 24l-2.4-9.6L0 12l9.6-2.4z"/></svg></span>
+  <span class="celestial c-2"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></span>
+  <span class="celestial c-3"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0l2.4 9.6L24 12l-9.6 2.4L12 24l-2.4-9.6L0 12l9.6-2.4z"/></svg></span>
+  <span class="celestial c-4"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></span>
+  <span class="celestial c-5"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0l2.4 9.6L24 12l-9.6 2.4L12 24l-2.4-9.6L0 12l9.6-2.4z"/></svg></span>
+
+  <div class="app-icon">
+    <svg viewBox="0 0 24 24" fill="none"><path d="M6 4l12 8-12 8V4z" fill="currentColor"/></svg>
+  </div>
+  <h1>
+    <span data-i18n="hero.h"><span class="serif">Scripts as Soft</span><br/><span class="iri">As Daydreams</span></span>
+  </h1>
+  <p class="hero-sub" data-i18n="hero.sub">
+    สตูดิโอ AI สำหรับครีเอเตอร์วิดีโอสั้นไทย — ปั้น<strong>สคริปต์การพูด</strong>และ<strong>แคปชั่นหน้าจอ</strong>ที่อบอวลด้วยความฝัน ใช้ง่าย ยอดขึ้นจริง
+  </p>
+  <form class="hero-form" onsubmit="event.preventDefault()">
+    <input type="email" placeholder="your@email.com" />
+    <button class="hover-target" data-cursor="join"><span data-i18n="hero.cta">เริ่มฟรี →</span></button>
+  </form>
+  <div class="hero-trust">
+    <div class="avs"><div class="av"></div><div class="av"></div><div class="av"></div></div>
+    <span><strong>2,847</strong> <span data-i18n="hero.trust">creators · กำลังใช้ตอนนี้</span></span>
+  </div>
+</section>
+
+<section class="dashboard-section">
+  <div class="dash-beam dash-beam-l"></div>
+  <div class="dash-beam dash-beam-r"></div>
+  <div class="dash-beam dash-beam-t"></div>
+  <div class="dash-eye" data-i18n="dash.eye">— LIVE STUDIO · WORKSPACE</div>
+  <div class="dashboard-wrap">
+    <div class="dashboard-frame">
+      <div class="dash-bar">
+        <div class="dash-brand-mini">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none"><path d="M6 4l12 8-12 8V4z" fill="currentColor"/></svg></div>
+          <div class="label">
+            <strong>Capduction <span class="beta">Beta</span></strong>
+            <span class="sub">AI Script Studio</span>
+          </div>
+        </div>
+        <div class="title" data-i18n="dash.title">Workspace</div>
+        <div class="dash-search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <span>Search anywhere</span>
+          <span class="kbd">⌘K</span>
+        </div>
+        <div class="actions">
+          <span class="ico-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/></svg></span>
+          <span class="ico-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/></svg></span>
+          <div class="avatar-mini">
+            <div class="av"></div>
+            <div class="info"><strong>Alex Smith</strong><span class="sub">New User</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="dash-body">
+        <aside class="dash-side">
+          <h6>STUDIOS</h6>
+          <div class="dash-item active">
+            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v20M2 12h20"/><circle cx="12" cy="12" r="9"/></svg>
+            <span data-i18n="dash.combo">Combo Mode</span>
+            <span class="badge">NEW</span>
+          </div>
+          <div class="dash-item hover-target" data-cursor="open">
+            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="6" width="18" height="14" rx="1"/></svg>
+            <span data-i18n="dash.script">Script Studio</span>
+          </div>
+          <div class="dash-item hover-target" data-cursor="open">
+            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/></svg>
+            <span data-i18n="dash.caption">Caption Studio</span>
+          </div>
+          <div class="dash-sep"></div>
+          <h6>PROJECTS</h6>
+          <div class="dash-item hover-target" data-cursor="open">
+            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 7l9-4 9 4-9 4-9-4z"/></svg>
+            <span data-i18n="dash.p1">ลิปสติกแดงแมตต์</span>
+          </div>
+          <div class="dash-item hover-target" data-cursor="open">
+            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 7l9-4 9 4-9 4-9-4z"/></svg>
+            <span data-i18n="dash.p2">แคมเปญฤดูร้อน</span>
+          </div>
+          <div class="dash-sep"></div>
+          <h6>RESOURCES</h6>
+          <div class="dash-item hover-target" data-cursor="open">
+            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/></svg>
+            <span data-i18n="dash.bv">Brand Voice</span>
+          </div>
+          <div class="dash-item hover-target" data-cursor="open">
+            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3h18v18H3z"/></svg>
+            <span data-i18n="dash.hist">History</span>
+          </div>
+        </aside>
+        <main class="dash-main">
+          <div class="dash-section-title">
+            <h4 data-i18n="dash.section">Pick the studio for your dream</h4>
+            <span class="demo-badge">Live</span>
+          </div>
+          <div class="dash-tabs">
+            <div class="dash-tab active">Script</div>
+            <div class="dash-tab hover-target" data-cursor="switch">Caption</div>
+            <div class="dash-tab hover-target" data-cursor="switch">Combo</div>
+            <div class="dash-tab hover-target" data-cursor="switch">Other</div>
+          </div>
+          <div class="dash-content">
+            <h5 data-i18n="dash.h5">From Scratch</h5>
+            <p data-i18n="dash.p">Begin from the ground up for a fully personalized creator experience — ลื่นไหลเหมือนความฝันที่กำลังเกิดขึ้นจริง</p>
+            <div class="dash-card">
+              <div class="ico-orb"></div>
+              <div class="info">
+                <strong data-i18n="dash.card.t">Real-Time Script Generator</strong>
+                <span data-i18n="dash.card.s">An assistant who dreams with you 24 × 7</span>
+              </div>
+              <button class="dash-create-btn hover-target" data-cursor="create">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14m-7-7h14"/></svg>
+                <span data-i18n="dash.create">Create</span>
+              </button>
+            </div>
+            <div class="dash-tags">
+              <span>15S—90S SCRIPTS</span>
+              <span>·</span>
+              <span>7 PLATFORMS</span>
+              <span>·</span>
+              <span>BRAND VOICE MEMORY</span>
+              <span>·</span>
+              <span>EXPORT .PDF</span>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="studios-section" id="studios">
+  <div class="studios-head">
+    <div class="eyebrow" data-i18n="st.eye">THREE STUDIOS · ONE WORKFLOW</div>
+    <h2 data-i18n="st.h">เครื่องมือที่ <span class="iri">นุ่มนวล</span><br/>เหมือนความฝัน</h2>
+    <p data-i18n="st.p">เลือกใช้ทีละโหมด หรือเรียก Combo เพื่อปั้น script + caption ใน hook เดียวกัน — ละมุนเหมือนเมฆในยามรุ่งสาง</p>
+  </div>
+  <div class="studios-grid">
+    <div class="studio">
+      <div class="studio-orb"></div>
+      <h3 data-i18n="st.1.n"><em>Script</em> Studio</h3>
+      <div class="sub">SPOKEN · TIMED · CUED</div>
+      <p data-i18n="st.1.d">สคริปต์การพูดสำหรับวิดีโอสั้น พร้อม timing markers ทุกวินาที B-roll cues และข้อความหน้าจอ — director's plan ที่ลื่นไหล</p>
+    </div>
+    <div class="studio">
+      <div class="studio-orb"></div>
+      <h3 data-i18n="st.2.n"><em>Caption</em> Studio</h3>
+      <div class="sub">POSTS · HOOKS · TAGS</div>
+      <p data-i18n="st.2.d">แคปชั่น 5 variants, hooks ดึงสายตา, hashtags ตรงเทรนด์, CTA ปิดการขายแบบอ่อนโยน — ปรับโทนตามแพลตฟอร์มอัตโนมัติ</p>
+    </div>
+    <div class="studio">
+      <div class="studio-orb"></div>
+      <h3 data-i18n="st.3.n"><em>Combo</em> Mode</h3>
+      <div class="sub">ALIGNED · PACKAGED · READY</div>
+      <p data-i18n="st.3.d">ปั้น script และ caption ใช้ hook เดียวกัน package พร้อมโพสต์ครบในไฟล์เดียว เหมาะกับ campaign ใหญ่</p>
+    </div>
+  </div>
+</section>
+
+<section class="bottom-cta">
+  <div class="bottom-cta-inner">
+    <h2 data-i18n="bcta.h"><span class="serif">Dream it.</span> <span class="iri">Ship it.</span></h2>
+    <p data-i18n="bcta.p">เริ่มใช้ Capduction ฟรี 10 ครั้ง · ไม่ต้องใช้บัตรเครดิต · ยกเลิกได้ทุกเมื่อ — ลื่นไหลเหมือนความฝัน</p>
+    <form class="hero-form" onsubmit="event.preventDefault()" style="display: inline-flex;">
+      <input type="email" placeholder="your@email.com" />
+      <button class="hover-target" data-cursor="join"><span data-i18n="bcta.btn">เริ่มเลย →</span></button>
+    </form>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-grid">
+    <div>
+      <a href="#" class="footer-brand-row">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none"><path d="M6 4l12 8-12 8V4z" fill="currentColor"/></svg></div>
+        <span class="name">Capduction</span>
+      </a>
+      <p class="footer-tag" data-i18n="ft.tag">สตูดิโอ AI ระหว่างไอเดียกับการกดอัปโหลด — สร้างในบางกอก เพื่อ creator ไทยทั่วประเทศ</p>
+    </div>
+    <div class="footer-col"><h5>STUDIOS</h5><a href="#" class="hover-target" data-cursor="go">Script</a><a href="#" class="hover-target" data-cursor="go">Caption</a><a href="#" class="hover-target" data-cursor="go">Combo</a><a href="#" class="hover-target" data-cursor="go">Brand Voice</a></div>
+    <div class="footer-col"><h5>RESOURCES</h5><a href="#" class="hover-target" data-cursor="go">Documentation</a><a href="#" class="hover-target" data-cursor="go">Changelog</a><a href="#" class="hover-target" data-cursor="go">API</a><a href="#" class="hover-target" data-cursor="go">Status</a></div>
+    <div class="footer-col"><h5>COMPANY</h5><a href="#" class="hover-target" data-cursor="go">About</a><a href="#" class="hover-target" data-cursor="go">Careers</a><a href="#" class="hover-target" data-cursor="go">Contact</a><a href="#" class="hover-target" data-cursor="go">Privacy</a></div>
+  </div>
+  <div class="footer-bot">
+    <span>© 2026 CAPDUCTION · MADE IN BANGKOK</span>
+    <span class="status">✧ All systems operational</span>
+    <span>LAVENDER MIST · MIX 03</span>
+  </div>
+</footer>
+
+<script>
+const cursor = document.getElementById('cursor');
+const cLabel = document.getElementById('clabel');
+const target = { x: 0, y: 0 };
+const actual = { x: 0, y: 0 };
+window.addEventListener('mousemove', e => { target.x = e.clientX; target.y = e.clientY; });
+function loopC(){
+  actual.x += (target.x - actual.x) * 0.22;
+  actual.y += (target.y - actual.y) * 0.22;
+  cursor.style.left = actual.x + 'px';
+  cursor.style.top = actual.y + 'px';
+  requestAnimationFrame(loopC);
+}
+loopC();
+const labels = { go: '→', start: '✧', join: '✧', open: 'OPEN', switch: '⇄', create: '+' };
+document.querySelectorAll('.hover-target').forEach(el => {
+  el.addEventListener('mouseenter', () => {
+    cursor.classList.add('target');
+    cLabel.textContent = labels[el.dataset.cursor] || '→';
+  });
+  el.addEventListener('mouseleave', () => cursor.classList.remove('target'));
+});
+
+const dict = {
+  th: {
+    "nav.cta":"เริ่มเลย",
+    "hero.h":"<span class='serif'>Scripts as Soft</span><br/><span class='iri'>As Daydreams</span>",
+    "hero.sub":"สตูดิโอ AI สำหรับครีเอเตอร์วิดีโอสั้นไทย — ปั้น<strong>สคริปต์การพูด</strong>และ<strong>แคปชั่นหน้าจอ</strong>ที่อบอวลด้วยความฝัน ใช้ง่าย ยอดขึ้นจริง",
+    "hero.cta":"เริ่มฟรี →","hero.trust":"creators · กำลังใช้ตอนนี้",
+    "dash.eye":"— LIVE STUDIO · WORKSPACE",
+    "dash.title":"เวิร์กสเปซ","dash.combo":"Combo Mode","dash.script":"Script Studio","dash.caption":"Caption Studio",
+    "dash.p1":"ลิปสติกแดงแมตต์","dash.p2":"แคมเปญฤดูร้อน",
+    "dash.bv":"Brand Voice","dash.hist":"ประวัติ",
+    "dash.section":"เลือก studio ตามฝันของคุณ",
+    "dash.h5":"เริ่มจากศูนย์",
+    "dash.p":"สร้างจาก scratch เพื่อปรับ creator experience ในแบบที่คุณต้องการ 100% — ลื่นไหลเหมือนความฝันที่กำลังเกิดขึ้นจริง",
+    "dash.card.t":"Real-Time Script Generator",
+    "dash.card.s":"Assistant ที่ฝันร่วมไปกับคุณ 24 × 7",
+    "dash.create":"สร้าง",
+    "st.eye":"THREE STUDIOS · ONE WORKFLOW",
+    "st.h":"เครื่องมือที่ <span class='iri'>นุ่มนวล</span><br/>เหมือนความฝัน",
+    "st.p":"เลือกใช้ทีละโหมด หรือเรียก Combo เพื่อปั้น script + caption ใน hook เดียวกัน — ละมุนเหมือนเมฆในยามรุ่งสาง",
+    "st.1.n":"<em>Script</em> Studio",
+    "st.1.d":"สคริปต์การพูดสำหรับวิดีโอสั้น พร้อม timing markers ทุกวินาที B-roll cues และข้อความหน้าจอ — director's plan ที่ลื่นไหล",
+    "st.2.n":"<em>Caption</em> Studio",
+    "st.2.d":"แคปชั่น 5 variants, hooks ดึงสายตา, hashtags ตรงเทรนด์, CTA ปิดการขายแบบอ่อนโยน — ปรับโทนตามแพลตฟอร์มอัตโนมัติ",
+    "st.3.n":"<em>Combo</em> Mode",
+    "st.3.d":"ปั้น script และ caption ใช้ hook เดียวกัน package พร้อมโพสต์ครบในไฟล์เดียว เหมาะกับ campaign ใหญ่",
+    "bcta.h":"<span class='serif'>Dream it.</span> <span class='iri'>Ship it.</span>",
+    "bcta.p":"เริ่มใช้ Capduction ฟรี 10 ครั้ง · ไม่ต้องใช้บัตรเครดิต · ยกเลิกได้ทุกเมื่อ — ลื่นไหลเหมือนความฝัน",
+    "bcta.btn":"เริ่มเลย →",
+    "ft.tag":"สตูดิโอ AI ระหว่างไอเดียกับการกดอัปโหลด — สร้างในบางกอก เพื่อ creator ไทยทั่วประเทศ"
+  },
+  en: {
+    "nav.cta":"Get started",
+    "hero.h":"<span class='serif'>Scripts as Soft</span><br/><span class='iri'>As Daydreams</span>",
+    "hero.sub":"An AI studio for Thai short-form creators — craft <strong>spoken scripts</strong> and <strong>on-screen captions</strong> wrapped in dreams. Easy to use, real results.",
+    "hero.cta":"Start free →","hero.trust":"creators · using now",
+    "dash.eye":"— LIVE STUDIO · WORKSPACE",
+    "dash.title":"Workspace","dash.combo":"Combo Mode","dash.script":"Script Studio","dash.caption":"Caption Studio",
+    "dash.p1":"Matte Red Lipstick","dash.p2":"Summer Campaign",
+    "dash.bv":"Brand Voice","dash.hist":"History",
+    "dash.section":"Pick the studio for your dream",
+    "dash.h5":"From Scratch",
+    "dash.p":"Begin from the ground up for a fully personalized creator experience — flowing like a dream coming true.",
+    "dash.card.t":"Real-Time Script Generator",
+    "dash.card.s":"An assistant who dreams with you 24 × 7",
+    "dash.create":"Create",
+    "st.eye":"THREE STUDIOS · ONE WORKFLOW",
+    "st.h":"Tools as <span class='iri'>soft</span><br/>as a daydream",
+    "st.p":"Use modes individually, or call Combo to craft script + caption on one hook — smooth like morning clouds.",
+    "st.1.n":"<em>Script</em> Studio",
+    "st.1.d":"Spoken video scripts with per-second timing markers, B-roll cues, and on-screen text — a flowing director's plan.",
+    "st.2.n":"<em>Caption</em> Studio",
+    "st.2.d":"5 caption variants, scroll-stopping hooks, trend-matched hashtags, gentle closing CTAs — tone tunes per platform.",
+    "st.3.n":"<em>Combo</em> Mode",
+    "st.3.d":"Script and caption on the same hook — ready-to-post package in one file. Built for major campaigns.",
+    "bcta.h":"<span class='serif'>Dream it.</span> <span class='iri'>Ship it.</span>",
+    "bcta.p":"Try Capduction free for 10 generations · no credit card · cancel anytime — flowing like a dream.",
+    "bcta.btn":"Get started →",
+    "ft.tag":"The AI studio between idea and upload — built in Bangkok, for Thai creators everywhere."
+  }
+};
+document.querySelectorAll('.lang-toggle button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.lang-toggle button').forEach(x => x.classList.remove('active'));
+    btn.classList.add('active');
+    const lang = btn.dataset.lang;
+    document.body.lang = lang;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.dataset.i18n;
+      if (dict[lang][key]) el.innerHTML = dict[lang][key];
+    });
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,2111 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Capduction — Studio for the scroll era · Issue 01</title>
+<meta name="description" content="The AI studio between idea and upload. Scripts, captions, and content for Thai short-form creators." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,300;1,9..144,400;1,9..144,500;1,9..144,600&family=Anuphan:wght@200;300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+<style>
+  :root {
+    --paper:    #F5F1E8;
+    --paper-2:  #EFEADB;
+    --paper-3:  #E8E3D6;
+    --ink:      #0B0B0B;
+    --ink-2:   #1A1817;
+    --signal:   #D4FF3F;
+    --ember:    #C45A1A;
+    --rust:     #8E3818;
+    --fog:      #DCD7C8;
+    --mist:     #B8B3A5;
+    --smoke:    #6B6760;
+    --slate:    #2E2C28;
+    --font-display: 'Fraunces', ui-serif, Georgia, serif;
+    --font-thai:    'Anuphan', sans-serif;
+    --font-mono:    'JetBrains Mono', ui-monospace, monospace;
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --ease-back: cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-display);
+    font-optical-sizing: auto;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    cursor: none;
+  }
+  body[lang="th"] { font-family: var(--font-thai); font-weight: 400; }
+
+  /* ─── Custom cursor ─────────────────────────────────────────── */
+  .cursor {
+    position: fixed; width: 12px; height: 12px;
+    background: var(--ink); border-radius: 50%;
+    pointer-events: none; z-index: 10000;
+    transform: translate(-50%, -50%);
+    transition: width 0.25s var(--ease), height 0.25s var(--ease),
+                background 0.25s var(--ease), mix-blend-mode 0.25s;
+    mix-blend-mode: difference;
+  }
+  .cursor.expand {
+    width: 56px; height: 56px;
+    background: var(--signal);
+    mix-blend-mode: normal;
+  }
+  .cursor.expand::after {
+    content: attr(data-label);
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono); font-size: 9px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--ink);
+  }
+  @media (max-width: 768px) { body { cursor: auto; } .cursor { display: none; } }
+  a, button, .hover-target { cursor: none; }
+
+  /* ─── Film grain & paper texture ────────────────────────────── */
+  body::after {
+    content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 9998;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: 0.05; mix-blend-mode: multiply;
+  }
+  body::before {
+    content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background:
+      radial-gradient(ellipse 90% 60% at 10% 0%, rgba(196,90,26,0.045), transparent 60%),
+      radial-gradient(ellipse 100% 80% at 90% 100%, rgba(11,11,11,0.045), transparent 55%);
+  }
+
+  /* ─── NAVIGATION ─────────────────────────────────────────────── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    padding: 18px 32px;
+    display: flex; justify-content: space-between; align-items: center;
+    backdrop-filter: blur(18px) saturate(1.3);
+    background: rgba(245,241,232,0.78);
+    border-bottom: 0.5px solid rgba(11,11,11,0.08);
+  }
+  .brand {
+    display: flex; align-items: center; gap: 12px;
+    font-family: var(--font-display);
+    font-style: italic; font-weight: 500;
+    font-size: 24px;
+    font-variation-settings: 'opsz' 144;
+    letter-spacing: -0.025em;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .brand-mark {
+    width: 20px; height: 20px;
+    border-radius: 50%; position: relative;
+    background: radial-gradient(circle at 30% 30%, #ffffff 0%, #c8c8c8 28%, #5a5a5a 72%, #161616 100%);
+    box-shadow:
+      inset 0 0 0 1.5px var(--ink),
+      0 1px 3px rgba(11,11,11,0.25);
+  }
+  .brand-mark::after {
+    content: ""; position: absolute; inset: 36%;
+    background: var(--ink); border-radius: 50%;
+  }
+  .brand-meta {
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.18em; color: var(--smoke);
+    text-transform: uppercase; padding-left: 14px;
+    border-left: 0.5px solid var(--mist);
+    margin-left: 4px;
+  }
+  nav .links {
+    display: flex; gap: 36px; align-items: center;
+    font-family: var(--font-mono);
+    font-size: 11px; letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  nav .links a {
+    color: var(--slate); text-decoration: none;
+    transition: color 0.2s var(--ease);
+    position: relative;
+  }
+  nav .links a::after {
+    content: ""; position: absolute;
+    left: 0; right: 0; bottom: -6px; height: 1px;
+    background: var(--ink); transform: scaleX(0);
+    transform-origin: right; transition: transform 0.3s var(--ease);
+  }
+  nav .links a:hover { color: var(--ink); }
+  nav .links a:hover::after { transform: scaleX(1); transform-origin: left; }
+  .lang-toggle {
+    display: inline-flex; padding: 3px;
+    background: rgba(11,11,11,0.05);
+    border-radius: 100px; gap: 2px;
+  }
+  .lang-toggle button {
+    border: 0; background: transparent;
+    padding: 5px 12px; border-radius: 100px;
+    font-family: var(--font-mono);
+    font-size: 10px; letter-spacing: 0.12em;
+    color: var(--smoke);
+    transition: all 0.25s var(--ease);
+  }
+  .lang-toggle button.active { background: var(--ink); color: var(--paper); }
+  .nav-cta {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--ink); color: var(--paper);
+    padding: 12px 22px; border-radius: 100px;
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    text-decoration: none;
+    transition: all 0.3s var(--ease);
+    position: relative; overflow: hidden;
+  }
+  .nav-cta::before {
+    content: ""; position: absolute; inset: 0;
+    background: var(--signal); transform: translateY(101%);
+    transition: transform 0.4s var(--ease);
+  }
+  .nav-cta:hover { color: var(--ink); }
+  .nav-cta:hover::before { transform: translateY(0); }
+  .nav-cta span { position: relative; z-index: 1; }
+
+  /* ─── ISSUE BANNER (above hero) ──────────────────────────────── */
+  .issue-bar {
+    margin-top: 70px; padding: 12px 32px;
+    background: var(--ink); color: var(--paper);
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    border-bottom: 1px solid var(--paper);
+  }
+  .issue-bar .signal-dot {
+    width: 6px; height: 6px; background: var(--signal);
+    border-radius: 50%; box-shadow: 0 0 10px var(--signal);
+    display: inline-block; margin-right: 8px;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:.6;transform:scale(.85);} }
+  .issue-bar .right { display: flex; gap: 32px; align-items: center; color: var(--mist); }
+  .issue-bar .right strong { color: var(--paper); font-weight: 400; }
+
+  /* ─── HERO ──────────────────────────────────────────────────── */
+  .hero {
+    padding: 60px 32px 100px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: start;
+    position: relative;
+    border-bottom: 0.5px solid var(--mist);
+  }
+  .hero-left { position: relative; z-index: 2; }
+  .hero-chapter {
+    font-family: var(--font-mono);
+    font-size: 11px; letter-spacing: 0.22em;
+    color: var(--smoke); text-transform: uppercase;
+    margin-bottom: 28px; display: flex; align-items: baseline; gap: 14px;
+  }
+  .hero-chapter .num {
+    font-family: var(--font-display); font-style: italic;
+    font-size: 22px; color: var(--ember);
+    font-variation-settings: 'opsz' 144;
+  }
+  .hero h1 {
+    font-family: var(--font-display);
+    font-size: clamp(56px, 7.2vw, 112px);
+    line-height: 0.92; font-weight: 400;
+    font-variation-settings: 'opsz' 144;
+    letter-spacing: -0.038em;
+    color: var(--ink); margin-bottom: 36px;
+  }
+  body[lang="th"] .hero h1 { font-family: var(--font-thai); font-weight: 300; font-size: clamp(48px, 6.4vw, 100px); }
+  .hero h1 .line { display: block; overflow: hidden; }
+  .hero h1 .line span {
+    display: inline-block;
+    transform: translateY(110%);
+    animation: lineRise 1.2s var(--ease) forwards;
+  }
+  .hero h1 .line:nth-child(1) span { animation-delay: 0.15s; }
+  .hero h1 .line:nth-child(2) span { animation-delay: 0.30s; }
+  .hero h1 .line:nth-child(3) span { animation-delay: 0.45s; }
+  @keyframes lineRise { to { transform: translateY(0); } }
+  .hero h1 em {
+    font-style: italic; font-weight: 300;
+    color: var(--ember);
+    font-variation-settings: 'opsz' 144;
+  }
+  .hero h1 .stroke {
+    display: inline-block; position: relative;
+  }
+  .hero h1 .stroke::after {
+    content: ""; position: absolute;
+    left: 0; right: 0; bottom: 0.13em;
+    height: 0.08em; background: var(--signal);
+    z-index: -1; animation: stroke 1s var(--ease) 1.2s both;
+    transform-origin: left; transform: scaleX(0);
+  }
+  @keyframes stroke { to { transform: scaleX(1); } }
+  .hero-deck {
+    max-width: 460px;
+    font-family: var(--font-display);
+    font-size: 19px; line-height: 1.55;
+    color: var(--slate); font-weight: 400;
+    margin-bottom: 40px;
+    font-variation-settings: 'opsz' 14;
+  }
+  body[lang="th"] .hero-deck { font-family: var(--font-thai); font-size: 17px; }
+  .hero-deck strong {
+    color: var(--ink); font-weight: 500;
+  }
+  .hero-actions {
+    display: flex; gap: 16px; align-items: center;
+    margin-bottom: 56px;
+  }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 12px;
+    background: var(--signal); color: var(--ink);
+    padding: 17px 28px; border-radius: 100px;
+    font-family: var(--font-mono); font-size: 12px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    text-decoration: none; font-weight: 500;
+    border: 1.5px solid var(--ink);
+    transition: all 0.35s var(--ease);
+    position: relative; overflow: hidden;
+  }
+  .btn-primary::before {
+    content: ""; position: absolute; inset: 0;
+    background: var(--ink); transform: translateX(-101%);
+    transition: transform 0.4s var(--ease);
+  }
+  .btn-primary:hover { color: var(--paper); }
+  .btn-primary:hover::before { transform: translateX(0); }
+  .btn-primary span { position: relative; z-index: 1; display: flex; align-items: center; gap: 12px; }
+  .btn-primary svg { transition: transform 0.3s var(--ease); }
+  .btn-primary:hover svg { transform: translateX(4px); }
+  .btn-ghost {
+    color: var(--slate); text-decoration: none;
+    font-family: var(--font-mono); font-size: 12px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 4px;
+    border-bottom: 1px solid var(--mist);
+    transition: all 0.2s var(--ease);
+  }
+  .btn-ghost:hover { color: var(--ink); border-color: var(--ink); padding-left: 0; padding-right: 8px; }
+
+  /* Hero stats */
+  .hero-stats {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 32px;
+    padding-top: 32px;
+    border-top: 0.5px solid var(--mist);
+  }
+  .hero-stats .stat .n {
+    font-family: var(--font-display);
+    font-size: 44px; font-weight: 400;
+    font-variation-settings: 'opsz' 144;
+    letter-spacing: -0.04em; line-height: 1;
+    color: var(--ink); display: flex; align-items: baseline; gap: 6px;
+  }
+  .hero-stats .stat .n .unit {
+    font-size: 18px; color: var(--smoke);
+    font-style: italic; font-weight: 400;
+  }
+  .hero-stats .stat .l {
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--smoke); margin-top: 8px;
+  }
+
+  /* ─── HERO RIGHT — 3D + Product preview floating card ──────── */
+  .hero-right {
+    position: sticky; top: 100px; height: calc(100vh - 140px);
+    min-height: 600px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  #stage3d {
+    position: absolute; inset: 0;
+    z-index: 1;
+  }
+  #stage3d canvas { width: 100% !important; height: 100% !important; }
+
+  /* Floating product preview card — looks like real app screenshot */
+  .preview-card {
+    position: relative; z-index: 2;
+    width: 420px; max-width: 100%;
+    background: var(--paper);
+    border: 0.5px solid var(--ink);
+    border-radius: 6px;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.6) inset,
+      0 24px 48px rgba(11,11,11,0.18),
+      0 4px 12px rgba(11,11,11,0.08);
+    overflow: hidden;
+    transform: rotate(-1.5deg);
+    animation: floatY 6s ease-in-out infinite;
+  }
+  @keyframes floatY {
+    0%,100% { transform: rotate(-1.5deg) translateY(0); }
+    50% { transform: rotate(-1.2deg) translateY(-8px); }
+  }
+  .pv-titlebar {
+    padding: 10px 14px;
+    background: var(--ink); color: var(--paper);
+    display: flex; align-items: center; gap: 10px;
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.12em;
+  }
+  .pv-titlebar .dots { display: flex; gap: 5px; }
+  .pv-titlebar .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(245,241,232,0.3); }
+  .pv-titlebar .dot:nth-child(1) { background: #ff5f57; }
+  .pv-titlebar .dot:nth-child(2) { background: #febc2e; }
+  .pv-titlebar .dot:nth-child(3) { background: #28c840; }
+  .pv-titlebar .path { color: var(--mist); margin-left: 12px; }
+  .pv-body { padding: 22px; }
+  .pv-tabs {
+    display: flex; gap: 0; margin-bottom: 18px;
+    border-bottom: 0.5px solid var(--mist);
+  }
+  .pv-tab {
+    padding: 8px 14px;
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--smoke); border-bottom: 2px solid transparent;
+    cursor: pointer;
+  }
+  .pv-tab.active {
+    color: var(--ink); border-bottom-color: var(--ember);
+    font-weight: 500;
+  }
+  .pv-label {
+    font-family: var(--font-mono); font-size: 9px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--smoke); margin-bottom: 6px;
+  }
+  .pv-beat {
+    padding: 12px 0;
+    border-top: 0.5px solid var(--fog);
+    display: grid; grid-template-columns: 42px 1fr; gap: 12px;
+  }
+  .pv-beat:first-of-type { border-top: 0; padding-top: 0; }
+  .pv-beat .tc {
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--ember); padding-top: 2px;
+  }
+  .pv-beat .role {
+    font-family: var(--font-mono); font-size: 9px;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--smoke); margin-bottom: 4px;
+  }
+  .pv-beat .text {
+    font-family: var(--font-thai); font-size: 13px;
+    line-height: 1.5; color: var(--ink);
+  }
+  .pv-beat .text em { font-style: italic; color: var(--ember); }
+  .pv-footer {
+    margin-top: 16px; padding-top: 14px;
+    border-top: 0.5px solid var(--fog);
+    display: flex; justify-content: space-between;
+    font-family: var(--font-mono); font-size: 10px;
+    color: var(--smoke); letter-spacing: 0.1em;
+  }
+  .pv-footer .signal { color: var(--ember); }
+
+  /* Hero captions floating tags */
+  .hero-tag {
+    position: absolute; z-index: 3;
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--smoke);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .hero-tag::before { content: ""; width: 12px; height: 1px; background: var(--ember); }
+  .hero-tag .n { color: var(--ember); font-weight: 500; }
+  .ht-1 { top: 6%; left: 8%; }
+  .ht-2 { bottom: 28%; right: 6%; }
+  .ht-3 { bottom: 8%; left: 12%; }
+
+  /* ─── CHAPTER DIVIDER ──────────────────────────────────────── */
+  .chapter {
+    padding: 60px 32px 32px;
+    display: grid; grid-template-columns: 1fr 1fr; align-items: end;
+    border-bottom: 0.5px solid var(--mist);
+  }
+  .chapter .num {
+    font-family: var(--font-display);
+    font-size: clamp(140px, 18vw, 260px);
+    font-weight: 200;
+    font-variation-settings: 'opsz' 144;
+    letter-spacing: -0.06em; line-height: 0.85;
+    color: var(--ink); position: relative;
+  }
+  .chapter .num em {
+    font-style: italic; color: var(--ember); font-weight: 200;
+  }
+  .chapter .meta {
+    text-align: right;
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.18em; color: var(--smoke);
+    text-transform: uppercase;
+    padding-bottom: 24px;
+  }
+  .chapter .meta .title {
+    display: block; color: var(--ink); font-size: 13px;
+    margin-bottom: 6px;
+  }
+  .chapter .meta .desc {
+    color: var(--slate); font-family: var(--font-display);
+    text-transform: none; letter-spacing: 0;
+    font-style: italic; font-size: 16px; margin-top: 8px;
+    max-width: 320px; margin-left: auto; line-height: 1.4;
+  }
+  body[lang="th"] .chapter .meta .desc { font-family: var(--font-thai); font-style: normal; }
+
+  /* ─── STUDIOS section ──────────────────────────────────────── */
+  .studios {
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border-bottom: 0.5px solid var(--mist);
+  }
+  .studio {
+    padding: 56px 36px 64px;
+    border-right: 0.5px solid var(--mist);
+    position: relative;
+    transition: background 0.4s var(--ease);
+    overflow: hidden;
+  }
+  .studio:last-child { border-right: 0; }
+  .studio::before {
+    content: "";
+    position: absolute; left: 0; right: 0; top: 0; height: 3px;
+    background: var(--ember); transform: scaleX(0);
+    transform-origin: left; transition: transform 0.5s var(--ease);
+  }
+  .studio:hover { background: var(--paper-2); }
+  .studio:hover::before { transform: scaleX(1); }
+  .studio-num {
+    font-family: var(--font-display); font-style: italic;
+    font-size: 48px; font-variation-settings: 'opsz' 144;
+    color: var(--ember); line-height: 1; margin-bottom: 32px;
+    font-weight: 300;
+  }
+  .studio-icon {
+    width: 64px; height: 64px;
+    margin-bottom: 28px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #fff, #c5c5c5 35%, #444 80%, #111 100%);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 12px rgba(11,11,11,0.15);
+    position: relative;
+  }
+  .studio-icon::after {
+    content: ""; position: absolute;
+    inset: -3px; border-radius: 50%;
+    border: 1px solid var(--ink);
+  }
+  .studio-icon svg { width: 26px; height: 26px; color: var(--ink); }
+  .studio h3 {
+    font-family: var(--font-display);
+    font-size: 36px; font-weight: 400;
+    font-variation-settings: 'opsz' 96;
+    letter-spacing: -0.025em;
+    margin-bottom: 6px; color: var(--ink);
+  }
+  body[lang="th"] .studio h3 { font-family: var(--font-thai); font-weight: 500; }
+  .studio h3 em { font-style: italic; color: var(--ember); font-weight: 300; }
+  .studio .tagline {
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--smoke); margin-bottom: 24px;
+  }
+  .studio .desc {
+    font-size: 15px; line-height: 1.6;
+    color: var(--slate); margin-bottom: 28px;
+  }
+  body[lang="th"] .studio .desc { font-family: var(--font-thai); }
+  .studio-out {
+    list-style: none; padding-top: 20px;
+    border-top: 0.5px solid var(--fog);
+  }
+  .studio-out li {
+    padding: 8px 0;
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--smoke); letter-spacing: 0.04em;
+    display: flex; gap: 10px; align-items: center;
+  }
+  .studio-out li::before { content: "›"; color: var(--ember); font-weight: 500; }
+  .studio-cta {
+    margin-top: 28px;
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--ink); text-decoration: none;
+    padding-bottom: 4px; border-bottom: 1px solid var(--ink);
+    transition: gap 0.3s var(--ease);
+  }
+  .studio-cta:hover { gap: 14px; }
+
+  /* ─── DEMO / SHOWCASE — Black slate section ────────────────── */
+  .showcase {
+    background: var(--ink); color: var(--paper);
+    padding: 100px 32px;
+    position: relative; overflow: hidden;
+  }
+  .showcase::before {
+    content: ""; position: absolute; inset: 0;
+    background: radial-gradient(circle at 80% 30%, rgba(212,255,63,0.06), transparent 50%);
+  }
+  .showcase-head {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 60px;
+    margin-bottom: 64px; align-items: end;
+    max-width: 1400px; margin-left: auto; margin-right: auto;
+    position: relative;
+  }
+  .showcase-eyebrow {
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.2em; color: var(--signal);
+    text-transform: uppercase; margin-bottom: 20px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .showcase-eyebrow::before {
+    content: ""; width: 40px; height: 1px; background: var(--signal);
+  }
+  .showcase h2 {
+    font-family: var(--font-display); font-size: clamp(48px, 6.5vw, 88px);
+    font-weight: 400; font-variation-settings: 'opsz' 144;
+    letter-spacing: -0.035em; line-height: 1;
+  }
+  body[lang="th"] .showcase h2 { font-family: var(--font-thai); font-weight: 300; }
+  .showcase h2 em {
+    font-style: italic; color: var(--signal); font-weight: 300;
+  }
+  .showcase-sub {
+    font-size: 18px; line-height: 1.6; color: var(--mist);
+    max-width: 440px; align-self: end;
+  }
+  body[lang="th"] .showcase-sub { font-family: var(--font-thai); }
+
+  .showcase-frame {
+    max-width: 1400px; margin: 0 auto;
+    background: var(--ink-2);
+    border-radius: 12px;
+    border: 1px solid rgba(245,241,232,0.1);
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 40px 100px rgba(0,0,0,0.5);
+  }
+  .frame-bar {
+    padding: 12px 18px;
+    background: #000;
+    border-bottom: 1px solid rgba(245,241,232,0.08);
+    display: flex; align-items: center; gap: 14px;
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.12em; color: var(--mist);
+  }
+  .frame-bar .dots { display: flex; gap: 6px; }
+  .frame-bar .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .frame-bar .dot:nth-child(1) { background: #ff5f57; }
+  .frame-bar .dot:nth-child(2) { background: #febc2e; }
+  .frame-bar .dot:nth-child(3) { background: #28c840; }
+  .frame-bar .url { flex: 1; text-align: center; color: var(--smoke); }
+  .frame-bar .url strong { color: var(--paper); }
+  .frame-bar .rec-tag {
+    display: flex; align-items: center; gap: 6px;
+    color: var(--signal);
+  }
+  .frame-bar .rec-tag .ring {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--signal);
+    box-shadow: 0 0 10px var(--signal);
+    animation: pulse 1.5s infinite;
+  }
+  .frame-body {
+    display: grid; grid-template-columns: 280px 1fr;
+    min-height: 540px;
+  }
+  /* Sidebar */
+  .frame-side {
+    padding: 24px 18px;
+    border-right: 1px solid rgba(245,241,232,0.08);
+    background: rgba(0,0,0,0.3);
+  }
+  .frame-side h6 {
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--smoke); margin-bottom: 14px; padding: 0 8px;
+  }
+  .frame-side .item {
+    padding: 10px 12px; border-radius: 6px;
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--mist); display: flex; align-items: center; gap: 10px;
+    cursor: pointer; margin-bottom: 4px;
+    transition: all 0.2s var(--ease);
+  }
+  .frame-side .item:hover { background: rgba(245,241,232,0.05); color: var(--paper); }
+  .frame-side .item.active {
+    background: rgba(212,255,63,0.1);
+    color: var(--signal); border-left: 2px solid var(--signal);
+    border-radius: 0 6px 6px 0;
+  }
+  .frame-side .item .ico {
+    width: 14px; height: 14px; opacity: 0.6;
+  }
+  .frame-side .sep {
+    height: 1px; background: rgba(245,241,232,0.08);
+    margin: 20px 0;
+  }
+  .frame-side .item .badge {
+    margin-left: auto; padding: 2px 8px;
+    background: var(--signal); color: var(--ink);
+    border-radius: 100px; font-size: 9px;
+    letter-spacing: 0.1em;
+  }
+  /* Main */
+  .frame-main { padding: 32px; }
+  .frame-tab-row {
+    display: flex; gap: 0; margin-bottom: 28px;
+    border-bottom: 1px solid rgba(245,241,232,0.1);
+  }
+  .frame-tab {
+    padding: 12px 20px;
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--mist); border-bottom: 2px solid transparent;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .frame-tab.active { color: var(--signal); border-bottom-color: var(--signal); }
+  .frame-form-row {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    margin-bottom: 24px;
+  }
+  .frame-field label {
+    display: block;
+    font-family: var(--font-mono); font-size: 9px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--smoke); margin-bottom: 8px;
+  }
+  .frame-field .val {
+    background: #000;
+    border: 1px solid rgba(245,241,232,0.1);
+    padding: 12px 14px; border-radius: 4px;
+    font-family: var(--font-thai); font-size: 14px;
+    color: var(--paper);
+  }
+  .frame-output {
+    border-top: 1px solid rgba(245,241,232,0.1);
+    padding-top: 24px;
+  }
+  .frame-output-grid {
+    display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px;
+  }
+  .out-block {
+    background: #000;
+    border: 1px solid rgba(245,241,232,0.08);
+    border-radius: 6px; padding: 18px;
+  }
+  .out-block-label {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 16px;
+    font-family: var(--font-mono); font-size: 9px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+  }
+  .out-block-label .name { color: var(--signal); }
+  .out-block-label .count { color: var(--smoke); }
+  .out-block .beat {
+    padding: 10px 0; display: grid;
+    grid-template-columns: 50px 1fr; gap: 12px;
+    border-top: 0.5px solid rgba(245,241,232,0.08);
+  }
+  .out-block .beat:first-of-type { border-top: 0; padding-top: 0; }
+  .out-block .beat .tc {
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--ember); padding-top: 2px;
+  }
+  .out-block .beat .role {
+    font-family: var(--font-mono); font-size: 8px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--mist); margin-bottom: 3px;
+  }
+  .out-block .beat .text {
+    font-family: var(--font-thai); font-size: 13px;
+    line-height: 1.5; color: var(--paper);
+  }
+  .out-block .beat .text em { color: var(--signal); font-style: italic; }
+  .out-caption .text-block {
+    font-family: var(--font-thai); font-size: 13px;
+    line-height: 1.6; color: var(--paper);
+    margin-bottom: 14px;
+  }
+  .out-caption .text-block em {
+    color: var(--signal); font-style: italic;
+  }
+  .out-caption .tags {
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--mist); line-height: 1.7;
+  }
+  .frame-actions {
+    margin-top: 24px; padding-top: 20px;
+    border-top: 1px solid rgba(245,241,232,0.1);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .frame-meta {
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.12em; color: var(--smoke);
+    text-transform: uppercase;
+  }
+  .frame-meta .gen { color: var(--signal); }
+  .frame-btn {
+    background: var(--signal); color: var(--ink);
+    padding: 10px 18px; border-radius: 100px;
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    border: 0; cursor: pointer;
+  }
+
+  /* ─── FEATURES SECTION ──────────────────────────────────────── */
+  .features {
+    padding: 100px 32px;
+    border-bottom: 0.5px solid var(--mist);
+  }
+  .features-head {
+    max-width: 1400px; margin: 0 auto 80px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 60px;
+    align-items: end;
+  }
+  .features-eyebrow {
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.2em; color: var(--ember);
+    text-transform: uppercase; margin-bottom: 20px;
+  }
+  .features h2 {
+    font-family: var(--font-display);
+    font-size: clamp(48px, 6vw, 80px);
+    font-weight: 400; font-variation-settings: 'opsz' 144;
+    letter-spacing: -0.035em; line-height: 1;
+  }
+  body[lang="th"] .features h2 { font-family: var(--font-thai); font-weight: 400; }
+  .features h2 em { font-style: italic; color: var(--ember); font-weight: 300; }
+  .features-sub {
+    font-size: 17px; line-height: 1.55; color: var(--slate);
+    max-width: 460px;
+  }
+  body[lang="th"] .features-sub { font-family: var(--font-thai); }
+  .features-grid {
+    max-width: 1400px; margin: 0 auto;
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 0;
+    border-top: 0.5px solid var(--ink);
+  }
+  .feature {
+    padding: 40px 32px 60px;
+    border-right: 0.5px solid var(--fog);
+    border-bottom: 0.5px solid var(--fog);
+    transition: background 0.3s var(--ease);
+    position: relative;
+  }
+  .feature:nth-child(3n) { border-right: 0; }
+  .feature:nth-last-child(-n+3) { border-bottom: 0; }
+  .feature:hover { background: var(--paper-2); }
+  .feature .num {
+    font-family: var(--font-display); font-style: italic;
+    font-size: 28px; font-variation-settings: 'opsz' 144;
+    color: var(--ember); margin-bottom: 16px;
+    font-weight: 300;
+  }
+  .feature h4 {
+    font-family: var(--font-display); font-size: 26px;
+    font-weight: 500; font-variation-settings: 'opsz' 48;
+    letter-spacing: -0.022em; margin-bottom: 10px;
+  }
+  body[lang="th"] .feature h4 { font-family: var(--font-thai); font-weight: 600; }
+  .feature h4 em { font-style: italic; color: var(--ember); font-weight: 400; }
+  .feature p {
+    font-size: 14px; line-height: 1.6; color: var(--slate);
+  }
+  body[lang="th"] .feature p { font-family: var(--font-thai); }
+
+  /* ─── PRICING ──────────────────────────────────────────────── */
+  .pricing {
+    padding: 100px 32px;
+    background: var(--paper-2);
+    border-bottom: 0.5px solid var(--mist);
+  }
+  .pricing-head { text-align: center; max-width: 700px; margin: 0 auto 64px; }
+  .pricing-eyebrow {
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.2em; color: var(--ember);
+    text-transform: uppercase; margin-bottom: 20px;
+    display: inline-flex; align-items: center; gap: 12px;
+  }
+  .pricing-eyebrow::before, .pricing-eyebrow::after {
+    content: ""; width: 24px; height: 1px; background: var(--ember);
+  }
+  .pricing h2 {
+    font-family: var(--font-display);
+    font-size: clamp(44px, 5.5vw, 72px); font-weight: 400;
+    font-variation-settings: 'opsz' 144;
+    letter-spacing: -0.03em; margin-bottom: 16px;
+  }
+  body[lang="th"] .pricing h2 { font-family: var(--font-thai); }
+  .pricing h2 em { font-style: italic; color: var(--ember); }
+  .pricing-sub { color: var(--smoke); font-size: 16px; }
+  body[lang="th"] .pricing-sub { font-family: var(--font-thai); }
+
+  .pricing-grid {
+    max-width: 1100px; margin: 0 auto;
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 0;
+    background: var(--paper);
+    border: 0.5px solid var(--ink);
+  }
+  .plan {
+    padding: 48px 32px;
+    border-right: 0.5px solid var(--fog);
+    display: flex; flex-direction: column;
+    position: relative;
+  }
+  .plan:last-child { border-right: 0; }
+  .plan.featured { background: var(--ink); color: var(--paper); }
+  .plan-badge {
+    position: absolute; top: -1px; right: -1px;
+    background: var(--signal); color: var(--ink);
+    padding: 8px 14px;
+    font-family: var(--font-mono); font-size: 9px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    font-weight: 500;
+  }
+  .plan-name {
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.2em; color: var(--smoke);
+    text-transform: uppercase; margin-bottom: 20px;
+    font-weight: 500;
+  }
+  .plan.featured .plan-name { color: var(--signal); }
+  .plan-price {
+    font-family: var(--font-display); font-size: 64px;
+    font-weight: 400; font-variation-settings: 'opsz' 144;
+    letter-spacing: -0.035em; line-height: 1; margin-bottom: 6px;
+    display: flex; align-items: baseline; gap: 6px;
+  }
+  .plan-price .currency {
+    font-size: 22px; color: var(--smoke);
+    font-style: italic; font-weight: 400;
+  }
+  .plan-price .unit {
+    font-family: var(--font-mono); font-size: 14px;
+    color: var(--smoke); font-weight: 400;
+  }
+  .plan.featured .plan-price .unit { color: var(--mist); }
+  .plan-desc {
+    color: var(--slate); font-size: 15px;
+    margin-bottom: 32px; line-height: 1.5;
+  }
+  .plan.featured .plan-desc { color: var(--mist); }
+  body[lang="th"] .plan-desc { font-family: var(--font-thai); }
+  .plan ul {
+    list-style: none; flex: 1;
+    margin-bottom: 32px;
+  }
+  .plan li {
+    padding: 9px 0; font-size: 14px;
+    color: var(--slate);
+    display: flex; gap: 12px;
+    align-items: flex-start;
+  }
+  .plan.featured li { color: var(--paper); }
+  body[lang="th"] .plan li { font-family: var(--font-thai); }
+  .plan li::before {
+    content: "→"; color: var(--ember);
+    flex-shrink: 0; font-family: var(--font-mono);
+  }
+  .plan-cta {
+    display: block; text-align: center;
+    padding: 14px; border: 1px solid var(--ink);
+    background: transparent; color: var(--ink);
+    text-decoration: none;
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    transition: all 0.25s var(--ease);
+  }
+  .plan-cta:hover { background: var(--ink); color: var(--paper); }
+  .plan.featured .plan-cta {
+    background: var(--signal); border-color: var(--signal); color: var(--ink);
+  }
+  .plan.featured .plan-cta:hover {
+    background: var(--paper); border-color: var(--paper);
+  }
+
+  /* ─── TESTIMONIAL / EDITORIAL QUOTE ───────────────────────── */
+  .quote-section {
+    padding: 120px 32px;
+    border-bottom: 0.5px solid var(--mist);
+  }
+  .quote {
+    max-width: 1000px; margin: 0 auto;
+    display: grid; grid-template-columns: 80px 1fr; gap: 40px;
+  }
+  .quote .mark {
+    font-family: var(--font-display); font-style: italic;
+    font-size: 140px; line-height: 0.8; color: var(--ember);
+    font-variation-settings: 'opsz' 144;
+  }
+  .quote-text {
+    font-family: var(--font-display);
+    font-size: clamp(28px, 3.8vw, 48px); font-weight: 400;
+    font-variation-settings: 'opsz' 144;
+    line-height: 1.2; letter-spacing: -0.02em;
+    margin-bottom: 36px; color: var(--ink);
+  }
+  body[lang="th"] .quote-text { font-family: var(--font-thai); font-weight: 400; }
+  .quote-text em { font-style: italic; color: var(--ember); }
+  .quote-author {
+    display: flex; align-items: center; gap: 16px;
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.12em; color: var(--smoke);
+    text-transform: uppercase;
+  }
+  .quote-author .avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--ember), var(--rust));
+    border: 1px solid var(--ink);
+  }
+  .quote-author strong {
+    color: var(--ink); font-weight: 500;
+    display: block; margin-bottom: 2px;
+  }
+
+  /* ─── FOOTER ────────────────────────────────────────────────── */
+  footer {
+    background: var(--ink); color: var(--paper);
+    padding: 80px 32px 32px;
+  }
+  .footer-top {
+    max-width: 1400px; margin: 0 auto;
+    display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+    gap: 40px;
+    padding-bottom: 56px;
+    border-bottom: 0.5px solid rgba(245,241,232,0.15);
+    margin-bottom: 32px;
+  }
+  .footer-brand {
+    font-family: var(--font-display); font-style: italic;
+    font-size: 56px; font-weight: 400;
+    font-variation-settings: 'opsz' 144;
+    letter-spacing: -0.035em; line-height: 1;
+    margin-bottom: 16px;
+  }
+  .footer-brand em { color: var(--signal); }
+  .footer-tag {
+    font-size: 14px; color: var(--mist);
+    max-width: 320px; line-height: 1.5; margin-bottom: 24px;
+  }
+  body[lang="th"] .footer-tag { font-family: var(--font-thai); }
+  .footer-newsletter {
+    display: flex; gap: 0;
+    border: 1px solid rgba(245,241,232,0.2);
+    border-radius: 100px; padding: 4px;
+    max-width: 340px;
+  }
+  .footer-newsletter input {
+    flex: 1; background: transparent; border: 0;
+    padding: 10px 16px; color: var(--paper);
+    font-family: var(--font-mono); font-size: 12px;
+    outline: none;
+  }
+  .footer-newsletter input::placeholder { color: var(--smoke); }
+  .footer-newsletter button {
+    background: var(--signal); color: var(--ink);
+    border: 0; padding: 10px 18px; border-radius: 100px;
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    font-weight: 500; cursor: pointer;
+  }
+  .footer-col h5 {
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.2em; color: var(--mist);
+    text-transform: uppercase; margin-bottom: 20px;
+  }
+  .footer-col a {
+    display: block; color: var(--paper);
+    text-decoration: none; font-size: 14px;
+    padding: 5px 0; transition: color 0.2s;
+  }
+  .footer-col a:hover { color: var(--signal); }
+  .footer-bot {
+    max-width: 1400px; margin: 0 auto;
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.15em; color: var(--smoke);
+    text-transform: uppercase;
+    padding-top: 24px;
+  }
+  .footer-bot .status {
+    display: flex; align-items: center; gap: 8px;
+    color: var(--signal);
+  }
+  .footer-bot .status::before {
+    content: ""; width: 6px; height: 6px;
+    border-radius: 50%; background: var(--signal);
+    box-shadow: 0 0 8px var(--signal);
+    animation: pulse 2s infinite;
+  }
+
+  /* ─── Marquee ───────────────────────────────────────────────── */
+  .marquee {
+    overflow: hidden; padding: 28px 0;
+    background: var(--ink); color: var(--paper);
+    border-top: 0.5px solid rgba(245,241,232,0.1);
+    border-bottom: 0.5px solid rgba(245,241,232,0.1);
+  }
+  .marquee-inner {
+    display: flex; gap: 56px;
+    white-space: nowrap;
+    animation: scroll 40s linear infinite;
+    font-family: var(--font-display); font-style: italic;
+    font-size: 32px; font-weight: 300;
+    font-variation-settings: 'opsz' 144;
+    letter-spacing: -0.02em;
+  }
+  .marquee-inner span:nth-child(odd) { color: var(--paper); }
+  .marquee-inner span:nth-child(even) { color: var(--signal); }
+  @keyframes scroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  /* ─── REVEAL animations ────────────────────────────────────── */
+  .fade-in {
+    opacity: 0; transform: translateY(40px);
+    transition: opacity 0.9s var(--ease), transform 0.9s var(--ease);
+  }
+  .fade-in.in-view {
+    opacity: 1; transform: translateY(0);
+  }
+
+  /* ─── RESPONSIVE ───────────────────────────────────────────── */
+  @media (max-width: 1024px) {
+    .hero, .chapter, .studios, .features-head, .features-grid,
+    .pricing-grid, .showcase-head, .footer-top { grid-template-columns: 1fr; }
+    .frame-body { grid-template-columns: 1fr; }
+    .frame-side { display: none; }
+    .frame-output-grid { grid-template-columns: 1fr; }
+    .hero { padding: 90px 20px 60px; }
+    .hero-right { position: relative; top: 0; height: 480px; min-height: 0; }
+    .preview-card { width: 100%; max-width: 380px; }
+    .studio, .feature, .plan { border-right: 0; border-bottom: 0.5px solid var(--mist); }
+    .features, .pricing, .showcase, .quote-section { padding: 60px 20px; }
+    nav { padding: 14px 20px; }
+    nav .links { display: none; }
+    nav .links .lang-toggle, nav .links .nav-cta { display: inline-flex; }
+    .hero-stats { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+    .chapter .num { font-size: 100px; }
+    body { cursor: auto; }
+  }
+</style>
+</head>
+<body lang="th">
+
+<div class="cursor" id="cursor"></div>
+
+<!-- ═══════════════ NAV ═══════════════ -->
+<nav>
+  <a href="#" class="brand">
+    <span class="brand-mark"></span>
+    Capduction
+    <span class="brand-meta">ISSUE 01</span>
+  </a>
+  <div class="links">
+    <a href="#studios">Studios</a>
+    <a href="#showcase">Workspace</a>
+    <a href="#features">Features</a>
+    <a href="#pricing">Pricing</a>
+    <div class="lang-toggle">
+      <button class="active" data-lang="th">TH</button>
+      <button data-lang="en">EN</button>
+    </div>
+    <a href="#" class="nav-cta hover-target" data-cursor="enter">
+      <span data-i18n="nav.cta">เริ่มฟรี</span>
+    </a>
+  </div>
+</nav>
+
+<!-- ═══════════════ ISSUE BAR ═══════════════ -->
+<div class="issue-bar">
+  <span><span class="signal-dot"></span>STUDIO V1.0 · NOW LIVE · MAY 2026</span>
+  <div class="right">
+    <span><strong>007</strong> PLATFORMS</span>
+    <span><strong>003</strong> STUDIOS</span>
+    <span><strong>2,847</strong> SCRIPTS SHIPPED THIS WEEK</span>
+    <span data-i18n="issue.tag">EDITORIAL ISSUE 01 — บางกอก</span>
+  </div>
+</div>
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<section class="hero">
+  <div class="hero-left">
+    <div class="hero-chapter">
+      <span class="num">01</span>
+      <span data-i18n="hero.chapter">บทนำ · OPENING</span>
+    </div>
+    <h1>
+      <span class="line"><span data-i18n="hero.l1">เขียน<em>สคริปต์</em></span></span>
+      <span class="line"><span data-i18n="hero.l2">ปั้น<span class="stroke">แคปชั่น</span></span></span>
+      <span class="line"><span data-i18n="hero.l3">ก่อนกด record.</span></span>
+    </h1>
+    <p class="hero-deck" data-i18n="hero.deck">
+      สตูดิโอ AI สำหรับครีเอเตอร์วิดีโอสั้นไทยยุค scroll-first ตั้งแต่<strong>สคริปต์การพูด</strong>พร้อม timing ทุกวินาที ไปจนถึง<strong>แคปชั่นหน้าคลิป</strong>ที่ปิดการขายได้จริง ทุกอย่างพร้อมยิงในไฟล์เดียว
+    </p>
+    <div class="hero-actions">
+      <a href="#" class="btn-primary hover-target" data-cursor="start">
+        <span>
+          <span data-i18n="hero.cta1">เริ่มฟรี 10 ครั้ง</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+        </span>
+      </a>
+      <a href="#showcase" class="btn-ghost hover-target" data-cursor="watch">
+        <span data-i18n="hero.cta2">ดูสตูดิโอทำงานจริง</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+      </a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat">
+        <div class="n">2.8<span class="unit">k</span></div>
+        <div class="l" data-i18n="stat.users">creators · this week</div>
+      </div>
+      <div class="stat">
+        <div class="n">07</div>
+        <div class="l" data-i18n="stat.platforms">platforms supported</div>
+      </div>
+      <div class="stat">
+        <div class="n">1.4<span class="unit">s</span></div>
+        <div class="l" data-i18n="stat.speed">avg generation time</div>
+      </div>
+      <div class="stat">
+        <div class="n">98<span class="unit">%</span></div>
+        <div class="l" data-i18n="stat.repeat">come back next day</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div id="stage3d"></div>
+    <span class="hero-tag ht-1"><span class="n">01</span><span data-i18n="ht.1">Chrome studio rig</span></span>
+    <span class="hero-tag ht-2"><span class="n">02</span><span data-i18n="ht.2">Real-time output</span></span>
+    <span class="hero-tag ht-3"><span class="n">03</span><span data-i18n="ht.3">Issue 01 · live</span></span>
+
+    <!-- Floating preview card -->
+    <div class="preview-card">
+      <div class="pv-titlebar">
+        <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+        <span class="path">capduction.app/workspace/script · matte-red-lipstick</span>
+      </div>
+      <div class="pv-body">
+        <div class="pv-tabs">
+          <div class="pv-tab active">SCRIPT</div>
+          <div class="pv-tab">CAPTION</div>
+          <div class="pv-tab">COMBO</div>
+        </div>
+        <div class="pv-label">› SCRIPT · TikTok · 30s · 4 beats</div>
+        <div class="pv-beat">
+          <div class="tc">00:00</div>
+          <div>
+            <div class="role">HOOK</div>
+            <div class="text" data-i18n="pv.s1">"ริมฝีปากแดงที่<em>คนหันมามอง</em> ติด 12 ชั่วโมง ไม่ต้องแตะเลย"</div>
+          </div>
+        </div>
+        <div class="pv-beat">
+          <div class="tc">00:05</div>
+          <div>
+            <div class="role">BODY</div>
+            <div class="text" data-i18n="pv.s2">"เนื้อแมตต์ เนียนไม่กินผิว สีคลาสสิคที่ใส่กับชุดอะไรก็ได้"</div>
+          </div>
+        </div>
+        <div class="pv-beat">
+          <div class="tc">00:18</div>
+          <div>
+            <div class="role">PROOF + CTA</div>
+            <div class="text" data-i18n="pv.s3">"รีวิวล้น 2,000+ ลูกค้า กดลิงก์ในโปรไฟล์ <em>ลด 20% เฉพาะ 50 คนแรก</em>"</div>
+          </div>
+        </div>
+        <div class="pv-footer">
+          <span>4 BEATS · 30s</span>
+          <span class="signal">› GENERATED 1.4s</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ MARQUEE ═══════════════ -->
+<div class="marquee">
+  <div class="marquee-inner">
+    <span>STUDIO FOR THE SCROLL ERA</span><span>·</span>
+    <span>script before record</span><span>·</span>
+    <span>caption before post</span><span>·</span>
+    <span>between idea and upload</span><span>·</span>
+    <span>STUDIO FOR THE SCROLL ERA</span><span>·</span>
+    <span>script before record</span><span>·</span>
+    <span>caption before post</span><span>·</span>
+    <span>between idea and upload</span><span>·</span>
+  </div>
+</div>
+
+<!-- ═══════════════ CHAPTER 01 ═══════════════ -->
+<div class="chapter">
+  <div class="num"><em>01</em></div>
+  <div class="meta">
+    <span class="title" data-i18n="ch1.t">THE THREE STUDIOS</span>
+    <span data-i18n="ch1.m">SCRIPT · CAPTION · COMBO</span>
+    <p class="desc" data-i18n="ch1.d">เลือกใช้ทีละโหมดได้ หรือเรียก Combo ให้ปั้นทั้งหมดบน hook เดียวกัน</p>
+  </div>
+</div>
+
+<!-- ═══════════════ STUDIOS ═══════════════ -->
+<section class="studios" id="studios">
+  <div class="studio">
+    <div class="studio-num">01</div>
+    <div class="studio-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <rect x="3" y="6" width="18" height="14" rx="1"/>
+        <path d="M3 10h18M7 6l-2 4M11 6l-2 4M15 6l-2 4M19 6l-2 4"/>
+      </svg>
+    </div>
+    <h3 data-i18n="st.1.n"><em>Script</em> Studio</h3>
+    <div class="tagline">SPOKEN VIDEO · TIMING · CUES</div>
+    <p class="desc" data-i18n="st.1.d">สคริปต์การพูดสำหรับวิดีโอสั้น พร้อม timing markers ทุกวินาที B-roll cues และข้อความหน้าจอ แบ่ง hook · body · proof · CTA ชัดเจน พร้อมส่งทีมตัดต่อ</p>
+    <ul class="studio-out">
+      <li>15s · 30s · 60s · 90s · long-form</li>
+      <li>timed beats per second</li>
+      <li>b-roll cue notation</li>
+      <li>on-screen text overlay</li>
+      <li>hook · body · payoff · cta</li>
+    </ul>
+    <a href="#" class="studio-cta hover-target" data-cursor="enter">
+      เปิด Script Studio →
+    </a>
+  </div>
+  <div class="studio">
+    <div class="studio-num">02</div>
+    <div class="studio-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/>
+        <path d="M12 3v3M12 18v3M21 12h-3M6 12H3"/>
+      </svg>
+    </div>
+    <h3 data-i18n="st.2.n"><em>Caption</em> Studio</h3>
+    <div class="tagline">POST COPY · HOOKS · HASHTAGS</div>
+    <p class="desc" data-i18n="st.2.d">แคปชั่น 5 variants พร้อมใช้, hooks ดึงสายตา 5 แบบ, hashtags 10 ตัวตรงเทรนด์, CTA ปิดการขาย — ทุกอย่างปรับโทนตามแพลตฟอร์มอัตโนมัติ</p>
+    <ul class="studio-out">
+      <li>5 captions · copy-ready</li>
+      <li>5 scroll-stopping hooks</li>
+      <li>10 trend-matched hashtags</li>
+      <li>5 closing CTAs</li>
+      <li>4 angles · 4 video ideas</li>
+    </ul>
+    <a href="#" class="studio-cta hover-target" data-cursor="enter">
+      เปิด Caption Studio →
+    </a>
+  </div>
+  <div class="studio">
+    <div class="studio-num">03</div>
+    <div class="studio-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M12 2v20M2 12h20"/><circle cx="12" cy="12" r="9"/>
+      </svg>
+    </div>
+    <h3 data-i18n="st.3.n"><em>Combo</em> Mode</h3>
+    <div class="tagline">SCRIPT + CAPTION · ALIGNED</div>
+    <p class="desc" data-i18n="st.3.d">สำหรับเวลาที่อยากได้ทั้งหมดในครั้งเดียว — ปั้น script และ caption ที่ใช้ hook เดียวกัน ความหมายเดียวกัน package พร้อมโพสต์ครบในไฟล์เดียว</p>
+    <ul class="studio-out">
+      <li>shared hook system</li>
+      <li>aligned messaging</li>
+      <li>thumbnail copy</li>
+      <li>posting checklist</li>
+      <li>export pack (.pdf .txt)</li>
+    </ul>
+    <a href="#" class="studio-cta hover-target" data-cursor="enter">
+      เปิด Combo Mode →
+    </a>
+  </div>
+</section>
+
+<!-- ═══════════════ CHAPTER 02 ═══════════════ -->
+<div class="chapter">
+  <div class="num"><em>02</em></div>
+  <div class="meta">
+    <span class="title" data-i18n="ch2.t">THE WORKSPACE</span>
+    <span data-i18n="ch2.m">LIVE PRODUCT · NO MOCK</span>
+    <p class="desc" data-i18n="ch2.d">ดูตอน Capduction ทำงานจริง — จากชื่อสินค้าถึง package พร้อมโพสต์ใน 1.4 วินาที</p>
+  </div>
+</div>
+
+<!-- ═══════════════ SHOWCASE — Workspace mockup ═══════════════ -->
+<section class="showcase" id="showcase">
+  <div class="showcase-head">
+    <div>
+      <div class="showcase-eyebrow" data-i18n="sc.eye">— WORKSPACE PREVIEW</div>
+      <h2 data-i18n="sc.h">ดูตอน <em>สตูดิโอ</em><br/>ทำงานจริง</h2>
+    </div>
+    <p class="showcase-sub" data-i18n="sc.sub">
+      ใส่ชื่อสินค้า เลือกแพลตฟอร์ม กด Generate ได้ script + caption + hashtags ครบใน 1.4 วินาที — นี่คือหน้า workspace จริงของ Capduction
+    </p>
+  </div>
+
+  <div class="showcase-frame">
+    <div class="frame-bar">
+      <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+      <div class="url">capduction.app / workspace / <strong>combo</strong></div>
+      <div class="rec-tag"><span class="ring"></span> LIVE · 00:00:14</div>
+    </div>
+    <div class="frame-body">
+      <aside class="frame-side">
+        <h6>STUDIOS</h6>
+        <div class="item active">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v20M2 12h20"/><circle cx="12" cy="12" r="9"/></svg>
+          Combo Mode
+          <span class="badge">NEW</span>
+        </div>
+        <div class="item">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="6" width="18" height="14" rx="1"/><path d="M3 10h18"/></svg>
+          Script Studio
+        </div>
+        <div class="item">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/></svg>
+          Caption Studio
+        </div>
+        <div class="sep"></div>
+        <h6>PROJECTS</h6>
+        <div class="item">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 12l9 4 9-4M3 17l9 4 9-4"/></svg>
+          Matte Red Lipstick
+        </div>
+        <div class="item">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 7l9-4 9 4-9 4-9-4z"/></svg>
+          Summer Campaign 2026
+        </div>
+        <div class="sep"></div>
+        <h6>RESOURCES</h6>
+        <div class="item">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6m0-6l-6 6"/></svg>
+          Brand Voice
+        </div>
+        <div class="item">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3h18v18H3z"/></svg>
+          History
+        </div>
+      </aside>
+      <main class="frame-main">
+        <div class="frame-tab-row">
+          <div class="frame-tab active">› INPUT</div>
+          <div class="frame-tab">› OUTPUT</div>
+          <div class="frame-tab">› EXPORT</div>
+        </div>
+        <div class="frame-form-row">
+          <div class="frame-field">
+            <label>PRODUCT NAME</label>
+            <div class="val">ลิปสติกสีแดง เนื้อแมตต์ ติดทน 12 ชั่วโมง</div>
+          </div>
+          <div class="frame-field">
+            <label>PLATFORM · DURATION</label>
+            <div class="val">TikTok · 30 seconds</div>
+          </div>
+          <div class="frame-field">
+            <label>TARGET CUSTOMER</label>
+            <div class="val">ผู้หญิงวัย 18-35 ที่ชอบแต่งหน้า</div>
+          </div>
+          <div class="frame-field">
+            <label>TONE</label>
+            <div class="val">Persuasive · โน้มน้าวสไตล์แม่ค้าไทย</div>
+          </div>
+        </div>
+
+        <div class="frame-output">
+          <div class="frame-output-grid">
+            <div class="out-block">
+              <div class="out-block-label">
+                <span class="name">› SCRIPT · 4 BEATS · 30s</span>
+                <span class="count">SPOKEN VIDEO</span>
+              </div>
+              <div class="beat">
+                <div class="tc">00:00</div>
+                <div>
+                  <div class="role">HOOK</div>
+                  <div class="text">"ริมฝีปากแดงที่<em>คนหันมามอง</em> — ติด 12 ชั่วโมง ไม่ต้องแตะเลย"</div>
+                </div>
+              </div>
+              <div class="beat">
+                <div class="tc">00:05</div>
+                <div>
+                  <div class="role">BODY</div>
+                  <div class="text">"เนื้อแมตต์เนียนแบบไม่กินผิว สีแดงคลาสสิคที่ใส่กับชุดอะไรก็ได้ ลองทาช่วงเช้า เที่ยงยังอยู่ เย็นยังสวย"</div>
+                </div>
+              </div>
+              <div class="beat">
+                <div class="tc">00:18</div>
+                <div>
+                  <div class="role">PROOF</div>
+                  <div class="text">"รีวิวล้นจาก 2,000+ ลูกค้า ส่งฟรี ส่งเร็วทั่วประเทศ"</div>
+                </div>
+              </div>
+              <div class="beat">
+                <div class="tc">00:25</div>
+                <div>
+                  <div class="role">CTA</div>
+                  <div class="text">"กดลิงก์ในโปรไฟล์ <em>สั่งวันนี้ลด 20%</em> เฉพาะ 50 คนแรก"</div>
+                </div>
+              </div>
+            </div>
+            <div class="out-block out-caption">
+              <div class="out-block-label">
+                <span class="name">› CAPTION · V1/5</span>
+                <span class="count">POST COPY</span>
+              </div>
+              <div class="text-block">
+                ลิปสีแดงที่ไม่ทำให้ผิดหวัง <em>เนื้อแมตต์เนียน ติด 12 ชั่วโมง</em> ราคา ฿299 ส่งฟรี กดลิงก์โปรไฟล์ทักเลย ✨
+              </div>
+              <div class="out-block-label" style="margin-top: 20px;">
+                <span class="name">› HASHTAGS · 10</span>
+              </div>
+              <div class="tags">
+                #ลิปสติก #ลิปแดง #mattelip #รีวิวลิป<br/>
+                #ลิปติดทน #แต่งหน้า #TikTokShop<br/>
+                #ของมันต้องมี #ลิปไทย #freeshipping
+              </div>
+              <div class="out-block-label" style="margin-top: 20px;">
+                <span class="name">› CTA SUGGESTIONS · 5</span>
+              </div>
+              <div class="tags">
+                ทักแชทรับสิทธิ์ส่งฟรี<br/>
+                กดลิงก์โปรไฟล์ก่อนหมด<br/>
+                คอมเมนต์ "1" รับโค้ดส่วนลด
+              </div>
+            </div>
+          </div>
+          <div class="frame-actions">
+            <span class="frame-meta">› <span class="gen">GENERATED 1.4s</span> · 4 BEATS · 5 VARIANTS · 10 TAGS</span>
+            <button class="frame-btn hover-target" data-cursor="export">EXPORT PACK →</button>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ CHAPTER 03 ═══════════════ -->
+<div class="chapter">
+  <div class="num"><em>03</em></div>
+  <div class="meta">
+    <span class="title" data-i18n="ch3.t">WHAT MAKES IT WORK</span>
+    <span data-i18n="ch3.m">BUILT FOR THAI CREATORS</span>
+    <p class="desc" data-i18n="ch3.d">ไม่ใช่ caption generator ทั่วไป — เป็น studio ที่จับมือคุณตั้งแต่ idea แรก</p>
+  </div>
+</div>
+
+<!-- ═══════════════ FEATURES ═══════════════ -->
+<section class="features" id="features">
+  <div class="features-head">
+    <div>
+      <div class="features-eyebrow" data-i18n="ft.eye">— SIX REASONS</div>
+      <h2 data-i18n="ft.h">เครื่องมือ <em>ครบทุกขั้น</em><br/>ของการผลิตคอนเทนต์</h2>
+    </div>
+    <p class="features-sub" data-i18n="ft.sub">
+      Capduction ไม่ใช่แค่ caption generator แต่เป็นสตูดิโอที่จับมือคุณตั้งแต่ idea แรกจนถึงคลิปที่พร้อมอัปโหลด — built for Thai short-form creators
+    </p>
+  </div>
+  <div class="features-grid">
+    <div class="feature">
+      <div class="num">01</div>
+      <h4 data-i18n="f.1.h">ภาษาไทย <em>ที่ขายได้จริง</em></h4>
+      <p data-i18n="f.1.p">โทนแม่ค้าไทยผสมศัพท์ TikTok ใช้คำที่คนซื้อจริงเข้าใจ ไม่ใช่ภาษาแปลกๆ จาก AI ที่อ่านแล้วรู้ทันที</p>
+    </div>
+    <div class="feature">
+      <div class="num">02</div>
+      <h4 data-i18n="f.2.h">Script ที่มี <em>timing</em></h4>
+      <p data-i18n="f.2.p">รู้ว่าวินาทีไหนพูดอะไร B-roll เมื่อไหร่ เปลี่ยน shot ตอนไหน ปิดยังไง — ไม่ใช่แค่ block ข้อความให้ไปจัดต่อเอง</p>
+    </div>
+    <div class="feature">
+      <div class="num">03</div>
+      <h4 data-i18n="f.3.h">Brand Voice <em>Memory</em></h4>
+      <p data-i18n="f.3.p">สอน AI ให้รู้จักโทนแบรนด์คุณ ใส่ตัวอย่าง 3 โพสต์ มันจะปั้นในเสียงคุณตลอดไป ไม่ต้องสอนใหม่ทุกครั้ง</p>
+    </div>
+    <div class="feature">
+      <div class="num">04</div>
+      <h4 data-i18n="f.4.h">Project <em>Workspaces</em></h4>
+      <p data-i18n="f.4.p">รวม script + caption + asset ของแต่ละสินค้า/แคมเปญในโฟลเดอร์เดียว ไม่กระจาย ไม่หาย ไม่ลืมว่าโพสต์ไหนตัวไหน</p>
+    </div>
+    <div class="feature">
+      <div class="num">05</div>
+      <h4 data-i18n="f.5.h">7 platforms · <em>6 tones</em></h4>
+      <p data-i18n="f.5.p">TikTok, IG, Facebook, Shopee, Lazada, LINE, YouTube — โทนปรับอัตโนมัติตามที่เลือก เขียนภาษาเดียวกันแต่ฟีลคนละแบบ</p>
+    </div>
+    <div class="feature">
+      <div class="num">06</div>
+      <h4 data-i18n="f.6.h">Export <em>Pack</em></h4>
+      <p data-i18n="f.6.p">ดาวน์โหลดเป็น .pdf .txt หรือ copy เป็น batch ส่งทีมตัดต่อ พร้อม notes ทุก beat — ไม่ต้องพิมพ์ส่งใหม่</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ EDITORIAL QUOTE ═══════════════ -->
+<section class="quote-section">
+  <div class="quote">
+    <div class="mark">"</div>
+    <div>
+      <p class="quote-text" data-i18n="q.text">
+        ก่อนใช้ Capduction ใช้เวลา <em>2 ชั่วโมง</em>ต่อโพสต์ เขียน-แก้-ลบ-เขียนใหม่ ตอนนี้ใช้ <em>5 นาที</em>ได้ script + caption + hashtags ครบ แล้วเหลือเวลาไปทำคอนเทนต์ที่สำคัญกว่า
+      </p>
+      <div class="quote-author">
+        <div class="avatar"></div>
+        <div>
+          <strong>Khun Nam</strong>
+          <span data-i18n="q.role">เจ้าของร้านเครื่องสำอาง · 47K followers · TikTok</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ CHAPTER 04 ═══════════════ -->
+<div class="chapter">
+  <div class="num"><em>04</em></div>
+  <div class="meta">
+    <span class="title" data-i18n="ch4.t">CHOOSE A PLAN</span>
+    <span data-i18n="ch4.m">START FREE · UPGRADE ANY TIME</span>
+    <p class="desc" data-i18n="ch4.d">ฟรี 10 ครั้งทดลองทุก studio · อัปเกรดเมื่อพร้อม · ยกเลิกได้ตลอด</p>
+  </div>
+</div>
+
+<!-- ═══════════════ PRICING ═══════════════ -->
+<section class="pricing" id="pricing">
+  <div class="pricing-head">
+    <div class="pricing-eyebrow" data-i18n="pr.eye">PRICING · MAY 2026</div>
+    <h2 data-i18n="pr.h">ราคา <em>ตรงไปตรงมา</em></h2>
+    <p class="pricing-sub" data-i18n="pr.sub">เริ่มฟรี 10 ครั้ง อัปเกรดเมื่อพร้อม ยกเลิกได้ตลอดเวลา</p>
+  </div>
+  <div class="pricing-grid">
+    <div class="plan">
+      <div class="plan-name">FREE</div>
+      <div class="plan-price"><span class="currency">฿</span>0<span class="unit">/mo</span></div>
+      <div class="plan-desc" data-i18n="pl.free.d">ทดลองทุก studio ก่อนตัดสินใจ ไม่ต้องใส่บัตรเครดิต</div>
+      <ul>
+        <li><span data-i18n="pl.free.f1">10 generations/เดือน</span></li>
+        <li><span data-i18n="pl.free.f2">ทุก studio ทุกแพลตฟอร์ม</span></li>
+        <li><span data-i18n="pl.free.f3">ประวัติย้อนหลัง 7 วัน</span></li>
+        <li><span data-i18n="pl.free.f4">community support</span></li>
+      </ul>
+      <a href="#" class="plan-cta hover-target" data-cursor="start">เริ่มฟรี</a>
+    </div>
+    <div class="plan featured">
+      <div class="plan-badge">RECOMMENDED</div>
+      <div class="plan-name">STUDIO</div>
+      <div class="plan-price"><span class="currency">฿</span>349<span class="unit">/mo</span></div>
+      <div class="plan-desc" data-i18n="pl.studio.d">สำหรับ creator และร้านค้าที่โพสต์ทุกวัน คุ้มที่สุดในเซต</div>
+      <ul>
+        <li><span data-i18n="pl.studio.f1">500 generations/เดือน</span></li>
+        <li><span data-i18n="pl.studio.f2">Brand Voice Memory</span></li>
+        <li><span data-i18n="pl.studio.f3">Project workspaces</span></li>
+        <li><span data-i18n="pl.studio.f4">Export pack (.pdf .txt)</span></li>
+        <li><span data-i18n="pl.studio.f5">ประวัติไม่จำกัด</span></li>
+        <li><span data-i18n="pl.studio.f6">Priority support · ตอบใน 4 ชม.</span></li>
+      </ul>
+      <a href="#" class="plan-cta hover-target" data-cursor="start">อัปเกรดเป็น Studio</a>
+    </div>
+    <div class="plan">
+      <div class="plan-name">AGENCY</div>
+      <div class="plan-price"><span class="currency">฿</span>1,290<span class="unit">/mo</span></div>
+      <div class="plan-desc" data-i18n="pl.agency.d">สำหรับเอเจนซี่และทีมที่ดูแลหลายแบรนด์พร้อมกัน</div>
+      <ul>
+        <li><span data-i18n="pl.agency.f1">Unlimited generations</span></li>
+        <li><span data-i18n="pl.agency.f2">10 brand voices</span></li>
+        <li><span data-i18n="pl.agency.f3">Team workspace · 5 seats</span></li>
+        <li><span data-i18n="pl.agency.f4">API access</span></li>
+        <li><span data-i18n="pl.agency.f5">White-label export</span></li>
+        <li><span data-i18n="pl.agency.f6">Dedicated success manager</span></li>
+      </ul>
+      <a href="#" class="plan-cta hover-target" data-cursor="enter">ติดต่อทีมขาย</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ FOOTER ═══════════════ -->
+<footer>
+  <div class="footer-top">
+    <div>
+      <div class="footer-brand">Capduction<em>.</em></div>
+      <p class="footer-tag" data-i18n="ft.tag">
+        สตูดิโอ AI ระหว่างไอเดียกับการกดอัปโหลด — สร้างในบางกอก เพื่อ creator ไทยทั่วประเทศ
+      </p>
+      <div class="footer-newsletter">
+        <input type="email" placeholder="your@email.com" />
+        <button class="hover-target" data-cursor="subscribe">SUBSCRIBE</button>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h5>PRODUCT</h5>
+      <a href="#" class="hover-target" data-cursor="enter">Script Studio</a>
+      <a href="#" class="hover-target" data-cursor="enter">Caption Studio</a>
+      <a href="#" class="hover-target" data-cursor="enter">Combo Mode</a>
+      <a href="#" class="hover-target" data-cursor="enter">Brand Voice</a>
+      <a href="#" class="hover-target" data-cursor="enter">Export Pack</a>
+    </div>
+    <div class="footer-col">
+      <h5>RESOURCES</h5>
+      <a href="#" class="hover-target" data-cursor="read">Documentation</a>
+      <a href="#" class="hover-target" data-cursor="read">Brand Voice Guide</a>
+      <a href="#" class="hover-target" data-cursor="read">Changelog</a>
+      <a href="#" class="hover-target" data-cursor="read">Status Page</a>
+      <a href="#" class="hover-target" data-cursor="read">API Docs</a>
+    </div>
+    <div class="footer-col">
+      <h5>COMPANY</h5>
+      <a href="#" class="hover-target" data-cursor="read">About</a>
+      <a href="#" class="hover-target" data-cursor="read">Manifesto</a>
+      <a href="#" class="hover-target" data-cursor="read">Careers</a>
+      <a href="#" class="hover-target" data-cursor="read">Press Kit</a>
+      <a href="#" class="hover-target" data-cursor="enter">Contact</a>
+    </div>
+    <div class="footer-col">
+      <h5>LEGAL</h5>
+      <a href="#" class="hover-target" data-cursor="read">Privacy</a>
+      <a href="#" class="hover-target" data-cursor="read">Terms</a>
+      <a href="#" class="hover-target" data-cursor="read">Cookies</a>
+      <a href="#" class="hover-target" data-cursor="read">DPA</a>
+    </div>
+  </div>
+  <div class="footer-bot">
+    <span>© 2026 CAPDUCTION · MADE IN BANGKOK</span>
+    <span class="status">ALL SYSTEMS OPERATIONAL · UPTIME 99.98%</span>
+    <span>STUDIO V1.0 · BUILD 2026.05.16</span>
+  </div>
+</footer>
+
+<!-- ═══════════════ THREE.JS — Rich studio scene ═══════════════ -->
+<script type="module">
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+const stage = document.getElementById('stage3d');
+const scene = new THREE.Scene();
+const cam = new THREE.PerspectiveCamera(38, stage.clientWidth/stage.clientHeight, 0.1, 100);
+cam.position.set(0, 0.3, 6);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(stage.clientWidth, stage.clientHeight);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+stage.appendChild(renderer.domElement);
+
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+
+// Materials
+const chrome = new THREE.MeshPhysicalMaterial({
+  color: 0xefefef, metalness: 1.0, roughness: 0.12,
+  envMapIntensity: 1.4, clearcoat: 0.6, clearcoatRoughness: 0.15
+});
+const dark = new THREE.MeshStandardMaterial({ color: 0x121212, metalness: 0.85, roughness: 0.3 });
+const ember = new THREE.MeshStandardMaterial({
+  color: 0xC45A1A, metalness: 0.5, roughness: 0.3,
+  emissive: 0xC45A1A, emissiveIntensity: 0.15
+});
+const signal = new THREE.MeshStandardMaterial({
+  color: 0xD4FF3F, metalness: 0.3, roughness: 0.4,
+  emissive: 0xD4FF3F, emissiveIntensity: 0.5
+});
+
+const studio = new THREE.Group();
+
+// ─── Main Clapperboard ───────────────────────────
+const clap = new THREE.Group();
+const slate = new THREE.Mesh(new THREE.BoxGeometry(3.4, 2.1, 0.2), dark);
+clap.add(slate);
+
+// Top hinged board with diagonal stripes
+const topBoard = new THREE.Group();
+const topPlank = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.6, 0.16), chrome);
+topBoard.add(topPlank);
+for (let i = -5; i <= 5; i++) {
+  const stripeMat = i % 2 === 0 ? dark : chrome;
+  const stripe = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.62, 0.17), stripeMat);
+  stripe.position.x = i * 0.34;
+  stripe.rotation.z = -0.18;
+  topBoard.add(stripe);
+}
+topBoard.position.y = 1.05;
+clap.add(topBoard);
+
+// Info strips on slate
+for (let i = 0; i < 4; i++) {
+  const strip = new THREE.Mesh(
+    new THREE.BoxGeometry(2.8, 0.04, 0.05),
+    new THREE.MeshStandardMaterial({ color: 0xF5F1E8, roughness: 0.7 })
+  );
+  strip.position.set(0, -0.6 + i * 0.35, 0.11);
+  clap.add(strip);
+}
+
+// Aperture mark dot
+const apMark = new THREE.Mesh(new THREE.SphereGeometry(0.14, 32, 32), ember);
+apMark.position.set(-1.4, -0.5, 0.18);
+clap.add(apMark);
+
+clap.position.y = -0.2;
+studio.add(clap);
+
+// ─── Floating Lens ───────────────────────────────
+const lensGroup = new THREE.Group();
+const lensRing = new THREE.Mesh(new THREE.TorusGeometry(0.6, 0.16, 24, 64), chrome);
+lensGroup.add(lensRing);
+const lensInner = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 0.12, 48), dark);
+lensInner.rotation.x = Math.PI/2;
+lensGroup.add(lensInner);
+const lensGlass = new THREE.Mesh(
+  new THREE.CylinderGeometry(0.42, 0.42, 0.02, 48),
+  new THREE.MeshPhysicalMaterial({
+    color: 0x0B0B0B, metalness: 0.2, roughness: 0.05,
+    transmission: 0.5, thickness: 1.0, ior: 1.5
+  })
+);
+lensGlass.rotation.x = Math.PI/2;
+lensGlass.position.z = 0.07;
+lensGroup.add(lensGlass);
+const lensIris = new THREE.Mesh(new THREE.RingGeometry(0.25, 0.42, 8), signal);
+lensIris.position.z = 0.08;
+lensGroup.add(lensIris);
+lensGroup.position.set(2.6, 1.4, 1.2);
+lensGroup.rotation.set(0.3, 0.4, 0);
+studio.add(lensGroup);
+
+// ─── Floating Microphone ─────────────────────────
+const mic = new THREE.Group();
+const micBody = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.18, 0.6, 32), chrome);
+mic.add(micBody);
+const micCap = new THREE.Mesh(new THREE.SphereGeometry(0.22, 32, 32, 0, Math.PI*2, 0, Math.PI/2),
+  new THREE.MeshPhysicalMaterial({
+    color: 0x222222, metalness: 0.9, roughness: 0.25,
+    wireframe: false
+  })
+);
+micCap.position.y = 0.3;
+mic.add(micCap);
+// Grille rings
+for (let i = 0; i < 4; i++) {
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(0.2 - i*0.04, 0.012, 8, 32), chrome);
+  ring.rotation.x = Math.PI/2;
+  ring.position.y = 0.3 + i * 0.04;
+  mic.add(ring);
+}
+// Stand
+const micStand = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.5, 16), chrome);
+micStand.position.y = -0.55;
+mic.add(micStand);
+const micBase = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.25, 0.06, 32), dark);
+micBase.position.y = -0.83;
+mic.add(micBase);
+mic.position.set(-2.9, 0.6, 1.0);
+mic.rotation.z = 0.25;
+studio.add(mic);
+
+// ─── Film reel (small, behind) ──────────────────
+const reel = new THREE.Group();
+const reelDisc = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.7, 0.06, 48), chrome);
+reelDisc.rotation.x = Math.PI/2;
+reel.add(reelDisc);
+for (let i = 0; i < 6; i++) {
+  const spoke = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.04, 0.04), chrome);
+  spoke.rotation.z = (i * Math.PI)/6;
+  reel.add(spoke);
+}
+const reelHub = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.1, 24), ember);
+reelHub.rotation.x = Math.PI/2;
+reel.add(reelHub);
+reel.position.set(0.5, 1.8, -2);
+reel.scale.setScalar(0.7);
+studio.add(reel);
+
+// ─── Tiny accent orbs ────────────────────────────
+const orbs = [];
+for (let i = 0; i < 6; i++) {
+  const orb = new THREE.Mesh(
+    new THREE.SphereGeometry(0.06 + Math.random() * 0.08, 24, 24),
+    i % 2 === 0 ? signal : chrome
+  );
+  orb.position.set(
+    (Math.random() - 0.5) * 7,
+    (Math.random() - 0.5) * 4,
+    (Math.random() - 0.5) * 3 + 1
+  );
+  orb.userData = { speed: 0.3 + Math.random()*0.7, offset: Math.random()*Math.PI*2 };
+  orbs.push(orb);
+  studio.add(orb);
+}
+
+scene.add(studio);
+
+// Lights
+scene.add(new THREE.AmbientLight(0xffffff, 0.3));
+const key = new THREE.DirectionalLight(0xffffff, 1.4); key.position.set(3, 5, 4); scene.add(key);
+const fill = new THREE.DirectionalLight(0xC45A1A, 0.5); fill.position.set(-3, -2, 2); scene.add(fill);
+const rim = new THREE.PointLight(0xD4FF3F, 0.4, 10); rim.position.set(0, 0, -3); scene.add(rim);
+
+let mx=0, my=0;
+const targetMouse = { x: 0, y: 0 };
+window.addEventListener('mousemove', e => {
+  targetMouse.x = (e.clientX/innerWidth - 0.5) * 0.5;
+  targetMouse.y = (e.clientY/innerHeight - 0.5) * 0.5;
+});
+
+let scrollY = 0;
+window.addEventListener('scroll', () => { scrollY = window.scrollY; });
+
+let t = 0;
+function loop(){
+  t += 0.005;
+  mx += (targetMouse.x - mx) * 0.04;
+  my += (targetMouse.y - my) * 0.04;
+
+  studio.rotation.y = mx + Math.sin(t*0.3) * 0.08 + scrollY * 0.0006;
+  studio.rotation.x = my * 0.4 + Math.sin(t*0.4) * 0.04;
+  studio.position.y = Math.sin(t*0.6) * 0.06;
+
+  topBoard.rotation.x = Math.sin(t*0.5) * 0.06 - 0.04;
+  lensGroup.rotation.z = t * 0.2;
+  lensGroup.position.y = 1.4 + Math.sin(t*0.7) * 0.12;
+  mic.rotation.y = Math.sin(t*0.3) * 0.15;
+  reel.rotation.z = t * 0.6;
+  apMark.position.x = -1.4 + Math.sin(t*1.2) * 0.04;
+
+  orbs.forEach((orb, i) => {
+    orb.position.y += Math.sin(t * orb.userData.speed + orb.userData.offset) * 0.005;
+    orb.rotation.y = t * orb.userData.speed;
+  });
+
+  renderer.render(scene, cam);
+  requestAnimationFrame(loop);
+}
+loop();
+
+window.addEventListener('resize', () => {
+  cam.aspect = stage.clientWidth/stage.clientHeight;
+  cam.updateProjectionMatrix();
+  renderer.setSize(stage.clientWidth, stage.clientHeight);
+});
+</script>
+
+<!-- ═══════════════ CURSOR + INTERACTIONS ═══════════════ -->
+<script>
+const cursor = document.getElementById('cursor');
+const targetCursor = { x: 0, y: 0 };
+const actualCursor = { x: 0, y: 0 };
+
+window.addEventListener('mousemove', e => {
+  targetCursor.x = e.clientX;
+  targetCursor.y = e.clientY;
+});
+
+function loopCursor() {
+  actualCursor.x += (targetCursor.x - actualCursor.x) * 0.2;
+  actualCursor.y += (targetCursor.y - actualCursor.y) * 0.2;
+  cursor.style.left = actualCursor.x + 'px';
+  cursor.style.top = actualCursor.y + 'px';
+  requestAnimationFrame(loopCursor);
+}
+loopCursor();
+
+const cursorLabels = {
+  enter: 'ENTER →',
+  start: 'START →',
+  watch: 'WATCH →',
+  read: 'READ →',
+  export: 'EXPORT →',
+  subscribe: 'JOIN →'
+};
+
+document.querySelectorAll('.hover-target').forEach(el => {
+  el.addEventListener('mouseenter', () => {
+    const label = el.dataset.cursor;
+    cursor.classList.add('expand');
+    cursor.dataset.label = cursorLabels[label] || 'CLICK →';
+  });
+  el.addEventListener('mouseleave', () => {
+    cursor.classList.remove('expand');
+  });
+});
+
+// ─── Reveal on scroll ─────────────────────────
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) entry.target.classList.add('in-view');
+  });
+}, { threshold: 0.15 });
+document.querySelectorAll('.fade-in').forEach(el => io.observe(el));
+
+// ─── i18n toggle ──────────────────────────────
+const dict = {
+  th: {
+    "nav.cta": "เริ่มฟรี",
+    "issue.tag": "EDITORIAL ISSUE 01 — บางกอก",
+    "hero.chapter": "บทนำ · OPENING",
+    "hero.l1": "เขียน<em>สคริปต์</em>",
+    "hero.l2": "ปั้น<span class='stroke'>แคปชั่น</span>",
+    "hero.l3": "ก่อนกด record.",
+    "hero.deck": "สตูดิโอ AI สำหรับครีเอเตอร์วิดีโอสั้นไทยยุค scroll-first ตั้งแต่<strong>สคริปต์การพูด</strong>พร้อม timing ทุกวินาที ไปจนถึง<strong>แคปชั่นหน้าคลิป</strong>ที่ปิดการขายได้จริง ทุกอย่างพร้อมยิงในไฟล์เดียว",
+    "hero.cta1": "เริ่มฟรี 10 ครั้ง",
+    "hero.cta2": "ดูสตูดิโอทำงานจริง",
+    "stat.users": "creators · สัปดาห์นี้",
+    "stat.platforms": "แพลตฟอร์มรองรับ",
+    "stat.speed": "ความเร็วเฉลี่ย",
+    "stat.repeat": "กลับมาใช้ในวันถัดไป",
+    "ht.1": "Chrome studio rig",
+    "ht.2": "Real-time output",
+    "ht.3": "Issue 01 · live",
+    "pv.s1": "\"ริมฝีปากแดงที่<em>คนหันมามอง</em> ติด 12 ชั่วโมง ไม่ต้องแตะเลย\"",
+    "pv.s2": "\"เนื้อแมตต์ เนียนไม่กินผิว สีคลาสสิคที่ใส่กับชุดอะไรก็ได้\"",
+    "pv.s3": "\"รีวิวล้น 2,000+ ลูกค้า กดลิงก์ในโปรไฟล์ <em>ลด 20% เฉพาะ 50 คนแรก</em>\"",
+    "ch1.t": "สามสตูดิโอ", "ch1.m": "SCRIPT · CAPTION · COMBO",
+    "ch1.d": "เลือกใช้ทีละโหมดได้ หรือเรียก Combo ให้ปั้นทั้งหมดบน hook เดียวกัน",
+    "st.1.n": "<em>Script</em> Studio",
+    "st.1.d": "สคริปต์การพูดสำหรับวิดีโอสั้น พร้อม timing markers ทุกวินาที B-roll cues และข้อความหน้าจอ แบ่ง hook · body · proof · CTA ชัดเจน พร้อมส่งทีมตัดต่อ",
+    "st.2.n": "<em>Caption</em> Studio",
+    "st.2.d": "แคปชั่น 5 variants พร้อมใช้, hooks ดึงสายตา 5 แบบ, hashtags 10 ตัวตรงเทรนด์, CTA ปิดการขาย — ทุกอย่างปรับโทนตามแพลตฟอร์มอัตโนมัติ",
+    "st.3.n": "<em>Combo</em> Mode",
+    "st.3.d": "สำหรับเวลาที่อยากได้ทั้งหมดในครั้งเดียว — ปั้น script และ caption ที่ใช้ hook เดียวกัน ความหมายเดียวกัน package พร้อมโพสต์ครบในไฟล์เดียว",
+    "ch2.t": "เวิร์กสเปซ", "ch2.m": "LIVE PRODUCT · NO MOCK",
+    "ch2.d": "ดูตอน Capduction ทำงานจริง — จากชื่อสินค้าถึง package พร้อมโพสต์ใน 1.4 วินาที",
+    "sc.eye": "— WORKSPACE PREVIEW",
+    "sc.h": "ดูตอน <em>สตูดิโอ</em><br/>ทำงานจริง",
+    "sc.sub": "ใส่ชื่อสินค้า เลือกแพลตฟอร์ม กด Generate ได้ script + caption + hashtags ครบใน 1.4 วินาที — นี่คือหน้า workspace จริงของ Capduction",
+    "ch3.t": "ทำไม Capduction", "ch3.m": "BUILT FOR THAI CREATORS",
+    "ch3.d": "ไม่ใช่ caption generator ทั่วไป — เป็น studio ที่จับมือคุณตั้งแต่ idea แรก",
+    "ft.eye": "— SIX REASONS",
+    "ft.h": "เครื่องมือ <em>ครบทุกขั้น</em><br/>ของการผลิตคอนเทนต์",
+    "ft.sub": "Capduction ไม่ใช่แค่ caption generator แต่เป็นสตูดิโอที่จับมือคุณตั้งแต่ idea แรกจนถึงคลิปที่พร้อมอัปโหลด — built for Thai short-form creators",
+    "f.1.h": "ภาษาไทย <em>ที่ขายได้จริง</em>",
+    "f.1.p": "โทนแม่ค้าไทยผสมศัพท์ TikTok ใช้คำที่คนซื้อจริงเข้าใจ ไม่ใช่ภาษาแปลกๆ จาก AI ที่อ่านแล้วรู้ทันที",
+    "f.2.h": "Script ที่มี <em>timing</em>",
+    "f.2.p": "รู้ว่าวินาทีไหนพูดอะไร B-roll เมื่อไหร่ เปลี่ยน shot ตอนไหน ปิดยังไง — ไม่ใช่แค่ block ข้อความให้ไปจัดต่อเอง",
+    "f.3.h": "Brand Voice <em>Memory</em>",
+    "f.3.p": "สอน AI ให้รู้จักโทนแบรนด์คุณ ใส่ตัวอย่าง 3 โพสต์ มันจะปั้นในเสียงคุณตลอดไป ไม่ต้องสอนใหม่ทุกครั้ง",
+    "f.4.h": "Project <em>Workspaces</em>",
+    "f.4.p": "รวม script + caption + asset ของแต่ละสินค้า/แคมเปญในโฟลเดอร์เดียว ไม่กระจาย ไม่หาย ไม่ลืมว่าโพสต์ไหนตัวไหน",
+    "f.5.h": "7 platforms · <em>6 tones</em>",
+    "f.5.p": "TikTok, IG, Facebook, Shopee, Lazada, LINE, YouTube — โทนปรับอัตโนมัติตามที่เลือก เขียนภาษาเดียวกันแต่ฟีลคนละแบบ",
+    "f.6.h": "Export <em>Pack</em>",
+    "f.6.p": "ดาวน์โหลดเป็น .pdf .txt หรือ copy เป็น batch ส่งทีมตัดต่อ พร้อม notes ทุก beat — ไม่ต้องพิมพ์ส่งใหม่",
+    "q.text": "ก่อนใช้ Capduction ใช้เวลา <em>2 ชั่วโมง</em>ต่อโพสต์ เขียน-แก้-ลบ-เขียนใหม่ ตอนนี้ใช้ <em>5 นาที</em>ได้ script + caption + hashtags ครบ แล้วเหลือเวลาไปทำคอนเทนต์ที่สำคัญกว่า",
+    "q.role": "เจ้าของร้านเครื่องสำอาง · 47K followers · TikTok",
+    "ch4.t": "เลือกแผน", "ch4.m": "START FREE · UPGRADE ANY TIME",
+    "ch4.d": "ฟรี 10 ครั้งทดลองทุก studio · อัปเกรดเมื่อพร้อม · ยกเลิกได้ตลอด",
+    "pr.eye": "PRICING · MAY 2026",
+    "pr.h": "ราคา <em>ตรงไปตรงมา</em>",
+    "pr.sub": "เริ่มฟรี 10 ครั้ง อัปเกรดเมื่อพร้อม ยกเลิกได้ตลอดเวลา",
+    "pl.free.d": "ทดลองทุก studio ก่อนตัดสินใจ ไม่ต้องใส่บัตรเครดิต",
+    "pl.free.f1": "10 generations/เดือน", "pl.free.f2": "ทุก studio ทุกแพลตฟอร์ม",
+    "pl.free.f3": "ประวัติย้อนหลัง 7 วัน", "pl.free.f4": "community support",
+    "pl.studio.d": "สำหรับ creator และร้านค้าที่โพสต์ทุกวัน คุ้มที่สุดในเซต",
+    "pl.studio.f1": "500 generations/เดือน", "pl.studio.f2": "Brand Voice Memory",
+    "pl.studio.f3": "Project workspaces", "pl.studio.f4": "Export pack (.pdf .txt)",
+    "pl.studio.f5": "ประวัติไม่จำกัด", "pl.studio.f6": "Priority support · ตอบใน 4 ชม.",
+    "pl.agency.d": "สำหรับเอเจนซี่และทีมที่ดูแลหลายแบรนด์พร้อมกัน",
+    "pl.agency.f1": "Unlimited generations", "pl.agency.f2": "10 brand voices",
+    "pl.agency.f3": "Team workspace · 5 seats", "pl.agency.f4": "API access",
+    "pl.agency.f5": "White-label export", "pl.agency.f6": "Dedicated success manager",
+    "ft.tag": "สตูดิโอ AI ระหว่างไอเดียกับการกดอัปโหลด — สร้างในบางกอก เพื่อ creator ไทยทั่วประเทศ",
+  },
+  en: {
+    "nav.cta": "Start free",
+    "issue.tag": "EDITORIAL ISSUE 01 — BANGKOK",
+    "hero.chapter": "OPENING · ISSUE 01",
+    "hero.l1": "Write <em>scripts.</em>",
+    "hero.l2": "Craft <span class='stroke'>captions.</span>",
+    "hero.l3": "Before you hit record.",
+    "hero.deck": "An AI studio for Thai short-form creators in the scroll-first era. From <strong>spoken scripts</strong> with second-by-second timing to <strong>on-screen captions</strong> that actually convert — everything ready to ship in one file.",
+    "hero.cta1": "Try 10 free",
+    "hero.cta2": "See the studio at work",
+    "stat.users": "creators · this week",
+    "stat.platforms": "platforms supported",
+    "stat.speed": "avg generation time",
+    "stat.repeat": "return next day",
+    "ht.1": "Chrome studio rig",
+    "ht.2": "Real-time output",
+    "ht.3": "Issue 01 · live",
+    "pv.s1": "\"Red lips that <em>turn heads</em> — 12hr hold, zero touch-ups\"",
+    "pv.s2": "\"Matte finish, never dry. Classic red that pairs with anything.\"",
+    "pv.s3": "\"2,000+ five-star reviews. Tap link in bio — <em>20% off, first 50 only</em>\"",
+    "ch1.t": "THE STUDIOS", "ch1.m": "SCRIPT · CAPTION · COMBO",
+    "ch1.d": "Use modes individually, or call Combo to align script and caption on one hook.",
+    "st.1.n": "<em>Script</em> Studio",
+    "st.1.d": "Spoken video scripts with second-by-second timing, B-roll cues, and on-screen text. Clean hook · body · proof · CTA breakdown — ready for the edit bay.",
+    "st.2.n": "<em>Caption</em> Studio",
+    "st.2.d": "5 caption variants, 5 scroll-stopping hooks, 10 trend-matched hashtags, 5 closing CTAs — tone auto-tunes per platform.",
+    "st.3.n": "<em>Combo</em> Mode",
+    "st.3.d": "When you want everything in one shot — script and caption built on the same hook and meaning. Complete post package, one file.",
+    "ch2.t": "THE WORKSPACE", "ch2.m": "LIVE PRODUCT · NO MOCK",
+    "ch2.d": "See Capduction working — from product name to post-ready package in 1.4 seconds.",
+    "sc.eye": "— WORKSPACE PREVIEW",
+    "sc.h": "Watch the <em>studio</em><br/>at work.",
+    "sc.sub": "Type a product name, pick a platform, hit Generate — get script + caption + hashtags in 1.4 seconds. This is the real Capduction workspace.",
+    "ch3.t": "WHY CAPDUCTION", "ch3.m": "BUILT FOR THAI CREATORS",
+    "ch3.d": "Not a generic caption generator — a studio that walks you from idea to upload.",
+    "ft.eye": "— SIX REASONS",
+    "ft.h": "Tools for <em>every step</em><br/>of production",
+    "ft.sub": "Capduction isn't just a caption generator — it's the studio that takes you from first idea to ready-to-upload clip. Built for Thai short-form creators.",
+    "f.1.h": "Thai that <em>actually sells</em>",
+    "f.1.p": "Real seller voice mixed with TikTok-native phrasing. Words real buyers use — not the giveaway language of generic AI.",
+    "f.2.h": "Scripts with <em>timing</em>",
+    "f.2.p": "Know what to say at each second, when B-roll lands, when to cut, when to close. Not a wall of text — a director's plan.",
+    "f.3.h": "Brand Voice <em>Memory</em>",
+    "f.3.p": "Teach the AI your brand. Feed it 3 sample posts. It writes in your voice forever — no re-training every session.",
+    "f.4.h": "Project <em>Workspaces</em>",
+    "f.4.p": "Group scripts, captions, and assets per product or campaign — no scattered tabs, no losing which post is for which item.",
+    "f.5.h": "7 platforms · <em>6 tones</em>",
+    "f.5.p": "TikTok, IG, Facebook, Shopee, Lazada, LINE, YouTube — tone auto-adjusts per channel. Same message, different feel.",
+    "f.6.h": "Export <em>Pack</em>",
+    "f.6.p": "Download as .pdf or .txt. Batch-copy to your edit team with notes on every beat — no retyping, no lost context.",
+    "q.text": "Before Capduction I spent <em>2 hours</em> per post — writing, deleting, rewriting. Now <em>5 minutes</em> gets me script + caption + hashtags. The rest of the day goes to actual content.",
+    "q.role": "Cosmetics shop owner · 47K followers · TikTok",
+    "ch4.t": "CHOOSE A PLAN", "ch4.m": "START FREE · UPGRADE ANY TIME",
+    "ch4.d": "Free 10 generations across all studios · upgrade when ready · cancel anytime.",
+    "pr.eye": "PRICING · MAY 2026",
+    "pr.h": "Pricing, <em>plainly stated.</em>",
+    "pr.sub": "Start free with 10 generations. Upgrade when you're ready. Cancel anytime.",
+    "pl.free.d": "Try every studio before you commit. No credit card required.",
+    "pl.free.f1": "10 generations / month", "pl.free.f2": "All studios, all platforms",
+    "pl.free.f3": "7-day history", "pl.free.f4": "Community support",
+    "pl.studio.d": "For creators and shops posting daily. Best value in the set.",
+    "pl.studio.f1": "500 generations / month", "pl.studio.f2": "Brand Voice Memory",
+    "pl.studio.f3": "Project workspaces", "pl.studio.f4": "Export pack (.pdf .txt)",
+    "pl.studio.f5": "Unlimited history", "pl.studio.f6": "Priority support · 4hr reply",
+    "pl.agency.d": "For agencies and teams managing multiple brands at once.",
+    "pl.agency.f1": "Unlimited generations", "pl.agency.f2": "10 brand voices",
+    "pl.agency.f3": "Team workspace · 5 seats", "pl.agency.f4": "API access",
+    "pl.agency.f5": "White-label export", "pl.agency.f6": "Dedicated success manager",
+    "ft.tag": "The AI studio between idea and upload — built in Bangkok, for Thai creators everywhere.",
+  }
+};
+
+document.querySelectorAll('.lang-toggle button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.lang-toggle button').forEach(x => x.classList.remove('active'));
+    btn.classList.add('active');
+    const lang = btn.dataset.lang;
+    document.body.lang = lang;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.dataset.i18n;
+      if (dict[lang][key]) el.innerHTML = dict[lang][key];
+    });
+  });
+});
+</script>
+</body>
+</html>

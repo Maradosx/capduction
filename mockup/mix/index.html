@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Capduction · Mix Gallery — Liquid × Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=Geist+Mono:wght@400;500&family=Sarabun:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FDFBFF;
+    --ink: #2A2348;
+    --ink-2: #5C548A;
+    --slate: #8A82B0;
+    --line: rgba(94,79,138,0.12);
+    --line-2: rgba(94,79,138,0.18);
+    --font: 'Inter', sans-serif;
+    --font-serif: 'Instrument Serif', serif;
+    --font-mono: 'Geist Mono', monospace;
+    --font-thai: 'Sarabun', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--ink);
+    font-family: var(--font); font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh; padding: 60px 32px 80px;
+    position: relative; cursor: none;
+  }
+  body[lang="th"] { font-family: var(--font-thai); }
+  /* Iridescent mesh subtle bg */
+  body::before {
+    content: ""; position: fixed; inset: 0; z-index: -2;
+    background:
+      radial-gradient(circle at 10% 18%, #E8DEFF 0%, transparent 40%),
+      radial-gradient(circle at 85% 12%, #FFE0D0 0%, transparent 38%),
+      radial-gradient(circle at 70% 85%, #D6F5E5 0%, transparent 42%),
+      radial-gradient(circle at 20% 80%, #D5E8FF 0%, transparent 40%);
+    filter: saturate(1.1);
+  }
+  body::after {
+    content: ""; position: fixed; inset: 0; z-index: -1;
+    background: rgba(253,251,255,0.55);
+    backdrop-filter: blur(50px);
+  }
+
+  .cursor {
+    position: fixed; pointer-events: none; z-index: 10000;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, white, #B58FFF 50%, #5E4F8A);
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.6), 0 4px 16px rgba(181,143,255,0.4);
+    transform: translate(-50%, -50%);
+    transition: width 0.25s, height 0.25s;
+  }
+  .cursor.target {
+    width: 64px; height: 64px;
+    background: radial-gradient(circle at 35% 30%, white, #FF8FB5 25%, #B58FFF 65%, #5E4F8A);
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.7), 0 12px 36px rgba(181,143,255,0.5);
+  }
+  .cursor::after {
+    content: attr(data-label);
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono); font-size: 9px;
+    color: white; letter-spacing: 0.1em;
+    text-transform: uppercase; font-weight: 600;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  }
+  @media (max-width: 768px) { body { cursor: auto; } .cursor { display: none; } }
+  a, button, .hover-target { cursor: none; }
+
+  .wrap { max-width: 1500px; margin: 0 auto; position: relative; z-index: 1; }
+
+  header { text-align: center; margin-bottom: 80px; }
+  .eyebrow {
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--slate); margin-bottom: 28px;
+    display: inline-flex; align-items: center; gap: 14px;
+  }
+  .eyebrow::before, .eyebrow::after {
+    content: ""; width: 40px; height: 1px;
+    background: linear-gradient(90deg, transparent, #B58FFF);
+  }
+  .eyebrow::after { background: linear-gradient(90deg, #B58FFF, transparent); }
+  .eyebrow .dot {
+    width: 7px; height: 7px;
+    background: radial-gradient(circle at 30% 30%, white, #B58FFF, #5E4F8A);
+    border-radius: 50%; box-shadow: 0 0 12px rgba(181,143,255,0.6);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1;}50%{opacity:.5;} }
+  header h1 {
+    font-family: var(--font);
+    font-size: clamp(48px, 7vw, 96px);
+    font-weight: 700; letter-spacing: -0.035em;
+    line-height: 0.98; margin-bottom: 24px;
+  }
+  header h1 .iri {
+    background: linear-gradient(135deg, #FF8FB5, #B58FFF, #5DD5DA);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  header h1 .serif {
+    font-family: var(--font-serif); font-style: italic; font-weight: 400;
+    background: linear-gradient(180deg, var(--ink), #5E4F8A);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 1.08em;
+  }
+  body[lang="th"] header h1 .serif { font-family: var(--font-thai); font-style: normal; }
+  header p {
+    font-size: 17px; color: var(--ink-2);
+    max-width: 720px; margin: 0 auto;
+    line-height: 1.55;
+  }
+  body[lang="th"] header p { font-family: var(--font-thai); }
+  header .ref-row {
+    margin-top: 28px;
+    display: inline-flex; gap: 18px; align-items: center;
+    padding: 10px 18px;
+    background: rgba(255,255,255,0.6);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.8);
+    border-radius: 100px;
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.16em; color: var(--ink-2);
+    text-transform: uppercase;
+    box-shadow: 0 8px 24px rgba(94,79,138,0.1);
+  }
+  header .ref-row strong {
+    background: linear-gradient(135deg, #FF8FB5, #B58FFF);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 700;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(440px, 1fr));
+    gap: 28px;
+  }
+  .card {
+    background: rgba(255,255,255,0.65);
+    backdrop-filter: blur(28px);
+    border-radius: 26px; overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.85);
+    transition: all 0.4s cubic-bezier(0.22,1,0.36,1);
+    display: flex; flex-direction: column;
+    text-decoration: none; color: var(--ink);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.9) inset,
+      0 10px 30px rgba(94,79,138,0.1);
+  }
+  .card:hover {
+    transform: translateY(-10px);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.95) inset,
+      0 36px 80px rgba(94,79,138,0.2);
+  }
+  .card-preview {
+    aspect-ratio: 16/10;
+    position: relative; overflow: hidden;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 32px;
+  }
+
+  /* ─── Mix 1: Soft Liquid (balanced) ──────────────────── */
+  .preview-1 {
+    background:
+      radial-gradient(circle at 12% 18%, #E8DEFF 0%, transparent 38%),
+      radial-gradient(circle at 85% 12%, #FFE0D0 0%, transparent 38%),
+      radial-gradient(circle at 50% 50%, #FFD0E0 0%, transparent 55%),
+      radial-gradient(circle at 78% 78%, #D6F5E5 0%, transparent 42%),
+      radial-gradient(circle at 18% 82%, #D5E8FF 0%, transparent 38%);
+    overflow: hidden;
+  }
+  .preview-1 .demo-icon {
+    width: 64px; height: 64px; border-radius: 18px;
+    background: radial-gradient(circle at 30% 25%,
+      white, #E8DEFF 20%, #FFD0E0 40%, #B58FFF 70%, #5E4F8A);
+    box-shadow:
+      inset 0 2px 0 rgba(255,255,255,0.6),
+      0 0 0 1px rgba(255,255,255,0.4),
+      0 16px 40px rgba(181,143,255,0.5);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 18px;
+    position: relative;
+  }
+  .preview-1 .demo-icon::after {
+    content: ""; position: absolute;
+    top: 8px; left: 14px; width: 22px; height: 8px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.7), transparent);
+    border-radius: 50%; transform: rotate(-25deg);
+  }
+  .preview-1 .demo-icon svg { width: 28px; height: 28px; color: white; }
+  .preview-1 .demo-h {
+    font-family: var(--font); font-weight: 700;
+    font-size: 30px; line-height: 1.05;
+    letter-spacing: -0.025em; text-align: center;
+    color: var(--ink);
+  }
+  .preview-1 .demo-h .iri {
+    background: linear-gradient(135deg, #FF8FB5, #B58FFF, #5DD5DA);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .preview-1 .demo-h .serif {
+    font-family: var(--font-serif); font-style: italic; font-weight: 400;
+    color: #5E4F8A;
+  }
+  .preview-1 .chip {
+    position: absolute; top: 16px; left: 16px;
+    padding: 5px 12px; border-radius: 100px;
+    background: rgba(255,255,255,0.6); backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.8);
+    font-family: var(--font-mono); font-size: 9px;
+    color: #5E4F8A; letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .preview-1 .sp {
+    position: absolute; width: 14px; height: 14px;
+    filter: drop-shadow(0 0 6px currentColor);
+  }
+  .preview-1 .sp svg { width: 100%; height: 100%; }
+  .preview-1 .sp1 { top: 22%; right: 22%; color: #FFE5A0; }
+  .preview-1 .sp2 { bottom: 22%; left: 22%; color: #FF8FB5; }
+  .preview-1 .sp3 { top: 30%; left: 14%; color: #B58FFF; }
+
+  /* ─── Mix 2: Rosé Daydream ──────────────────────────── */
+  .preview-2 {
+    background:
+      radial-gradient(circle at 12% 18%, #FFC4D6 0%, transparent 38%),
+      radial-gradient(circle at 85% 12%, #FFD0B5 0%, transparent 42%),
+      radial-gradient(circle at 50% 50%, #FFE0D6 0%, transparent 60%),
+      radial-gradient(circle at 75% 78%, #FFE5A8 0%, transparent 40%),
+      radial-gradient(circle at 15% 82%, #FFA38F 0%, transparent 35%);
+    overflow: hidden;
+  }
+  .preview-2 .demo-icon {
+    width: 64px; height: 64px; border-radius: 18px;
+    background: radial-gradient(circle at 30% 25%,
+      white, #FFE0D6 15%, #FFC4D6 35%, #FF7AA8 60%, #B85577);
+    box-shadow:
+      inset 0 2px 0 rgba(255,255,255,0.6),
+      0 0 0 1px rgba(255,255,255,0.4),
+      0 16px 40px rgba(255,122,168,0.5);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 18px;
+    position: relative;
+  }
+  .preview-2 .demo-icon::after {
+    content: ""; position: absolute;
+    top: 8px; left: 14px; width: 22px; height: 8px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.7), transparent);
+    border-radius: 50%; transform: rotate(-25deg);
+  }
+  .preview-2 .demo-icon svg { width: 28px; height: 28px; color: white; }
+  .preview-2 .demo-h {
+    font-family: var(--font); font-weight: 700;
+    font-size: 30px; line-height: 1.05;
+    letter-spacing: -0.025em; text-align: center;
+    color: #4A2538;
+  }
+  .preview-2 .demo-h .iri {
+    background: linear-gradient(135deg, #FFA38F, #FF7AA8, #B85577);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .preview-2 .demo-h .serif {
+    font-family: var(--font-serif); font-style: italic; font-weight: 400;
+    color: #B85577;
+  }
+  .preview-2 .chip {
+    position: absolute; top: 16px; left: 16px;
+    padding: 5px 12px; border-radius: 100px;
+    background: rgba(255,255,255,0.6); backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.8);
+    font-family: var(--font-mono); font-size: 9px;
+    color: #B85577; letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .preview-2 .heart {
+    position: absolute;
+    filter: drop-shadow(0 0 8px currentColor);
+  }
+  .preview-2 .heart svg { width: 100%; height: 100%; }
+  .preview-2 .h1 { top: 20%; right: 18%; width: 18px; color: #FFA38F; }
+  .preview-2 .h2 { bottom: 22%; left: 20%; width: 16px; color: #FF7AA8; }
+  .preview-2 .h3 { top: 32%; left: 14%; width: 14px; color: #FFE5A8; }
+
+  /* ─── Mix 3: Lavender Mist ──────────────────────────── */
+  .preview-3 {
+    background:
+      radial-gradient(circle at 12% 18%, #D5CAFF 0%, transparent 42%),
+      radial-gradient(circle at 85% 12%, #C8E0FF 0%, transparent 40%),
+      radial-gradient(circle at 50% 50%, #E8E0FF 0%, transparent 55%),
+      radial-gradient(circle at 78% 78%, #B5E5F0 0%, transparent 45%),
+      radial-gradient(circle at 18% 82%, #D5CAFF 0%, transparent 38%),
+      radial-gradient(circle at 50% 30%, #FFE4B0 0%, transparent 35%);
+    overflow: hidden;
+  }
+  .preview-3 .demo-icon {
+    width: 64px; height: 64px; border-radius: 18px;
+    background: radial-gradient(circle at 30% 25%,
+      white, #E8E0FF 15%, #D5CAFF 35%, #9C8AFF 65%, #5C4CC4);
+    box-shadow:
+      inset 0 2px 0 rgba(255,255,255,0.6),
+      0 0 0 1px rgba(255,255,255,0.4),
+      0 16px 40px rgba(156,138,255,0.5);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 18px;
+    position: relative;
+  }
+  .preview-3 .demo-icon::after {
+    content: ""; position: absolute;
+    top: 8px; left: 14px; width: 22px; height: 8px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.7), transparent);
+    border-radius: 50%; transform: rotate(-25deg);
+  }
+  .preview-3 .demo-icon svg { width: 28px; height: 28px; color: white; }
+  .preview-3 .demo-h {
+    font-family: var(--font); font-weight: 700;
+    font-size: 30px; line-height: 1.05;
+    letter-spacing: -0.025em; text-align: center;
+    color: #1F1B3D;
+  }
+  .preview-3 .demo-h .iri {
+    background: linear-gradient(135deg, #4A8BC4, #9C8AFF, #5C4CC4);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .preview-3 .demo-h .serif {
+    font-family: var(--font-serif); font-style: italic; font-weight: 400;
+    color: #5C4CC4;
+  }
+  .preview-3 .chip {
+    position: absolute; top: 16px; left: 16px;
+    padding: 5px 12px; border-radius: 100px;
+    background: rgba(255,255,255,0.6); backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.8);
+    font-family: var(--font-mono); font-size: 9px;
+    color: #5C4CC4; letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .preview-3 .star {
+    position: absolute;
+    filter: drop-shadow(0 0 8px currentColor);
+  }
+  .preview-3 .star svg { width: 100%; height: 100%; }
+  .preview-3 .s1 { top: 20%; right: 18%; width: 18px; color: #FFE4B0; }
+  .preview-3 .s2 { bottom: 22%; left: 20%; width: 16px; color: #9C8AFF; }
+  .preview-3 .s3 { top: 32%; left: 14%; width: 14px; color: #4A8BC4; }
+
+  /* Card meta */
+  .card-meta {
+    padding: 28px 32px 30px;
+    border-top: 1px solid var(--line);
+    flex: 1; display: flex; flex-direction: column;
+    background: rgba(255,255,255,0.5);
+  }
+  .card-num {
+    font-family: var(--font-mono);
+    font-size: 11px; letter-spacing: 0.22em;
+    color: var(--slate); text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .card-name {
+    font-family: var(--font); font-size: 30px;
+    font-weight: 700;
+    letter-spacing: -0.025em; margin-bottom: 10px; line-height: 1.05;
+  }
+  .card-name em {
+    font-family: var(--font-serif);
+    font-style: italic; font-weight: 400;
+  }
+  .card-name.k1 em { color: #B58FFF; }
+  .card-name.k2 em { color: #FF7AA8; }
+  .card-name.k3 em { color: #9C8AFF; }
+  .card-vibe {
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    margin-bottom: 16px; font-weight: 600;
+  }
+  .card-vibe.k1 {
+    background: linear-gradient(135deg, #FF8FB5, #B58FFF, #5DD5DA);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .card-vibe.k2 {
+    background: linear-gradient(135deg, #FFA38F, #FF7AA8, #B85577);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .card-vibe.k3 {
+    background: linear-gradient(135deg, #4A8BC4, #9C8AFF, #5C4CC4);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .card-desc {
+    font-size: 14.5px; line-height: 1.6;
+    color: var(--ink-2); margin-bottom: 22px;
+    flex: 1;
+  }
+  body[lang="th"] .card-desc { font-family: var(--font-thai); }
+  .card-tags {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    margin-bottom: 24px;
+  }
+  .tag {
+    font-family: var(--font-mono);
+    font-size: 10px; padding: 4px 10px;
+    border: 1px solid var(--line-2); border-radius: 100px;
+    color: var(--ink-2); text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .tag.hl { color: white; border-color: transparent; }
+  .tag.hl.k1 { background: linear-gradient(135deg, #FF8FB5, #B58FFF); }
+  .tag.hl.k2 { background: linear-gradient(135deg, #FF7AA8, #B85577); }
+  .tag.hl.k3 { background: linear-gradient(135deg, #4A8BC4, #5C4CC4); }
+  .card-actions {
+    display: flex; gap: 12px;
+    padding-top: 16px;
+    border-top: 1px dashed var(--line);
+  }
+  .btn-open {
+    flex: 1; text-align: center;
+    padding: 14px; border-radius: 100px;
+    color: white; text-decoration: none;
+    font-family: var(--font-mono);
+    font-size: 11px; letter-spacing: 0.14em;
+    text-transform: uppercase; font-weight: 600;
+    transition: all 0.3s;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.4) inset,
+      0 8px 22px rgba(94,79,138,0.25);
+  }
+  .btn-open.k1 { background: linear-gradient(135deg, #FF8FB5, #B58FFF, #5DD5DA); }
+  .btn-open.k2 { background: linear-gradient(135deg, #FFA38F, #FF7AA8, #B85577); }
+  .btn-open.k3 { background: linear-gradient(135deg, #4A8BC4, #9C8AFF, #5C4CC4); }
+  .btn-open:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.4) inset,
+      0 14px 36px rgba(94,79,138,0.35);
+  }
+
+  footer {
+    margin-top: 100px;
+    padding-top: 48px;
+    border-top: 1px solid var(--line);
+    text-align: center;
+  }
+  footer h3 {
+    font-family: var(--font); font-size: 38px;
+    font-weight: 700; letter-spacing: -0.025em;
+    margin-bottom: 14px;
+  }
+  footer h3 .serif {
+    font-family: var(--font-serif); font-style: italic; font-weight: 400;
+    color: #B58FFF;
+  }
+  body[lang="th"] footer h3 .serif { font-family: var(--font-thai); font-style: normal; }
+  footer p {
+    font-size: 15px; color: var(--ink-2);
+    max-width: 620px; margin: 0 auto;
+    line-height: 1.55;
+  }
+  body[lang="th"] footer p { font-family: var(--font-thai); }
+  .build-stamp {
+    margin-top: 56px;
+    font-family: var(--font-mono);
+    font-size: 10px; letter-spacing: 0.18em;
+    color: var(--slate); text-transform: uppercase;
+  }
+
+  @media (max-width: 768px) {
+    body { padding: 40px 20px 60px; }
+    .grid { grid-template-columns: 1fr; }
+    header h1 { font-size: 40px; }
+    header .ref-row { flex-direction: column; gap: 8px; padding: 16px; }
+  }
+</style>
+</head>
+<body lang="th">
+
+<div class="cursor" id="cursor"></div>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">
+      <span>CAPDUCTION</span>
+      <span class="dot"></span>
+      <span>MIX GALLERY · LIQUID × CONSOLE</span>
+    </div>
+    <h1>
+      <span class="serif">เลือกโทนสี</span><br/>
+      <span class="iri">ที่ใช่สำหรับคุณ</span>
+    </h1>
+    <p>3 mockups ที่ผสม <strong>aesthetic ของ Liquid Chrome</strong> (สี + ความน่ารัก + iridescent feel) กับ <strong>layout ของ Studio Console</strong> (3D app icon + dashboard preview + Inter bold) — ต่างกันที่โทนสี/อารมณ์เท่านั้น</p>
+    <div class="ref-row">
+      <span>BASE: <strong>v2 / theme-4-liquid</strong></span>
+      <span>·</span>
+      <span>LAYOUT: <strong>v3 / theme-3-studio-console</strong></span>
+    </div>
+  </header>
+
+  <div class="grid">
+
+    <!-- MIX 1 -->
+    <a href="mix-1-soft-liquid.html" class="card hover-target" data-cursor="OPEN →" target="_blank">
+      <div class="card-preview preview-1">
+        <span class="chip">◉ MIX 01 · BALANCED</span>
+        <span class="sp sp1"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0l2.4 9.6L24 12l-9.6 2.4L12 24l-2.4-9.6L0 12l9.6-2.4z"/></svg></span>
+        <span class="sp sp2"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0l2.4 9.6L24 12l-9.6 2.4L12 24l-2.4-9.6L0 12l9.6-2.4z"/></svg></span>
+        <span class="sp sp3"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0l2.4 9.6L24 12l-9.6 2.4L12 24l-2.4-9.6L0 12l9.6-2.4z"/></svg></span>
+        <div class="demo-icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M6 4l12 8-12 8V4z" fill="currentColor"/></svg>
+        </div>
+        <div class="demo-h">
+          <span class="serif">Smart Scripts,</span><br/>
+          <span class="iri">Built By Creators</span>
+        </div>
+      </div>
+      <div class="card-meta">
+        <div class="card-num">— MIX 01</div>
+        <div class="card-name k1">Soft <em>Liquid</em> Console</div>
+        <div class="card-vibe k1">BALANCED IRIDESCENT · PLAYFUL FUTURISTIC</div>
+        <p class="card-desc">โทนสีพาสเทล <strong>balanced</strong> (lavender + peach + mint + sky + rose ผสมเท่ากัน) ที่อบอุ่นและน่ารักครบทุกมิติ App icon chrome pink-violet ฟีลผสมความฝัน + เทคโนโลยี Sparkles ทอง/ชมพู/ม่วง/teal twinkling รอบ hero — เหมาะกับ creator ที่ต้องการ "ครอบคลุมทุก mood"</p>
+        <div class="card-tags">
+          <span class="tag hl k1">BALANCED PASTEL</span>
+          <span class="tag">SPARKLES ✦</span>
+          <span class="tag">PINK + VIOLET CTA</span>
+          <span class="tag">5 GRADIENT COLORS</span>
+        </div>
+        <div class="card-actions">
+          <a href="mix-1-soft-liquid.html" class="btn-open k1 hover-target" data-cursor="OPEN →" target="_blank">เปิด Mix 01 →</a>
+        </div>
+      </div>
+    </a>
+
+    <!-- MIX 2 -->
+    <a href="mix-2-rose-daydream.html" class="card hover-target" data-cursor="OPEN →" target="_blank">
+      <div class="card-preview preview-2">
+        <span class="chip">♥ MIX 02 · WARM</span>
+        <span class="heart h1"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21l-1.5-1.4C5 14.7 2 12 2 8.5 2 6 4 4 6.5 4c1.5 0 2.9.7 3.8 1.8L12 7.5l1.7-1.7C14.6 4.7 16 4 17.5 4 20 4 22 6 22 8.5c0 3.5-3 6.2-8.5 11.1L12 21z"/></svg></span>
+        <span class="heart h2"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21l-1.5-1.4C5 14.7 2 12 2 8.5 2 6 4 4 6.5 4c1.5 0 2.9.7 3.8 1.8L12 7.5l1.7-1.7C14.6 4.7 16 4 17.5 4 20 4 22 6 22 8.5c0 3.5-3 6.2-8.5 11.1L12 21z"/></svg></span>
+        <span class="heart h3"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0l2.4 9.6L24 12l-9.6 2.4L12 24l-2.4-9.6L0 12l9.6-2.4z"/></svg></span>
+        <div class="demo-icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M6 4l12 8-12 8V4z" fill="currentColor"/></svg>
+        </div>
+        <div class="demo-h">
+          <span class="serif">Where Scripts</span><br/>
+          <span class="iri">Bloom Like Roses</span>
+        </div>
+      </div>
+      <div class="card-meta">
+        <div class="card-num">— MIX 02</div>
+        <div class="card-name k2">Rosé <em>Daydream</em></div>
+        <div class="card-vibe k2">WARM PINK · FEMININE LIFESTYLE PREMIUM</div>
+        <p class="card-desc">โทนสีพาสเทล <strong>warm</strong> เน้น pink/peach/coral/sun (อบอุ่น หวาน feminine) App icon chrome blush-rose-pink-plum 5 ดวงใจ + ดาวลอย hover orbs glow ฟีลแบบ "lifestyle" สำหรับ creator beauty/fashion/lifestyle — น่ารักแต่ดูพรีเมียม จับใจกลุ่มแม่ค้าผู้หญิง</p>
+        <div class="card-tags">
+          <span class="tag hl k2">WARM ROSÉ</span>
+          <span class="tag">HEARTS ♥</span>
+          <span class="tag">CORAL + PINK CTA</span>
+          <span class="tag">FEMININE PREMIUM</span>
+        </div>
+        <div class="card-actions">
+          <a href="mix-2-rose-daydream.html" class="btn-open k2 hover-target" data-cursor="OPEN →" target="_blank">เปิด Mix 02 →</a>
+        </div>
+      </div>
+    </a>
+
+    <!-- MIX 3 -->
+    <a href="mix-3-lavender-mist.html" class="card hover-target" data-cursor="OPEN →" target="_blank">
+      <div class="card-preview preview-3">
+        <span class="chip">✧ MIX 03 · COOL</span>
+        <span class="star s1"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0l2.4 9.6L24 12l-9.6 2.4L12 24l-2.4-9.6L0 12l9.6-2.4z"/></svg></span>
+        <span class="star s2"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></span>
+        <span class="star s3"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0l2.4 9.6L24 12l-9.6 2.4L12 24l-2.4-9.6L0 12l9.6-2.4z"/></svg></span>
+        <div class="demo-icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M6 4l12 8-12 8V4z" fill="currentColor"/></svg>
+        </div>
+        <div class="demo-h">
+          <span class="serif">Scripts as Soft</span><br/>
+          <span class="iri">As Daydreams</span>
+        </div>
+      </div>
+      <div class="card-meta">
+        <div class="card-num">— MIX 03</div>
+        <div class="card-name k3">Lavender <em>Mist</em></div>
+        <div class="card-vibe k3">COOL VIOLET · ETHEREAL DREAMY COSMIC</div>
+        <p class="card-desc">โทนสีพาสเทล <strong>cool</strong> เน้น lavender/sky/lilac/cyan (เย็น ฝัน ลื่นไหล) App icon chrome mist-violet-indigo มี Starfield ละเอียด + 5 ดาว/พระจันทร์ลอย hover orbs ฟีล "ethereal cosmic" สำหรับ creator ที่ลึกซึ้ง ครีเอทีฟ — premium dreamy แบบ Apple Pro Display</p>
+        <div class="card-tags">
+          <span class="tag hl k3">COOL VIOLET</span>
+          <span class="tag">STARFIELD ✧</span>
+          <span class="tag">SKY + VIOLET CTA</span>
+          <span class="tag">ETHEREAL DREAMY</span>
+        </div>
+        <div class="card-actions">
+          <a href="mix-3-lavender-mist.html" class="btn-open k3 hover-target" data-cursor="OPEN →" target="_blank">เปิด Mix 03 →</a>
+        </div>
+      </div>
+    </a>
+  </div>
+
+  <footer>
+    <h3>กดเปิดเทียบกัน <span class="serif">เลือกอันที่ใช่</span></h3>
+    <p>ทั้ง 3 mockups ใช้ <strong>layout เดียวกัน</strong> (Studio Console structure) — ต่างกันที่โทนสี/cursor/sparkle/copy mood ดู feeling แต่ละแบบแล้วบอกหมายเลขที่ใช่ครับ</p>
+    <div class="build-stamp">CAPDUCTION © 2026 · MIX GALLERY · LIQUID × CONSOLE</div>
+  </footer>
+</div>
+
+<script>
+const cursor = document.getElementById('cursor');
+const target = { x: 0, y: 0 };
+const actual = { x: 0, y: 0 };
+window.addEventListener('mousemove', e => { target.x = e.clientX; target.y = e.clientY; });
+function loopC(){
+  actual.x += (target.x - actual.x) * 0.22;
+  actual.y += (target.y - actual.y) * 0.22;
+  cursor.style.left = actual.x + 'px';
+  cursor.style.top = actual.y + 'px';
+  requestAnimationFrame(loopC);
+}
+loopC();
+document.querySelectorAll('.hover-target').forEach(el => {
+  el.addEventListener('mouseenter', () => {
+    cursor.classList.add('target');
+    cursor.dataset.label = el.dataset.cursor || 'OPEN →';
+  });
+  el.addEventListener('mouseleave', () => cursor.classList.remove('target'));
+});
+</script>
+
+</body>
+</html>

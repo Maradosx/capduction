@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Capduction · Theme 05 — Bangkok Sunset</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Manrope:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Noto+Serif+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script type="importmap">
+{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }
+</script>
+<style>
+  :root {
+    --cream:   #FFF5E4;
+    --cream-2: #FBE9CC;
+    --terra:   #C2532E;
+    --terra-d: #8E3818;
+    --mango:   #F4A82A;
+    --teal:    #093A3E;
+    --teal-2:  #155E62;
+    --ink:     #2B1810;
+    --rose:    #E37468;
+    --font-display: 'DM Serif Display', serif;
+    --font-thai:    'Noto Serif Thai', serif;
+    --font-body:    'Manrope', sans-serif;
+    --font-mono:    'IBM Plex Mono', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--cream); color: var(--ink);
+    font-family: var(--font-body); font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden; min-height: 100vh;
+    position: relative;
+  }
+  body[lang="th"] { font-family: var(--font-thai); font-weight: 500; }
+
+  /* Warm sunset gradient backdrop */
+  body::before {
+    content: ""; position: fixed; inset: 0; z-index: -2;
+    background:
+      radial-gradient(ellipse 80% 60% at 70% -10%, #FFD89F 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 0% 80%, #E37468 0%, transparent 55%),
+      radial-gradient(ellipse 100% 70% at 100% 100%, #C2532E 0%, transparent 70%),
+      var(--cream);
+  }
+  /* Soft grain */
+  body::after {
+    content: ""; position: fixed; inset: 0;
+    pointer-events: none; z-index: 999;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E");
+    opacity: 0.05; mix-blend-mode: multiply;
+  }
+
+  /* Nav */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+    padding: 22px 40px;
+    display: flex; justify-content: space-between; align-items: center;
+    background: rgba(255,245,228,0.72);
+    backdrop-filter: blur(20px) saturate(1.3);
+    border-bottom: 1px solid rgba(43,24,16,0.08);
+  }
+  .brand {
+    font-family: var(--font-display); font-style: italic;
+    font-size: 26px; letter-spacing: -0.01em;
+    display: flex; align-items: center; gap: 12px;
+    color: var(--teal);
+  }
+  .brand-sun {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #FFE5B4, #F4A82A 50%, #C2532E 100%);
+    box-shadow: 0 0 18px rgba(244,168,42,0.5);
+    position: relative;
+  }
+  nav .links { display: flex; gap: 32px; align-items: center; }
+  nav .links a {
+    color: var(--teal); text-decoration: none;
+    font-size: 14px; font-weight: 500;
+    transition: color 0.2s;
+  }
+  nav .links a:hover { color: var(--terra); }
+  .nav-cta {
+    padding: 12px 22px;
+    background: var(--teal); color: var(--cream) !important;
+    border-radius: 100px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(9,58,62,0.25);
+    transition: all 0.2s;
+  }
+  .nav-cta:hover {
+    background: var(--terra);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(194,83,46,0.35);
+  }
+
+  /* Hero */
+  .hero {
+    min-height: 100vh;
+    padding: 140px 60px 80px;
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 60px;
+    align-items: center;
+    position: relative;
+  }
+  .hero-eyebrow {
+    display: inline-flex; align-items: center; gap: 12px;
+    margin-bottom: 32px;
+    font-family: var(--font-mono);
+    font-size: 11px; letter-spacing: 0.15em;
+    color: var(--teal-2); text-transform: uppercase;
+  }
+  .hero-eyebrow .line {
+    width: 40px; height: 1px; background: var(--terra);
+  }
+  .hero-eyebrow .badge {
+    background: var(--mango);
+    color: var(--ink);
+    padding: 4px 10px;
+    border-radius: 100px;
+    font-weight: 500;
+  }
+  .hero h1 {
+    font-family: var(--font-display);
+    font-size: clamp(56px, 8.5vw, 120px);
+    line-height: 0.95;
+    font-weight: 400;
+    color: var(--teal);
+    letter-spacing: -0.025em;
+    margin-bottom: 32px;
+  }
+  body[lang="th"] .hero h1 {
+    font-family: var(--font-thai); font-weight: 700;
+    font-size: clamp(44px, 7vw, 100px);
+    line-height: 1.05;
+    color: var(--teal);
+  }
+  .hero h1 em {
+    font-style: italic;
+    color: var(--terra);
+  }
+  .hero h1 .underline {
+    position: relative; display: inline-block;
+  }
+  .hero h1 .underline::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; bottom: 0.08em;
+    height: 0.12em;
+    background: var(--mango);
+    z-index: -1;
+    border-radius: 4px;
+  }
+  .hero h1 .line { display: block; }
+  .hero-sub {
+    font-size: 18px;
+    line-height: 1.55;
+    color: var(--teal-2);
+    max-width: 480px;
+    margin-bottom: 40px;
+    font-weight: 400;
+  }
+  body[lang="th"] .hero-sub { font-family: var(--font-thai); font-weight: 400; }
+  .hero-actions {
+    display: flex; gap: 16px; align-items: center;
+    margin-bottom: 56px;
+  }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 16px 28px;
+    background: var(--terra);
+    color: var(--cream);
+    border-radius: 100px;
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 15px;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.2) inset,
+      0 -1px 0 rgba(142,56,24,0.5) inset,
+      0 8px 20px rgba(194,83,46,0.35);
+    transition: all 0.2s;
+  }
+  body[lang="th"] .btn-primary { font-family: var(--font-thai); }
+  .btn-primary:hover {
+    background: var(--terra-d);
+    transform: translateY(-2px);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.2) inset,
+      0 -1px 0 rgba(142,56,24,0.5) inset,
+      0 14px 28px rgba(194,83,46,0.5);
+  }
+  .btn-secondary {
+    color: var(--teal); font-size: 15px;
+    font-weight: 600; text-decoration: none;
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 16px 20px;
+    border-bottom: 1.5px solid var(--teal);
+  }
+  body[lang="th"] .btn-secondary { font-family: var(--font-thai); }
+  .btn-secondary:hover { color: var(--terra); border-color: var(--terra); }
+
+  .hero-stats {
+    display: flex; gap: 48px;
+    padding-top: 32px;
+    border-top: 1.5px dashed rgba(9,58,62,0.2);
+  }
+  .stat .n {
+    font-family: var(--font-display); font-style: italic;
+    font-size: 44px; line-height: 1; color: var(--teal);
+  }
+  .stat .l {
+    font-family: var(--font-mono); font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.15em;
+    color: var(--teal-2); margin-top: 8px;
+  }
+
+  /* 3D area */
+  #stage {
+    position: relative; width: 100%; height: 580px;
+  }
+  #stage canvas { width: 100% !important; height: 100% !important; }
+  .stage-note {
+    position: absolute;
+    padding: 8px 16px;
+    background: var(--cream);
+    border: 1.5px solid var(--teal);
+    border-radius: 100px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--teal);
+    text-transform: uppercase;
+    box-shadow: 4px 4px 0 var(--mango);
+  }
+  .note-1 { top: 8%; right: 4%; transform: rotate(2deg); }
+  .note-2 { top: 50%; left: -8px; transform: rotate(-3deg); background: var(--mango); border-color: var(--ink); }
+  .note-3 { bottom: 8%; right: 12%; transform: rotate(1deg); }
+
+  /* Studios */
+  .studios {
+    padding: 100px 60px;
+    position: relative;
+  }
+  .studios-head {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 60px; align-items: end;
+    margin-bottom: 64px;
+    padding-bottom: 32px;
+    border-bottom: 1.5px solid rgba(9,58,62,0.15);
+  }
+  .studios-head .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px; letter-spacing: 0.18em;
+    color: var(--terra); text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .studios-head h2 {
+    font-family: var(--font-display);
+    font-size: clamp(44px, 5.5vw, 84px);
+    font-weight: 400; letter-spacing: -0.025em;
+    line-height: 1;
+    color: var(--teal);
+  }
+  body[lang="th"] .studios-head h2 { font-family: var(--font-thai); font-weight: 700; line-height: 1.05; }
+  .studios-head h2 em {
+    font-style: italic;
+    color: var(--terra);
+  }
+  .studios-head .ssub {
+    font-size: 15px; line-height: 1.6;
+    color: var(--teal-2);
+  }
+  body[lang="th"] .studios-head .ssub { font-family: var(--font-thai); }
+
+  .studio-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  .studio {
+    padding: 40px 32px 36px;
+    background: var(--cream);
+    border: 1.5px solid var(--teal);
+    border-radius: 24px;
+    position: relative;
+    transition: all 0.3s;
+    overflow: hidden;
+  }
+  .studio::before {
+    content: "";
+    position: absolute; inset: 0;
+    background: radial-gradient(circle at 100% 0%, var(--mango), transparent 50%);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .studio:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 16px 40px rgba(43,24,16,0.12);
+  }
+  .studio:hover::before { opacity: 0.15; }
+  .studio > * { position: relative; z-index: 2; }
+  .studio-num {
+    font-family: var(--font-display); font-style: italic;
+    font-size: 22px; color: var(--terra);
+    margin-bottom: 20px;
+  }
+  .studio-icon-wrap {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    background: var(--cream-2);
+    border: 1.5px solid var(--teal);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 28px;
+    position: relative;
+  }
+  .studio:nth-child(1) .studio-icon-wrap { background: linear-gradient(135deg, #FFE5B4, var(--mango)); }
+  .studio:nth-child(2) .studio-icon-wrap { background: linear-gradient(135deg, #F4C5B0, var(--rose)); }
+  .studio:nth-child(3) .studio-icon-wrap { background: linear-gradient(135deg, #A8D5D2, var(--teal-2)); }
+  .studio-icon-wrap svg { width: 32px; height: 32px; color: var(--teal); }
+  .studio:nth-child(3) .studio-icon-wrap svg { color: var(--cream); }
+  .studio h3 {
+    font-family: var(--font-display);
+    font-size: 32px; font-weight: 400;
+    margin-bottom: 4px;
+    letter-spacing: -0.02em;
+    color: var(--teal);
+  }
+  .studio h3 em { font-style: italic; color: var(--terra); }
+  body[lang="th"] .studio h3 { font-family: var(--font-thai); font-weight: 700; }
+  .studio .sub {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--terra);
+    margin-bottom: 24px;
+  }
+  .studio p {
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--teal-2);
+    margin-bottom: 24px;
+  }
+  body[lang="th"] .studio p { font-family: var(--font-thai); }
+  .studio ul {
+    list-style: none;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--teal-2);
+    border-top: 1.5px dashed rgba(9,58,62,0.2);
+    padding-top: 16px;
+  }
+  .studio li {
+    padding: 6px 0;
+    display: flex; gap: 8px;
+  }
+  .studio li::before {
+    content: "✶"; color: var(--mango);
+  }
+
+  /* Sun divider */
+  .sun-div {
+    text-align: center;
+    padding: 40px 0;
+  }
+  .sun-div svg {
+    width: 240px; opacity: 0.6;
+  }
+
+  @media (max-width: 1024px) {
+    .hero, .studios-head, .studio-grid { grid-template-columns: 1fr; }
+    .hero { padding: 110px 24px 60px; }
+    .studios { padding: 60px 24px; }
+    nav { padding: 16px 20px; }
+    nav .links a:not(.nav-cta) { display: none; }
+    #stage { height: 380px; }
+  }
+</style>
+</head>
+<body lang="th">
+
+<nav>
+  <div class="brand"><span class="brand-sun"></span>Capduction</div>
+  <div class="links">
+    <a href="#">Studios</a>
+    <a href="#">Demo</a>
+    <a href="#">Pricing</a>
+    <a href="#" class="nav-cta">เริ่มฟรี →</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div>
+    <div class="hero-eyebrow">
+      <span class="line"></span>
+      <span class="badge">EST. 2026 · BKK</span>
+      <span>สตูดิโอเปิดแล้ว</span>
+    </div>
+    <h1>
+      <span class="line">เขียน<em>สคริปต์</em></span>
+      <span class="line">ปั้น<span class="underline">แคปชั่น</span></span>
+      <span class="line">ก่อนกด record.</span>
+    </h1>
+    <p class="hero-sub">
+      สตูดิโอ AI ที่เข้าใจวิดีโอสั้นสไตล์ไทย ตั้งแต่สคริปต์การพูดในคลิป ไปจนถึงแคปชั่นหน้าจอ — ทุกอย่างพร้อมยิงในไฟล์เดียว
+    </p>
+    <div class="hero-actions">
+      <a href="#" class="btn-primary">เริ่มฟรี 10 ครั้ง →</a>
+      <a href="#" class="btn-secondary">ดู demo</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><div class="n">7</div><div class="l">แพลตฟอร์ม</div></div>
+      <div class="stat"><div class="n">3</div><div class="l">สตูดิโอ</div></div>
+      <div class="stat"><div class="n">∞</div><div class="l">รูปแบบ</div></div>
+    </div>
+  </div>
+  <div id="stage">
+    <div class="stage-note note-1">✦ Made in Bangkok</div>
+    <div class="stage-note note-2">◐ Sunset Edition</div>
+    <div class="stage-note note-3">✶ Studio · v1</div>
+  </div>
+</section>
+
+<section class="studios">
+  <div class="studios-head">
+    <div>
+      <div class="eyebrow">— 01 · THE STUDIOS</div>
+      <h2>สามสตูดิโอ<br/>หนึ่ง <em>workflow</em></h2>
+    </div>
+    <p class="ssub">เลือกใช้ทีละโหมดได้ หรือเรียก Combo Mode เพื่อให้ปั้น script + caption พร้อมกันในครั้งเดียว ใช้ hook เดียวกัน ภาษาเดียวกัน</p>
+  </div>
+
+  <div class="studio-grid">
+    <div class="studio">
+      <div class="studio-num">— 01</div>
+      <div class="studio-icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="3" y="6" width="18" height="14" rx="1"/>
+          <path d="M3 10h18M7 6l-2 4M11 6l-2 4M15 6l-2 4M19 6l-2 4"/>
+        </svg>
+      </div>
+      <h3><em>Script</em> Studio</h3>
+      <div class="sub">SPOKEN VIDEO SCRIPTS</div>
+      <p>สคริปต์การพูดสำหรับวิดีโอสั้น พร้อม timing markers, B-roll cues และข้อความหน้าจอ แบ่ง hook · body · payoff · CTA ชัดเจน</p>
+      <ul>
+        <li>15s · 30s · 60s · 90s · long</li>
+        <li>timed beats / second</li>
+        <li>b-roll cue notation</li>
+        <li>on-screen text overlay</li>
+      </ul>
+    </div>
+    <div class="studio">
+      <div class="studio-num">— 02</div>
+      <div class="studio-icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/>
+          <path d="M12 3v3M12 18v3M21 12h-3M6 12H3"/>
+        </svg>
+      </div>
+      <h3><em>Caption</em> Studio</h3>
+      <div class="sub">POST COPY · HOOKS · TAGS</div>
+      <p>แคปชั่น 5 variants พร้อมใช้, hooks ดึงสายตา 5 แบบ, hashtags 10 ตัว, CTA ปิดการขาย 5 บรรทัด — ปรับโทนตามแพลตฟอร์มอัตโนมัติ</p>
+      <ul>
+        <li>5 captions copy-ready</li>
+        <li>5 scroll-stopping hooks</li>
+        <li>10 trend-matched tags</li>
+        <li>4 angles · 4 video ideas</li>
+      </ul>
+    </div>
+    <div class="studio">
+      <div class="studio-num">— 03</div>
+      <div class="studio-icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M12 2v20M2 12h20"/><circle cx="12" cy="12" r="9"/>
+        </svg>
+      </div>
+      <h3><em>Combo</em> Mode</h3>
+      <div class="sub">SCRIPT + CAPTION ALIGNED</div>
+      <p>สำหรับเวลาที่อยากได้ทั้งหมดในครั้งเดียว — ปั้น script และ caption บน hook เดียวกัน package พร้อมโพสต์ครบในไฟล์เดียว</p>
+      <ul>
+        <li>shared hook system</li>
+        <li>aligned messaging</li>
+        <li>thumbnail copy</li>
+        <li>posting checklist</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<script type="module">
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+const stage = document.getElementById('stage');
+const scene = new THREE.Scene();
+const cam = new THREE.PerspectiveCamera(38, stage.clientWidth/stage.clientHeight, 0.1, 100);
+cam.position.set(0, 0.2, 5.5);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(stage.clientWidth, stage.clientHeight);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.1;
+stage.appendChild(renderer.domElement);
+
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+
+// Sun: warm glowing sphere
+const sunMat = new THREE.MeshStandardMaterial({
+  color: 0xF4A82A,
+  emissive: 0xC2532E,
+  emissiveIntensity: 0.6,
+  metalness: 0.4, roughness: 0.5,
+});
+const sun = new THREE.Mesh(new THREE.SphereGeometry(1.1, 64, 64), sunMat);
+sun.position.set(-0.3, 0.3, 0);
+scene.add(sun);
+
+// Sun glow halo
+const haloMat = new THREE.MeshBasicMaterial({
+  color: 0xFFD89F, transparent: true, opacity: 0.18, side: THREE.BackSide
+});
+const halo = new THREE.Mesh(new THREE.SphereGeometry(1.6, 32, 32), haloMat);
+halo.position.copy(sun.position);
+scene.add(halo);
+
+// Organic blob cloud (rounded teal shape)
+const cloudMat = new THREE.MeshStandardMaterial({
+  color: 0x093A3E, metalness: 0.3, roughness: 0.4
+});
+// Cluster of spheres as a "blob"
+const cloudGroup = new THREE.Group();
+const blobs = [
+  { x: 1.6, y: -0.5, z: 0.5, r: 0.7 },
+  { x: 2.1, y: -0.3, z: 0.2, r: 0.55 },
+  { x: 1.3, y: -0.8, z: 0.6, r: 0.5 },
+  { x: 2.4, y: -0.7, z: 0.0, r: 0.45 },
+];
+blobs.forEach(b => {
+  const s = new THREE.Mesh(new THREE.SphereGeometry(b.r, 32, 32), cloudMat);
+  s.position.set(b.x, b.y, b.z);
+  cloudGroup.add(s);
+});
+scene.add(cloudGroup);
+
+// Mango ring (sun ring)
+const ringMat = new THREE.MeshStandardMaterial({
+  color: 0xF4A82A, metalness: 0.7, roughness: 0.2
+});
+const ring = new THREE.Mesh(new THREE.TorusGeometry(1.4, 0.06, 16, 64), ringMat);
+ring.position.copy(sun.position);
+ring.rotation.x = 1.2;
+ring.rotation.y = 0.4;
+scene.add(ring);
+
+// Small terracotta accent orb
+const accMat = new THREE.MeshStandardMaterial({ color: 0xE37468, metalness: 0.5, roughness: 0.3 });
+const acc = new THREE.Mesh(new THREE.SphereGeometry(0.28, 32, 32), accMat);
+acc.position.set(-1.6, 1.4, 0.5);
+scene.add(acc);
+
+// Lights
+const key = new THREE.DirectionalLight(0xFFD89F, 1.4);
+key.position.set(2, 3, 4); scene.add(key);
+const fill = new THREE.DirectionalLight(0xE37468, 0.6);
+fill.position.set(-3, -1, 2); scene.add(fill);
+const rim = new THREE.PointLight(0xF4A82A, 2, 10);
+rim.position.set(0, 0, -2); scene.add(rim);
+scene.add(new THREE.AmbientLight(0xffffff, 0.3));
+
+let mx=0, my=0;
+window.addEventListener('mousemove', e => {
+  mx = (e.clientX/innerWidth - 0.5) * 0.3;
+  my = (e.clientY/innerHeight - 0.5) * 0.3;
+});
+
+let t=0;
+function loop(){
+  t += 0.006;
+  sun.rotation.y = t * 0.2;
+  ring.rotation.z = t * 0.3;
+  cloudGroup.rotation.y = mx * 0.4 + Math.sin(t*0.3) * 0.08;
+  cloudGroup.position.y = Math.sin(t*0.5) * 0.1;
+  acc.position.y = 1.4 + Math.sin(t*0.8) * 0.15;
+  scene.rotation.y = mx * 0.15;
+  scene.rotation.x = my * 0.1;
+  renderer.render(scene, cam);
+  requestAnimationFrame(loop);
+}
+loop();
+window.addEventListener('resize', () => {
+  cam.aspect = stage.clientWidth/stage.clientHeight;
+  cam.updateProjectionMatrix();
+  renderer.setSize(stage.clientWidth, stage.clientHeight);
+});
+</script>
+</body>
+</html>

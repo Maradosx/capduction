@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Capduction · Theme 04 — Liquid Chrome</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script type="importmap">
+{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }
+</script>
+<style>
+  :root {
+    --lav:    #E8DEFF;
+    --peach:  #FFE0D0;
+    --mint:   #D6F5E5;
+    --sky:    #D5E8FF;
+    --ink:    #1A1530;
+    --ink-2:  #4A4170;
+    --silver: #C8C0E5;
+    --chrome-1: #FFFFFF;
+    --chrome-2: #B8B0D8;
+    --font-display: 'Instrument Serif', serif;
+    --font-thai:    'Sarabun', sans-serif;
+    --font-body:    'Geist', sans-serif;
+    --font-mono:    'Geist Mono', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #FAFAFF;
+    color: var(--ink);
+    font-family: var(--font-body); font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden; min-height: 100vh;
+    position: relative;
+  }
+  body[lang="th"] { font-family: var(--font-thai); }
+
+  /* Gradient mesh background — iridescent */
+  body::before {
+    content: ""; position: fixed; inset: 0; z-index: -1;
+    background:
+      radial-gradient(circle at 12% 20%, var(--lav) 0%, transparent 40%),
+      radial-gradient(circle at 85% 15%, var(--peach) 0%, transparent 38%),
+      radial-gradient(circle at 70% 78%, var(--mint) 0%, transparent 42%),
+      radial-gradient(circle at 20% 80%, var(--sky) 0%, transparent 40%);
+    filter: saturate(1.1);
+  }
+  body::after {
+    content: ""; position: fixed; inset: 0; z-index: -1;
+    background: rgba(255,255,255,0.4);
+    backdrop-filter: blur(40px);
+  }
+
+  /* Nav — glass pill */
+  nav {
+    position: fixed; top: 24px; left: 50%; z-index: 50;
+    transform: translateX(-50%);
+    padding: 12px 16px 12px 24px;
+    display: flex; gap: 24px; align-items: center;
+    background: rgba(255,255,255,0.55);
+    backdrop-filter: blur(30px) saturate(1.5);
+    border: 1px solid rgba(255,255,255,0.8);
+    border-radius: 100px;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.8) inset,
+      0 -1px 0 rgba(200,192,229,0.3) inset,
+      0 12px 40px rgba(74,65,112,0.12);
+  }
+  .brand {
+    font-family: var(--font-display); font-style: italic;
+    font-size: 22px; letter-spacing: -0.01em;
+    display: flex; align-items: center; gap: 10px;
+    color: var(--ink);
+  }
+  .brand-orb {
+    width: 18px; height: 18px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%,
+      #fff 0%, #e8e0ff 25%, #a89bd5 55%, #5e4f8a 100%);
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.6),
+      0 2px 6px rgba(74,65,112,0.3),
+      inset 0 -2px 4px rgba(94,79,138,0.4);
+  }
+  nav a {
+    color: var(--ink-2); text-decoration: none;
+    font-size: 13px; font-weight: 500;
+    transition: color 0.2s;
+  }
+  nav a:hover { color: var(--ink); }
+  .nav-cta {
+    padding: 8px 16px;
+    background: linear-gradient(180deg,
+      rgba(255,255,255,0.9) 0%, rgba(232,222,255,0.9) 100%);
+    border: 1px solid rgba(255,255,255,0.8);
+    border-radius: 100px;
+    color: var(--ink) !important;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.9) inset,
+      0 4px 12px rgba(168,155,213,0.3);
+    transition: all 0.2s;
+  }
+  .nav-cta:hover {
+    transform: translateY(-1px);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.9) inset,
+      0 8px 18px rgba(168,155,213,0.5);
+  }
+
+  /* Hero */
+  .hero {
+    min-height: 100vh;
+    padding: 140px 60px 80px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
+    position: relative;
+  }
+  .hero-marker {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 6px 14px;
+    background: rgba(255,255,255,0.6);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.8);
+    border-radius: 100px;
+    font-family: var(--font-mono);
+    font-size: 11px; letter-spacing: 0.1em;
+    color: var(--ink-2);
+    margin-bottom: 32px;
+    text-transform: uppercase;
+    box-shadow: 0 4px 16px rgba(168,155,213,0.15);
+  }
+  .hero-marker .dot {
+    width: 7px; height: 7px;
+    background: linear-gradient(135deg, #FFD0B5, #FF8FB5);
+    border-radius: 50%;
+    box-shadow: 0 0 12px rgba(255,143,181,0.6);
+  }
+  .hero h1 {
+    font-family: var(--font-display);
+    font-size: clamp(56px, 9vw, 130px);
+    line-height: 0.92;
+    font-weight: 400;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+    margin-bottom: 32px;
+  }
+  body[lang="th"] .hero h1 {
+    font-family: var(--font-thai); font-weight: 400;
+    font-size: clamp(46px, 7.5vw, 110px);
+    line-height: 0.95;
+  }
+  .hero h1 em {
+    font-style: italic;
+    background: linear-gradient(135deg, #FF8FB5 0%, #B58FFF 50%, #5DD5DA 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero h1 .line { display: block; }
+  .hero-sub {
+    font-size: 18px;
+    line-height: 1.55;
+    color: var(--ink-2);
+    max-width: 460px;
+    margin-bottom: 40px;
+    font-weight: 400;
+  }
+  body[lang="th"] .hero-sub { font-family: var(--font-thai); }
+  .hero-actions {
+    display: flex; gap: 16px; align-items: center;
+    margin-bottom: 56px;
+  }
+  .btn-chrome {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 16px 28px;
+    background: linear-gradient(180deg,
+      #FFFFFF 0%, #F5F0FF 40%, #E8DEFF 100%);
+    border: 1px solid rgba(255,255,255,0.9);
+    border-radius: 100px;
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: none;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.9) inset,
+      0 -1px 0 rgba(168,155,213,0.4) inset,
+      0 8px 24px rgba(168,155,213,0.3);
+    transition: all 0.2s;
+  }
+  .btn-chrome:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.9) inset,
+      0 -1px 0 rgba(168,155,213,0.4) inset,
+      0 14px 32px rgba(168,155,213,0.45);
+  }
+  body[lang="th"] .btn-chrome { font-family: var(--font-thai); }
+  .btn-ghost {
+    color: var(--ink-2); font-size: 14px;
+    text-decoration: none; font-weight: 500;
+    padding: 16px 20px;
+  }
+  .btn-ghost:hover { color: var(--ink); }
+
+  .hero-stats {
+    display: flex; gap: 32px;
+    padding-top: 32px;
+    border-top: 1px solid rgba(168,155,213,0.2);
+  }
+  .stat .n {
+    font-family: var(--font-display); font-style: italic;
+    font-size: 42px; line-height: 1; color: var(--ink);
+  }
+  .stat .l {
+    font-family: var(--font-mono); font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.15em;
+    color: var(--ink-2); margin-top: 6px;
+  }
+
+  /* 3D area */
+  #stage {
+    position: relative; width: 100%; height: 580px;
+  }
+  #stage canvas { width: 100% !important; height: 100% !important; }
+  .stage-pill {
+    position: absolute;
+    padding: 6px 14px;
+    background: rgba(255,255,255,0.55);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.8);
+    border-radius: 100px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--ink-2);
+    text-transform: uppercase;
+    box-shadow: 0 4px 16px rgba(168,155,213,0.15);
+  }
+  .pill-1 { top: 8%; right: 4%; }
+  .pill-2 { top: 50%; left: 0; }
+  .pill-3 { bottom: 8%; right: 12%; }
+
+  /* Studios */
+  .studios {
+    padding: 100px 60px;
+    position: relative;
+  }
+  .studios-head {
+    text-align: center;
+    margin-bottom: 64px;
+  }
+  .studios-head .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px; letter-spacing: 0.18em;
+    color: var(--ink-2); text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .studios-head h2 {
+    font-family: var(--font-display);
+    font-size: clamp(40px, 5vw, 72px);
+    font-weight: 400; letter-spacing: -0.025em;
+    line-height: 1;
+  }
+  body[lang="th"] .studios-head h2 { font-family: var(--font-thai); }
+  .studios-head h2 em {
+    font-style: italic;
+    background: linear-gradient(135deg, #FF8FB5, #B58FFF, #5DD5DA);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .studio-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .studio {
+    padding: 36px 28px;
+    background: rgba(255,255,255,0.5);
+    backdrop-filter: blur(30px) saturate(1.4);
+    border: 1px solid rgba(255,255,255,0.8);
+    border-radius: 24px;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.9) inset,
+      0 12px 32px rgba(168,155,213,0.12);
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .studio:hover {
+    transform: translateY(-4px);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.9) inset,
+      0 24px 48px rgba(168,155,213,0.2);
+  }
+  .studio-orb {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    margin-bottom: 28px;
+    position: relative;
+  }
+  .studio:nth-child(1) .studio-orb {
+    background: radial-gradient(circle at 35% 30%, #fff 0%, #FFE0D0 30%, #FF8FB5 70%, #C45A1A 100%);
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.6), 0 8px 24px rgba(255,143,181,0.4);
+  }
+  .studio:nth-child(2) .studio-orb {
+    background: radial-gradient(circle at 35% 30%, #fff 0%, #E8DEFF 30%, #B58FFF 70%, #5E4F8A 100%);
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.6), 0 8px 24px rgba(181,143,255,0.4);
+  }
+  .studio:nth-child(3) .studio-orb {
+    background: radial-gradient(circle at 35% 30%, #fff 0%, #D6F5E5 30%, #5DD5DA 70%, #2A7B82 100%);
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.6), 0 8px 24px rgba(93,213,218,0.4);
+  }
+  .studio h3 {
+    font-family: var(--font-display);
+    font-size: 30px;
+    font-weight: 400;
+    margin-bottom: 4px;
+    letter-spacing: -0.02em;
+  }
+  .studio h3 em { font-style: italic; }
+  body[lang="th"] .studio h3 { font-family: var(--font-thai); font-weight: 500; }
+  .studio .sub {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-2);
+    margin-bottom: 24px;
+  }
+  .studio p {
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--ink-2);
+    margin-bottom: 24px;
+  }
+  body[lang="th"] .studio p { font-family: var(--font-thai); }
+  .studio ul {
+    list-style: none;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-2);
+  }
+  .studio li {
+    padding: 8px 0;
+    border-top: 1px solid rgba(168,155,213,0.2);
+    display: flex; gap: 8px;
+  }
+  .studio li::before {
+    content: "✦"; color: #B58FFF;
+  }
+
+  @media (max-width: 1024px) {
+    .hero, .studio-grid { grid-template-columns: 1fr; }
+    .hero { padding: 120px 24px 60px; }
+    .studios { padding: 60px 24px; }
+    nav { width: calc(100% - 32px); padding: 10px 12px; }
+    nav a:not(.nav-cta):not(.brand) { display: none; }
+    #stage { height: 380px; }
+  }
+</style>
+</head>
+<body lang="th">
+
+<nav>
+  <div class="brand"><span class="brand-orb"></span>Capduction</div>
+  <a href="#">Studios</a>
+  <a href="#">Pricing</a>
+  <a href="#" class="nav-cta">Start free →</a>
+</nav>
+
+<section class="hero">
+  <div>
+    <div class="hero-marker"><span class="dot"></span>STUDIO V1 · Now Live</div>
+    <h1>
+      <span class="line">เขียน<em>สคริปต์</em></span>
+      <span class="line">ปั้น<em>แคปชั่น</em></span>
+      <span class="line">ก่อนกด record.</span>
+    </h1>
+    <p class="hero-sub">
+      สตูดิโอ AI ที่เข้าใจวิดีโอสั้นสไตล์ไทย ตั้งแต่สคริปต์การพูด ไปจนถึงแคปชั่นหน้าคลิป ทุกอย่างพร้อมยิงในไฟล์เดียว
+    </p>
+    <div class="hero-actions">
+      <a href="#" class="btn-chrome">เริ่มฟรี 10 ครั้ง →</a>
+      <a href="#" class="btn-ghost">ดู demo</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><div class="n">7</div><div class="l">platforms</div></div>
+      <div class="stat"><div class="n">3</div><div class="l">studios</div></div>
+      <div class="stat"><div class="n">∞</div><div class="l">variations</div></div>
+    </div>
+  </div>
+  <div id="stage">
+    <div class="stage-pill pill-1">◉ chrome · v1</div>
+    <div class="stage-pill pill-2">◉ liquid metal</div>
+    <div class="stage-pill pill-3">◉ studio rig</div>
+  </div>
+</section>
+
+<section class="studios">
+  <div class="studios-head">
+    <div class="eyebrow">— THE THREE STUDIOS</div>
+    <h2>สามสตูดิโอ <em>หนึ่ง</em> workflow</h2>
+  </div>
+  <div class="studio-grid">
+    <div class="studio">
+      <div class="studio-orb"></div>
+      <h3><em>Script</em> Studio</h3>
+      <div class="sub">SPOKEN · TIMED · CUED</div>
+      <p>สคริปต์การพูดสำหรับวิดีโอสั้น พร้อม timing, B-roll cues และข้อความหน้าจอ — แบ่ง hook, body, payoff, CTA ชัดเจน</p>
+      <ul>
+        <li>15s · 30s · 60s · 90s · long</li>
+        <li>timed beats per second</li>
+        <li>b-roll cue notation</li>
+        <li>on-screen text overlay</li>
+      </ul>
+    </div>
+    <div class="studio">
+      <div class="studio-orb"></div>
+      <h3><em>Caption</em> Studio</h3>
+      <div class="sub">POST COPY · HOOKS · TAGS</div>
+      <p>แคปชั่น 5 variants, hooks ดึงสายตา, hashtags ตรงเทรนด์, CTA ปิดการขาย — ปรับตามแพลตฟอร์มและโทน</p>
+      <ul>
+        <li>5 captions copy-ready</li>
+        <li>5 scroll-stopping hooks</li>
+        <li>10 trend-matched tags</li>
+        <li>4 angles · 4 video ideas</li>
+      </ul>
+    </div>
+    <div class="studio">
+      <div class="studio-orb"></div>
+      <h3><em>Combo</em> Mode</h3>
+      <div class="sub">SCRIPT + CAPTION ALIGNED</div>
+      <p>ปั้น script และ caption ที่ใช้ hook เดียวกัน ความหมายเดียวกัน — package พร้อมโพสต์ครบในครั้งเดียว</p>
+      <ul>
+        <li>shared hook system</li>
+        <li>aligned messaging</li>
+        <li>thumbnail copy</li>
+        <li>posting checklist</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<script type="module">
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+const stage = document.getElementById('stage');
+const scene = new THREE.Scene();
+const cam = new THREE.PerspectiveCamera(35, stage.clientWidth/stage.clientHeight, 0.1, 100);
+cam.position.set(0, 0, 6);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(stage.clientWidth, stage.clientHeight);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.1;
+stage.appendChild(renderer.domElement);
+
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+
+// Iridescent chrome material via shader uniforms (simulated)
+const chrome = new THREE.MeshPhysicalMaterial({
+  color: 0xffffff,
+  metalness: 1.0,
+  roughness: 0.08,
+  envMapIntensity: 1.8,
+  clearcoat: 1.0,
+  clearcoatRoughness: 0.1,
+  iridescence: 1.0,
+  iridescenceIOR: 1.5,
+  iridescenceThicknessRange: [100, 800],
+});
+
+// Torus knot — liquid chrome flagship object
+const knot = new THREE.Mesh(
+  new THREE.TorusKnotGeometry(1.1, 0.42, 220, 28, 2, 3),
+  chrome
+);
+scene.add(knot);
+
+// Floating orbs
+const orb1 = new THREE.Mesh(new THREE.SphereGeometry(0.32, 48, 48), chrome);
+orb1.position.set(2.2, 1.1, 0);
+scene.add(orb1);
+const orb2 = new THREE.Mesh(new THREE.SphereGeometry(0.22, 32, 32), chrome);
+orb2.position.set(-2.4, -1.0, 0.5);
+scene.add(orb2);
+const orb3 = new THREE.Mesh(new THREE.SphereGeometry(0.16, 32, 32), chrome);
+orb3.position.set(-1.5, 1.7, 0.8);
+scene.add(orb3);
+
+// Pastel rim lights
+const l1 = new THREE.PointLight(0xFFD0B5, 4, 12); l1.position.set(3, 3, 3); scene.add(l1);
+const l2 = new THREE.PointLight(0xB58FFF, 4, 12); l2.position.set(-3, -2, 3); scene.add(l2);
+const l3 = new THREE.PointLight(0x5DD5DA, 3, 12); l3.position.set(0, 3, -2); scene.add(l3);
+const l4 = new THREE.PointLight(0xFF8FB5, 3, 12); l4.position.set(0, -3, -2); scene.add(l4);
+scene.add(new THREE.AmbientLight(0xffffff, 0.2));
+
+let mx=0, my=0;
+window.addEventListener('mousemove', e => {
+  mx = (e.clientX/innerWidth - 0.5) * 0.5;
+  my = (e.clientY/innerHeight - 0.5) * 0.5;
+});
+
+let t=0;
+function loop(){
+  t += 0.008;
+  knot.rotation.x = t * 0.4 + my;
+  knot.rotation.y = t * 0.5 + mx;
+  orb1.position.y = 1.1 + Math.sin(t*1.2) * 0.2;
+  orb1.rotation.y = t;
+  orb2.position.y = -1.0 + Math.cos(t*0.9) * 0.2;
+  orb3.position.x = -1.5 + Math.sin(t*0.6) * 0.15;
+  renderer.render(scene, cam);
+  requestAnimationFrame(loop);
+}
+loop();
+window.addEventListener('resize', () => {
+  cam.aspect = stage.clientWidth/stage.clientHeight;
+  cam.updateProjectionMatrix();
+  renderer.setSize(stage.clientWidth, stage.clientHeight);
+});
+</script>
+</body>
+</html>

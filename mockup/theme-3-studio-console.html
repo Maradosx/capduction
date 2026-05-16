@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Capduction · Studio Console — Smart Scripts, Built By Creators</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Geist+Mono:wght@400;500&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script type="importmap">
+{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }
+</script>
+<style>
+  :root {
+    --void:    #0A0612;
+    --void-2:  #110A1F;
+    --void-3:  #1A1230;
+    --violet:  #8B7FFF;
+    --violet-d:#5A4CC4;
+    --violet-l:#B5A8FF;
+    --plum:    #2A1B45;
+    --gold:    #FFD08A;
+    --rose:    #FF6B9E;
+    --cream:   #F5F0FF;
+    --slate:   #9C95B5;
+    --slate-2: #6B6585;
+    --line:    rgba(245,240,255,0.08);
+    --line-2:  rgba(245,240,255,0.14);
+    --font-display: 'Inter', sans-serif;
+    --font-thai:    'Sarabun', sans-serif;
+    --font-mono:    'Geist Mono', monospace;
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--void);
+    color: var(--cream);
+    font-family: var(--font-display); font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden; min-height: 100vh; position: relative;
+    cursor: none;
+  }
+  body[lang="th"] { font-family: var(--font-thai); }
+
+  /* Cosmic starfield bg */
+  body::before {
+    content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image:
+      radial-gradient(1px 1px at 8% 12%, rgba(245,240,255,0.6), transparent),
+      radial-gradient(1px 1px at 22% 28%, rgba(245,240,255,0.5), transparent),
+      radial-gradient(1.5px 1.5px at 38% 8%, rgba(245,240,255,0.7), transparent),
+      radial-gradient(1px 1px at 52% 22%, rgba(245,240,255,0.5), transparent),
+      radial-gradient(1px 1px at 68% 14%, rgba(245,240,255,0.6), transparent),
+      radial-gradient(1.5px 1.5px at 82% 32%, rgba(139,127,255,0.8), transparent),
+      radial-gradient(1px 1px at 92% 18%, rgba(245,240,255,0.7), transparent),
+      radial-gradient(1px 1px at 5% 48%, rgba(245,240,255,0.4), transparent),
+      radial-gradient(1px 1px at 28% 52%, rgba(245,240,255,0.5), transparent),
+      radial-gradient(1.2px 1.2px at 48% 58%, rgba(255,208,138,0.7), transparent),
+      radial-gradient(1px 1px at 72% 62%, rgba(245,240,255,0.5), transparent),
+      radial-gradient(1px 1px at 88% 55%, rgba(245,240,255,0.6), transparent),
+      radial-gradient(1px 1px at 14% 78%, rgba(245,240,255,0.4), transparent),
+      radial-gradient(1px 1px at 42% 82%, rgba(245,240,255,0.5), transparent),
+      radial-gradient(1px 1px at 78% 88%, rgba(139,127,255,0.6), transparent);
+    background-attachment: fixed;
+    background-size: 100% 100%;
+  }
+  /* Spotlight cone from top */
+  body::after {
+    content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background:
+      radial-gradient(ellipse 60% 30% at 50% 0%, rgba(139,127,255,0.25), transparent 70%),
+      radial-gradient(ellipse 80% 40% at 50% 35%, rgba(139,127,255,0.1), transparent 65%);
+  }
+
+  /* Custom cursor */
+  .cursor {
+    position: fixed; pointer-events: none; z-index: 10000;
+    width: 14px; height: 14px;
+    background: var(--violet);
+    border-radius: 50%;
+    box-shadow: 0 0 18px var(--violet), 0 0 36px rgba(139,127,255,0.5);
+    transform: translate(-50%, -50%);
+    transition: width 0.25s var(--ease), height 0.25s var(--ease);
+  }
+  .cursor.target {
+    width: 58px; height: 58px;
+    background: rgba(139,127,255,0.18);
+    border: 1.5px solid var(--violet);
+    box-shadow: 0 0 36px rgba(139,127,255,0.6);
+  }
+  .cursor .label {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono); font-size: 9px;
+    color: var(--cream); letter-spacing: 0.14em;
+    text-transform: uppercase; opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .cursor.target .label { opacity: 1; }
+  @media (max-width: 768px) { body { cursor: auto; } .cursor { display: none; } }
+  a, button, .hover-target { cursor: none; }
+
+  /* Wave SVG decoration in hero */
+  .hero-wave {
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 60vh; pointer-events: none; z-index: 1;
+    opacity: 0.4;
+  }
+  .hero-wave svg { width: 100%; height: 100%; }
+
+  /* ─── NAV ────────────────────────────────────────────────── */
+  nav {
+    position: fixed; top: 20px; left: 20px; right: 20px;
+    z-index: 100;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 18px 14px 20px;
+    background: rgba(17,10,31,0.7);
+    backdrop-filter: blur(28px) saturate(1.4);
+    border: 1px solid var(--line-2);
+    border-radius: 16px;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.5);
+  }
+  .brand {
+    display: flex; align-items: center; gap: 12px;
+    color: var(--cream); text-decoration: none;
+  }
+  .brand-icon {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--violet) 0%, var(--violet-d) 100%);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 16px rgba(139,127,255,0.5),
+                inset 0 1px 0 rgba(255,255,255,0.3);
+    position: relative;
+  }
+  .brand-icon::after {
+    content: ""; position: absolute;
+    top: 4px; left: 8px; width: 10px; height: 4px;
+    background: rgba(255,255,255,0.4); border-radius: 50%;
+    transform: rotate(-25deg);
+  }
+  .brand-icon svg { width: 20px; height: 20px; color: var(--cream); }
+  .brand-name {
+    font-weight: 600; font-size: 18px; letter-spacing: -0.01em;
+  }
+  nav .center {
+    display: flex; gap: 28px; align-items: center;
+  }
+  nav .center a {
+    color: var(--slate); text-decoration: none;
+    font-size: 14px; font-weight: 500;
+    display: inline-flex; align-items: center; gap: 4px;
+    transition: color 0.2s;
+  }
+  body[lang="th"] nav .center a { font-family: var(--font-thai); }
+  nav .center a:hover { color: var(--cream); }
+  nav .center a.dropdown::after {
+    content: ""; width: 8px; height: 8px;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    transform: rotate(45deg); margin-left: 4px;
+    margin-top: -2px;
+  }
+  nav .right {
+    display: flex; align-items: center; gap: 16px;
+  }
+  .cart-tag {
+    font-family: var(--font-mono); font-size: 12px;
+    color: var(--slate); letter-spacing: 0.04em;
+  }
+  .lang-toggle {
+    display: inline-flex; padding: 4px;
+    background: rgba(245,240,255,0.06);
+    border: 1px solid var(--line-2);
+    border-radius: 8px; gap: 2px;
+  }
+  .lang-toggle button {
+    border: 0; background: transparent;
+    padding: 5px 10px; border-radius: 5px;
+    font-family: var(--font-mono); font-size: 10px;
+    color: var(--slate); cursor: none;
+    letter-spacing: 0.05em; transition: all 0.2s; font-weight: 500;
+  }
+  .lang-toggle button.active {
+    background: var(--cream); color: var(--void);
+  }
+  .nav-cta {
+    padding: 10px 20px; border-radius: 10px;
+    background: linear-gradient(180deg, var(--violet) 0%, var(--violet-d) 100%);
+    color: var(--cream); text-decoration: none;
+    font-size: 14px; font-weight: 600;
+    box-shadow: 0 4px 16px rgba(139,127,255,0.4),
+                inset 0 1px 0 rgba(255,255,255,0.2);
+    transition: all 0.25s;
+  }
+  body[lang="th"] .nav-cta { font-family: var(--font-thai); }
+  .nav-cta:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(139,127,255,0.6),
+                inset 0 1px 0 rgba(255,255,255,0.3);
+  }
+
+  /* ─── HERO ──────────────────────────────────────────────── */
+  .hero {
+    min-height: 88vh;
+    padding: 140px 32px 60px;
+    position: relative;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center;
+    z-index: 2;
+  }
+  /* Floating 3D app icon (like Volectra ref) */
+  .app-icon {
+    width: 110px; height: 110px;
+    border-radius: 26px;
+    background: linear-gradient(180deg,
+      rgba(245,240,255,0.5) 0%,
+      var(--violet-l) 40%,
+      var(--violet) 100%);
+    box-shadow:
+      inset 0 2px 0 rgba(255,255,255,0.5),
+      inset 0 -2px 0 rgba(94,79,138,0.5),
+      0 0 0 1px rgba(255,255,255,0.15),
+      0 24px 60px rgba(139,127,255,0.5),
+      0 0 80px rgba(139,127,255,0.3);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 40px;
+    position: relative;
+    animation: float 4s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+  .app-icon svg {
+    width: 50px; height: 50px; color: var(--cream);
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+  }
+  .app-icon::after {
+    content: ""; position: absolute;
+    top: 12px; left: 20px; width: 32px; height: 12px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.6), transparent);
+    border-radius: 50%; transform: rotate(-25deg);
+  }
+  .hero h1 {
+    font-family: var(--font-display);
+    font-size: clamp(48px, 7vw, 96px);
+    line-height: 1; font-weight: 700;
+    letter-spacing: -0.035em;
+    margin-bottom: 20px;
+    color: var(--cream); max-width: 1000px;
+  }
+  body[lang="th"] .hero h1 {
+    font-family: var(--font-thai); font-weight: 700;
+    font-size: clamp(40px, 6vw, 84px); line-height: 1.04;
+  }
+  .hero h1 .gradient {
+    background: linear-gradient(135deg, var(--violet-l), var(--violet), var(--rose));
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero-sub {
+    font-size: 18px; line-height: 1.55;
+    color: var(--slate); max-width: 600px;
+    margin: 0 auto 40px;
+  }
+  body[lang="th"] .hero-sub { font-family: var(--font-thai); }
+
+  /* Email + waitlist CTA */
+  .hero-form {
+    display: inline-flex; align-items: center;
+    padding: 5px 5px 5px 22px;
+    background: rgba(17,10,31,0.7);
+    backdrop-filter: blur(24px);
+    border: 1px solid var(--line-2);
+    border-radius: 12px;
+    min-width: 460px; max-width: 100%;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.4);
+  }
+  .hero-form input {
+    flex: 1;
+    background: transparent; border: 0;
+    padding: 14px 0;
+    color: var(--cream);
+    font-family: var(--font-display); font-size: 14px;
+    outline: none; min-width: 0;
+  }
+  body[lang="th"] .hero-form input { font-family: var(--font-thai); }
+  .hero-form input::placeholder { color: var(--slate-2); }
+  .hero-form button {
+    padding: 12px 22px; border-radius: 9px;
+    background: linear-gradient(180deg, var(--violet) 0%, var(--violet-d) 100%);
+    color: var(--cream); border: 0;
+    font-family: var(--font-display); font-size: 14px; font-weight: 600;
+    cursor: none;
+    box-shadow: 0 4px 14px rgba(139,127,255,0.5),
+                inset 0 1px 0 rgba(255,255,255,0.2);
+    transition: all 0.25s;
+    white-space: nowrap;
+  }
+  body[lang="th"] .hero-form button { font-family: var(--font-thai); }
+  .hero-form button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(139,127,255,0.7),
+                inset 0 1px 0 rgba(255,255,255,0.3);
+  }
+
+  /* Decorative star/sparkle in hero */
+  .sparkle {
+    position: absolute;
+    width: 16px; height: 16px;
+    color: var(--gold);
+    filter: drop-shadow(0 0 8px var(--gold));
+  }
+  .sparkle-1 { top: 25%; right: 22%; }
+  .sparkle-2 { top: 65%; right: 18%; }
+  .sparkle-3 { top: 30%; left: 18%; }
+
+  /* ─── DASHBOARD PREVIEW (the killer feature) ────────────── */
+  .dashboard-section {
+    padding: 40px 32px 100px;
+    position: relative; z-index: 2;
+    perspective: 2000px;
+  }
+  .dashboard-wrap {
+    max-width: 1500px; margin: 0 auto;
+    transform: rotateX(8deg);
+    transform-origin: center top;
+  }
+  .dashboard-frame {
+    background: rgba(17,10,31,0.85);
+    backdrop-filter: blur(28px);
+    border: 1px solid var(--line-2);
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.1) inset,
+      0 60px 120px rgba(0,0,0,0.6),
+      0 0 80px rgba(139,127,255,0.15);
+  }
+  .dash-bar {
+    padding: 14px 22px;
+    border-bottom: 1px solid var(--line);
+    display: flex; align-items: center; gap: 16px;
+    background: rgba(10,6,18,0.5);
+  }
+  .dash-brand-mini {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .dash-brand-mini .icon {
+    width: 30px; height: 30px; border-radius: 8px;
+    background: linear-gradient(135deg, var(--violet), var(--violet-d));
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 8px rgba(139,127,255,0.4);
+  }
+  .dash-brand-mini .icon svg { width: 16px; height: 16px; color: var(--cream); }
+  .dash-brand-mini .label {
+    line-height: 1.1;
+  }
+  .dash-brand-mini .label strong {
+    font-size: 14px; font-weight: 600;
+  }
+  .dash-brand-mini .label .beta {
+    display: inline-block; padding: 1px 6px;
+    background: var(--violet); color: var(--cream);
+    border-radius: 4px; font-size: 9px;
+    font-family: var(--font-mono); letter-spacing: 0.1em;
+    margin-left: 4px; vertical-align: middle;
+  }
+  .dash-brand-mini .label .sub {
+    font-size: 10px; color: var(--slate-2);
+    font-family: var(--font-mono); display: block;
+  }
+  .dash-bar .title {
+    font-size: 15px; font-weight: 600;
+    color: var(--cream);
+    padding-left: 16px; border-left: 1px solid var(--line-2);
+    margin-left: 4px;
+  }
+  body[lang="th"] .dash-bar .title { font-family: var(--font-thai); }
+  .dash-search {
+    flex: 1; max-width: 360px; margin: 0 auto;
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 14px;
+    background: rgba(10,6,18,0.6);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    font-family: var(--font-mono); font-size: 12px;
+    color: var(--slate);
+  }
+  .dash-search svg { width: 14px; height: 14px; }
+  .dash-search .kbd {
+    margin-left: auto;
+    padding: 2px 6px;
+    background: rgba(245,240,255,0.06);
+    border-radius: 4px; font-size: 10px;
+  }
+  .dash-bar .actions {
+    display: flex; align-items: center; gap: 14px;
+  }
+  .dash-bar .ico-btn {
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--slate);
+  }
+  .dash-bar .ico-btn svg { width: 16px; height: 16px; }
+  .dash-bar .avatar-mini {
+    display: flex; align-items: center; gap: 10px;
+    padding-left: 14px; border-left: 1px solid var(--line);
+  }
+  .dash-bar .avatar-mini .av {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--violet), var(--rose));
+  }
+  .dash-bar .avatar-mini .info { line-height: 1.1; }
+  .dash-bar .avatar-mini .info strong {
+    font-size: 13px; font-weight: 500;
+  }
+  .dash-bar .avatar-mini .info .sub {
+    font-size: 10px; color: var(--slate-2);
+    font-family: var(--font-mono);
+  }
+
+  .dash-body {
+    display: grid; grid-template-columns: 220px 1fr;
+  }
+  .dash-side {
+    padding: 18px 12px;
+    border-right: 1px solid var(--line);
+    background: rgba(10,6,18,0.4);
+  }
+  .dash-item {
+    padding: 10px 12px;
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13px; color: var(--slate);
+    border-radius: 8px;
+    margin-bottom: 2px;
+    cursor: none;
+    transition: all 0.2s;
+  }
+  body[lang="th"] .dash-item { font-family: var(--font-thai); }
+  .dash-item:hover { background: rgba(245,240,255,0.04); color: var(--cream); }
+  .dash-item.active {
+    background: rgba(139,127,255,0.12);
+    color: var(--violet-l);
+    border: 1px solid rgba(139,127,255,0.2);
+  }
+  .dash-item .ico { width: 14px; height: 14px; opacity: 0.7; }
+  .dash-item .arrow {
+    margin-left: auto; opacity: 0.4;
+  }
+  .dash-sep {
+    height: 1px; background: var(--line); margin: 14px 8px;
+  }
+  .dash-main {
+    padding: 28px 32px;
+  }
+  .dash-section-title {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 24px;
+  }
+  .dash-section-title h4 {
+    font-size: 18px; font-weight: 600; color: var(--cream);
+  }
+  body[lang="th"] .dash-section-title h4 { font-family: var(--font-thai); }
+  .dash-section-title .demo-badge {
+    padding: 5px 12px; border-radius: 6px;
+    background: var(--rose); color: var(--cream);
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.1em; font-weight: 500;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .dash-section-title .demo-badge::before {
+    content: ""; width: 6px; height: 6px;
+    background: var(--cream); border-radius: 50%;
+    animation: pulse 1.5s infinite;
+  }
+  .dash-tabs {
+    display: flex; gap: 4px; margin-bottom: 24px;
+    border-bottom: 1px solid var(--line);
+  }
+  .dash-tab {
+    padding: 10px 18px;
+    font-size: 13px; font-weight: 500; color: var(--slate);
+    border-bottom: 2px solid transparent;
+    cursor: none; margin-bottom: -1px;
+    transition: all 0.2s;
+  }
+  .dash-tab.active {
+    color: var(--violet-l); border-bottom-color: var(--violet);
+  }
+  .dash-content h5 {
+    font-size: 15px; font-weight: 600;
+    color: var(--cream); margin-bottom: 6px;
+  }
+  body[lang="th"] .dash-content h5 { font-family: var(--font-thai); }
+  .dash-content > p {
+    font-size: 13px; color: var(--slate); margin-bottom: 18px;
+  }
+  body[lang="th"] .dash-content > p { font-family: var(--font-thai); }
+  .dash-card {
+    background: rgba(245,240,255,0.04);
+    border: 1px solid var(--line-2);
+    border-radius: 14px; padding: 20px;
+    display: flex; align-items: center; gap: 16px;
+    margin-bottom: 16px;
+  }
+  .dash-card .ico-orb {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #FFE0B5, #FF9F7A);
+    flex-shrink: 0;
+  }
+  .dash-card .info {
+    flex: 1;
+  }
+  .dash-card .info strong {
+    display: block; font-size: 14px; font-weight: 600;
+    color: var(--cream); margin-bottom: 3px;
+  }
+  body[lang="th"] .dash-card .info strong { font-family: var(--font-thai); }
+  .dash-card .info span {
+    font-size: 12px; color: var(--slate);
+  }
+  body[lang="th"] .dash-card .info span { font-family: var(--font-thai); }
+  .dash-create-btn {
+    padding: 11px 24px;
+    background: linear-gradient(180deg, var(--violet) 0%, var(--violet-d) 100%);
+    color: var(--cream); border: 0; border-radius: 9px;
+    font-family: var(--font-display); font-weight: 600;
+    font-size: 13px; cursor: none;
+    display: inline-flex; align-items: center; gap: 6px;
+    box-shadow: 0 4px 14px rgba(139,127,255,0.4);
+  }
+  body[lang="th"] .dash-create-btn { font-family: var(--font-thai); }
+  .dash-tags {
+    display: flex; gap: 12px; margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+    font-family: var(--font-mono); font-size: 10px;
+    color: var(--slate-2); letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  /* Light beams on sides */
+  .dash-beam {
+    position: absolute; z-index: -1;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, var(--violet) 0%, transparent 70%);
+    filter: blur(60px); opacity: 0.5;
+  }
+  .dash-beam-l { bottom: 100px; left: 5%; }
+  .dash-beam-r { bottom: 100px; right: 5%; }
+
+  @keyframes pulse { 0%,100%{opacity:1;}50%{opacity:.4;} }
+
+  /* ─── BOTTOM CTA ─────────────────────────────────────────── */
+  .bottom-cta {
+    padding: 100px 32px;
+    text-align: center;
+    position: relative;
+    border-top: 1px solid var(--line);
+  }
+  .bottom-cta::before {
+    content: ""; position: absolute; inset: 0;
+    background: radial-gradient(ellipse 60% 40% at 50% 50%, rgba(139,127,255,0.15), transparent 70%);
+  }
+  .bottom-cta-inner { position: relative; max-width: 700px; margin: 0 auto; }
+  .bottom-cta h2 {
+    font-size: clamp(38px, 5vw, 64px);
+    font-weight: 700; letter-spacing: -0.03em;
+    line-height: 1.05; color: var(--cream); margin-bottom: 18px;
+  }
+  body[lang="th"] .bottom-cta h2 { font-family: var(--font-thai); }
+  .bottom-cta h2 .gradient {
+    background: linear-gradient(135deg, var(--violet-l), var(--violet), var(--rose));
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .bottom-cta p {
+    color: var(--slate); font-size: 16px;
+    margin-bottom: 32px; line-height: 1.55;
+  }
+  body[lang="th"] .bottom-cta p { font-family: var(--font-thai); }
+
+  /* Footer */
+  footer {
+    padding: 60px 32px 32px;
+    background: #050308;
+    border-top: 1px solid var(--line);
+  }
+  .footer-grid {
+    max-width: 1400px; margin: 0 auto;
+    display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 48px;
+    padding-bottom: 48px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 24px;
+  }
+  .footer-brand-row {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 16px; color: var(--cream); text-decoration: none;
+  }
+  .footer-brand-row .icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: linear-gradient(135deg, var(--violet), var(--violet-d));
+    display: flex; align-items: center; justify-content: center;
+  }
+  .footer-brand-row .icon svg { width: 18px; height: 18px; color: var(--cream); }
+  .footer-brand-row .name {
+    font-weight: 600; font-size: 20px;
+  }
+  .footer-tag {
+    font-size: 14px; color: var(--slate);
+    max-width: 320px; line-height: 1.55;
+  }
+  body[lang="th"] .footer-tag { font-family: var(--font-thai); }
+  .footer-col h5 {
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--violet-l); margin-bottom: 20px; font-weight: 500;
+  }
+  .footer-col a {
+    display: block; color: var(--cream);
+    text-decoration: none; font-size: 14px;
+    padding: 6px 0; transition: color 0.2s;
+  }
+  body[lang="th"] .footer-col a { font-family: var(--font-thai); }
+  .footer-col a:hover { color: var(--violet-l); }
+  .footer-bot {
+    max-width: 1400px; margin: 0 auto;
+    display: flex; justify-content: space-between; align-items: center;
+    padding-top: 24px;
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.16em; color: var(--slate-2);
+    text-transform: uppercase;
+  }
+  .footer-bot .status {
+    color: var(--violet-l);
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .footer-bot .status::before {
+    content: ""; width: 6px; height: 6px;
+    background: var(--violet); border-radius: 50%;
+    box-shadow: 0 0 10px var(--violet);
+    animation: pulse 2s infinite;
+  }
+
+  @media (max-width: 1024px) {
+    nav { flex-wrap: wrap; gap: 12px; padding: 12px; }
+    nav .center { order: 3; width: 100%; justify-content: center; flex-wrap: wrap; gap: 12px; }
+    .hero { padding: 200px 20px 60px; }
+    .app-icon { width: 84px; height: 84px; }
+    .hero-form { min-width: 0; width: 100%; max-width: 460px; }
+    .dashboard-wrap { transform: none; }
+    .dash-body { grid-template-columns: 1fr; }
+    .dash-side { display: none; }
+    .dash-bar .title, .dash-search, .dash-bar .actions { display: none; }
+    .footer-grid { grid-template-columns: 1fr; }
+    .bottom-cta { padding: 60px 20px; }
+    body { cursor: auto; }
+  }
+</style>
+</head>
+<body lang="th">
+
+<div class="cursor" id="cursor"><span class="label" id="clabel"></span></div>
+
+<!-- Wave decoration -->
+<div class="hero-wave">
+  <svg viewBox="0 0 1440 800" fill="none" preserveAspectRatio="none">
+    <path d="M0,300 Q360,200 720,300 T1440,300" stroke="rgba(139,127,255,0.3)" stroke-width="1" fill="none"/>
+    <path d="M0,350 Q360,250 720,350 T1440,350" stroke="rgba(139,127,255,0.18)" stroke-width="1" fill="none"/>
+    <path d="M0,400 Q360,300 720,400 T1440,400" stroke="rgba(139,127,255,0.12)" stroke-width="1" fill="none"/>
+  </svg>
+</div>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="brand">
+    <div class="brand-icon">
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M6 4l12 8-12 8V4z" fill="currentColor"/>
+      </svg>
+    </div>
+    <span class="brand-name">Capduction</span>
+  </a>
+  <div class="center">
+    <a href="#" class="hover-target" data-cursor="go">Home</a>
+    <a href="#" class="dropdown hover-target" data-cursor="go">Pages</a>
+    <a href="#" class="hover-target" data-cursor="go">About</a>
+    <a href="#" class="hover-target" data-cursor="go">Features</a>
+    <a href="#" class="hover-target" data-cursor="go">Pricing</a>
+  </div>
+  <div class="right">
+    <span class="cart-tag">Cart (0)</span>
+    <div class="lang-toggle">
+      <button class="active hover-target" data-lang="th">TH</button>
+      <button class="hover-target" data-lang="en">EN</button>
+    </div>
+    <a href="#" class="nav-cta hover-target" data-cursor="book"><span data-i18n="nav.cta">จองเดโม</span></a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <svg class="sparkle sparkle-1" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0l2.4 9.6L24 12l-9.6 2.4L12 24l-2.4-9.6L0 12l9.6-2.4z"/></svg>
+  <svg class="sparkle sparkle-2" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0l2.4 9.6L24 12l-9.6 2.4L12 24l-2.4-9.6L0 12l9.6-2.4z"/></svg>
+  <svg class="sparkle sparkle-3" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0l2.4 9.6L24 12l-9.6 2.4L12 24l-2.4-9.6L0 12l9.6-2.4z"/></svg>
+
+  <div class="app-icon">
+    <svg viewBox="0 0 24 24" fill="none">
+      <path d="M6 4l12 8-12 8V4z" fill="currentColor"/>
+    </svg>
+  </div>
+  <h1>
+    <span data-i18n="hero.h">Smart Scripts, <span class="gradient">Built By Creators</span></span>
+  </h1>
+  <p class="hero-sub" data-i18n="hero.sub">
+    ปั้นสคริปต์การพูดและแคปชั่นที่ขายได้จริง — Capduction เข้าใจวิดีโอสั้นสไตล์ไทย โดยทำงานร่วมกับทีมและแบรนด์คุณ
+  </p>
+  <form class="hero-form" onsubmit="event.preventDefault()">
+    <input type="email" placeholder="Enter your email" />
+    <button class="hover-target" data-cursor="join"><span data-i18n="hero.cta">Join Waitlist Now</span></button>
+  </form>
+</section>
+
+<!-- DASHBOARD PREVIEW -->
+<section class="dashboard-section">
+  <div class="dash-beam dash-beam-l"></div>
+  <div class="dash-beam dash-beam-r"></div>
+  <div class="dashboard-wrap">
+    <div class="dashboard-frame">
+      <div class="dash-bar">
+        <div class="dash-brand-mini">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none"><path d="M6 4l12 8-12 8V4z" fill="currentColor"/></svg></div>
+          <div class="label">
+            <strong>Capduction <span class="beta">Beta</span></strong>
+            <span class="sub">AI Script Studio</span>
+          </div>
+        </div>
+        <div class="title" data-i18n="dash.title">Workspace</div>
+        <div class="dash-search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <span>Search</span>
+          <span class="kbd">⌘K</span>
+        </div>
+        <div class="actions">
+          <span class="ico-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg></span>
+          <span class="ico-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
+          <span class="ico-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/></svg></span>
+          <div class="avatar-mini">
+            <div class="av"></div>
+            <div class="info">
+              <strong>Alex Smith</strong>
+              <span class="sub">New User</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="dash-body">
+        <aside class="dash-side">
+          <div class="dash-item active">
+            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+            <span>Design Lab</span>
+            <svg class="arrow" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+          <div class="dash-item hover-target" data-cursor="open">
+            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <span data-i18n="dash.assistants">Assistants</span>
+          </div>
+          <div class="dash-item hover-target" data-cursor="open">
+            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            <span data-i18n="dash.integrations">Integrations</span>
+          </div>
+          <div class="dash-item hover-target" data-cursor="open">
+            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            <span data-i18n="dash.kb">Knowledge Library</span>
+          </div>
+          <div class="dash-item hover-target" data-cursor="open">
+            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            <span data-i18n="dash.settings">Settings</span>
+          </div>
+          <div class="dash-sep"></div>
+          <div class="dash-item hover-target" data-cursor="open">
+            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span data-i18n="dash.campaigns">Campaigns</span>
+          </div>
+          <div class="dash-item hover-target" data-cursor="open">
+            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            <span data-i18n="dash.lists">Lists</span>
+          </div>
+          <div class="dash-item hover-target" data-cursor="open">
+            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <span data-i18n="dash.appointments">Appointments</span>
+          </div>
+          <div class="dash-item hover-target" data-cursor="open">
+            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            <span data-i18n="dash.reporting">Reporting</span>
+          </div>
+        </aside>
+        <main class="dash-main">
+          <div class="dash-section-title">
+            <h4 data-i18n="dash.section">Pick the AI for Your Use Case</h4>
+            <span class="demo-badge">Demo</span>
+          </div>
+          <div class="dash-tabs">
+            <div class="dash-tab active">Script Agent</div>
+            <div class="dash-tab hover-target" data-cursor="switch">Caption Agent</div>
+            <div class="dash-tab hover-target" data-cursor="switch">Combo Mode</div>
+            <div class="dash-tab hover-target" data-cursor="switch">Other</div>
+          </div>
+          <div class="dash-content">
+            <h5 data-i18n="dash.h5">From Scratch</h5>
+            <p data-i18n="dash.p">Begin from the ground up for a fully personalized agent experience.</p>
+            <div class="dash-card">
+              <div class="ico-orb"></div>
+              <div class="info">
+                <strong>Real-Time Script Generator</strong>
+                <span data-i18n="dash.card">An Assistant Who Works 24 × 7</span>
+              </div>
+              <button class="dash-create-btn hover-target" data-cursor="create">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14m-7-7h14"/></svg>
+                Create
+              </button>
+            </div>
+            <div class="dash-tags">
+              <span>15S-90S SCRIPTS</span>
+              <span>·</span>
+              <span>7 PLATFORMS</span>
+              <span>·</span>
+              <span>BRAND VOICE MEMORY</span>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BOTTOM CTA -->
+<section class="bottom-cta">
+  <div class="bottom-cta-inner">
+    <h2 data-i18n="bcta.h">Build the future. <span class="gradient">Built by you.</span></h2>
+    <p data-i18n="bcta.p">เริ่มต้นใช้ Capduction ฟรี — ทดลองทุก studio ครบทุก platform · ยกเลิกได้ตลอด</p>
+    <form class="hero-form" onsubmit="event.preventDefault()" style="display: inline-flex;">
+      <input type="email" placeholder="Enter your email" />
+      <button class="hover-target" data-cursor="join"><span data-i18n="bcta.btn">Join Waitlist Now</span></button>
+    </form>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div>
+      <a href="#" class="footer-brand-row">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none"><path d="M6 4l12 8-12 8V4z" fill="currentColor"/></svg></div>
+        <span class="name">Capduction</span>
+      </a>
+      <p class="footer-tag" data-i18n="ft.tag">สตูดิโอ AI ระหว่างไอเดียกับการกดอัปโหลด — สร้างในบางกอก เพื่อ creator ไทยทั่วประเทศ</p>
+    </div>
+    <div class="footer-col">
+      <h5>STUDIOS</h5>
+      <a href="#" class="hover-target" data-cursor="go">Script</a>
+      <a href="#" class="hover-target" data-cursor="go">Caption</a>
+      <a href="#" class="hover-target" data-cursor="go">Combo</a>
+      <a href="#" class="hover-target" data-cursor="go">Brand Voice</a>
+    </div>
+    <div class="footer-col">
+      <h5>RESOURCES</h5>
+      <a href="#" class="hover-target" data-cursor="go">Documentation</a>
+      <a href="#" class="hover-target" data-cursor="go">Changelog</a>
+      <a href="#" class="hover-target" data-cursor="go">API</a>
+      <a href="#" class="hover-target" data-cursor="go">Status</a>
+    </div>
+    <div class="footer-col">
+      <h5>COMPANY</h5>
+      <a href="#" class="hover-target" data-cursor="go">About</a>
+      <a href="#" class="hover-target" data-cursor="go">Careers</a>
+      <a href="#" class="hover-target" data-cursor="go">Contact</a>
+      <a href="#" class="hover-target" data-cursor="go">Privacy</a>
+    </div>
+  </div>
+  <div class="footer-bot">
+    <span>© 2026 CAPDUCTION · MADE IN BANGKOK</span>
+    <span class="status">ALL SYSTEMS OPERATIONAL</span>
+    <span>STUDIO CONSOLE · V3.0</span>
+  </div>
+</footer>
+
+<script>
+const cursor = document.getElementById('cursor');
+const cLabel = document.getElementById('clabel');
+const target = { x: 0, y: 0 };
+const actual = { x: 0, y: 0 };
+window.addEventListener('mousemove', e => { target.x = e.clientX; target.y = e.clientY; });
+function loopC(){
+  actual.x += (target.x - actual.x) * 0.22;
+  actual.y += (target.y - actual.y) * 0.22;
+  cursor.style.left = actual.x + 'px';
+  cursor.style.top = actual.y + 'px';
+  requestAnimationFrame(loopC);
+}
+loopC();
+const labels = { go: '→', book: 'BOOK', join: 'JOIN', open: 'OPEN', switch: '⇄', create: '+' };
+document.querySelectorAll('.hover-target').forEach(el => {
+  el.addEventListener('mouseenter', () => {
+    cursor.classList.add('target');
+    cLabel.textContent = labels[el.dataset.cursor] || '→';
+  });
+  el.addEventListener('mouseleave', () => cursor.classList.remove('target'));
+});
+
+const dict = {
+  th: {
+    "nav.cta":"จองเดโม",
+    "hero.h":"Smart Scripts, <span class='gradient'>Built By Creators</span>",
+    "hero.sub":"ปั้นสคริปต์การพูดและแคปชั่นที่ขายได้จริง — Capduction เข้าใจวิดีโอสั้นสไตล์ไทย โดยทำงานร่วมกับทีมและแบรนด์คุณ",
+    "hero.cta":"จองสิทธิ์ก่อนใคร",
+    "dash.title":"Workspace",
+    "dash.assistants":"Assistants","dash.integrations":"Integrations","dash.kb":"Knowledge Library","dash.settings":"Settings",
+    "dash.campaigns":"Campaigns","dash.lists":"Lists","dash.appointments":"Appointments","dash.reporting":"Reporting",
+    "dash.section":"เลือก AI ตามแบบที่คุณใช้",
+    "dash.h5":"เริ่มจากศูนย์",
+    "dash.p":"สร้างจาก scratch เพื่อปรับ agent ให้เป็นในแบบของคุณ 100%",
+    "dash.card":"Assistant ที่ทำงาน 24 × 7",
+    "bcta.h":"Build the future. <span class='gradient'>Built by you.</span>",
+    "bcta.p":"เริ่มต้นใช้ Capduction ฟรี — ทดลองทุก studio ครบทุก platform · ยกเลิกได้ตลอด",
+    "bcta.btn":"จองสิทธิ์ก่อนใคร",
+    "ft.tag":"สตูดิโอ AI ระหว่างไอเดียกับการกดอัปโหลด — สร้างในบางกอก เพื่อ creator ไทยทั่วประเทศ"
+  },
+  en: {
+    "nav.cta":"Book a Demo",
+    "hero.h":"Smart Scripts, <span class='gradient'>Built By Creators</span>",
+    "hero.sub":"Collaborate with teams to launch scripts and captions that truly convert — Capduction understands Thai short-form video.",
+    "hero.cta":"Join Waitlist Now",
+    "dash.title":"Workspace",
+    "dash.assistants":"Assistants","dash.integrations":"Integrations","dash.kb":"Knowledge Library","dash.settings":"Settings",
+    "dash.campaigns":"Campaigns","dash.lists":"Lists","dash.appointments":"Appointments","dash.reporting":"Reporting",
+    "dash.section":"Pick the AI for Your Use Case",
+    "dash.h5":"From Scratch",
+    "dash.p":"Begin from the ground up for a fully personalized agent experience.",
+    "dash.card":"An Assistant Who Works 24 × 7",
+    "bcta.h":"Build the future. <span class='gradient'>Built by you.</span>",
+    "bcta.p":"Get started for free — try every studio, every platform · cancel anytime.",
+    "bcta.btn":"Join Waitlist Now",
+    "ft.tag":"The AI studio between idea and upload — built in Bangkok, for Thai creators everywhere."
+  }
+};
+document.querySelectorAll('.lang-toggle button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.lang-toggle button').forEach(x => x.classList.remove('active'));
+    btn.classList.add('active');
+    const lang = btn.dataset.lang;
+    document.body.lang = lang;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.dataset.i18n;
+      if (dict[lang][key]) el.innerHTML = dict[lang][key];
+    });
+  });
+});
+</script>
+</body>
+</html>

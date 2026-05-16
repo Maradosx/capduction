@@ -1,0 +1,1688 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Capduction · Bangkok Sunset — Studio of warm evenings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Manrope:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Noto+Serif+Thai:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script type="importmap">
+{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }
+</script>
+<style>
+  :root {
+    --cream:   #FFF5E4;
+    --cream-2: #FBE9CC;
+    --cream-3: #F4DCB0;
+    --terra:   #C2532E;
+    --terra-d: #8E3818;
+    --terra-l: #E37468;
+    --mango:   #F4A82A;
+    --mango-d: #C7861F;
+    --teal:    #093A3E;
+    --teal-2:  #155E62;
+    --teal-3:  #2A7B82;
+    --ink:     #2B1810;
+    --rose:    #E37468;
+    --gold:    #D4A946;
+    --font-display: 'DM Serif Display', serif;
+    --font-thai:    'Noto Serif Thai', serif;
+    --font-body:    'Manrope', sans-serif;
+    --font-mono:    'IBM Plex Mono', monospace;
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: var(--font-body); font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    cursor: none; position: relative;
+  }
+  body[lang="th"] { font-family: var(--font-thai); font-weight: 500; }
+
+  /* ─── Sunset gradient backdrop ─────────────────────────────── */
+  body::before {
+    content: ""; position: fixed; inset: 0; z-index: -2;
+    background:
+      radial-gradient(ellipse 90% 70% at 78% -8%, #FFD89F 0%, transparent 58%),
+      radial-gradient(ellipse 70% 55% at 0% 78%, #E37468 0%, transparent 52%),
+      radial-gradient(ellipse 100% 75% at 100% 100%, #C2532E 0%, transparent 65%),
+      radial-gradient(ellipse 60% 50% at 50% 30%, rgba(244,168,42,0.15) 0%, transparent 60%),
+      var(--cream);
+    animation: sunDrift 40s ease-in-out infinite;
+  }
+  @keyframes sunDrift {
+    0%,100% { transform: scale(1); }
+    50% { transform: scale(1.04) translateY(-1%); }
+  }
+  body::after {
+    content: ""; position: fixed; inset: 0; pointer-events: none;
+    z-index: 999;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.7'/%3E%3C/svg%3E");
+    opacity: 0.06; mix-blend-mode: multiply;
+  }
+
+  /* ─── Sun cursor ───────────────────────────────────────────── */
+  .cursor {
+    position: fixed; pointer-events: none; z-index: 10000;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%,
+      #FFE5B4, var(--mango) 50%, var(--terra) 100%);
+    box-shadow: 0 0 18px rgba(244,168,42,0.6),
+                0 0 32px rgba(194,83,46,0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.3s var(--ease), height 0.3s var(--ease);
+  }
+  .cursor.target {
+    width: 56px; height: 56px;
+    box-shadow: 0 0 32px rgba(244,168,42,0.8),
+                0 0 60px rgba(194,83,46,0.5);
+  }
+  .cursor .label {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono); font-size: 10px;
+    color: var(--ink); letter-spacing: 0.1em;
+    text-transform: uppercase; opacity: 0;
+    transition: opacity 0.2s; font-weight: 600;
+  }
+  .cursor.target .label { opacity: 1; }
+  @media (max-width: 768px) { body { cursor: auto; } .cursor { display: none; } }
+  a, button, .hover-target { cursor: none; }
+
+  /* ─── NAV ──────────────────────────────────────────────────── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    padding: 22px 40px;
+    display: flex; justify-content: space-between; align-items: center;
+    background: rgba(255,245,228,0.78);
+    backdrop-filter: blur(20px) saturate(1.3);
+    border-bottom: 1px solid rgba(43,24,16,0.08);
+  }
+  .brand {
+    font-family: var(--font-display);
+    font-style: italic; font-size: 28px;
+    letter-spacing: -0.015em; color: var(--teal);
+    display: flex; align-items: center; gap: 14px;
+    text-decoration: none;
+  }
+  .brand-sun {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%,
+      #FFE5B4, var(--mango) 50%, var(--terra) 100%);
+    box-shadow: 0 0 20px rgba(244,168,42,0.5),
+                inset 0 -2px 4px rgba(142,56,24,0.3);
+    position: relative;
+  }
+  .brand-sun::after {
+    content: ""; position: absolute;
+    top: 3px; left: 5px; width: 10px; height: 5px;
+    background: rgba(255,255,255,0.6); border-radius: 50%;
+    transform: rotate(-30deg);
+  }
+  .brand-meta {
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.2em; color: var(--terra);
+    text-transform: uppercase;
+    padding-left: 14px; border-left: 1px solid rgba(9,58,62,0.2);
+  }
+  nav .links {
+    display: flex; gap: 32px; align-items: center;
+  }
+  nav .links a {
+    color: var(--teal); text-decoration: none;
+    font-size: 14px; font-weight: 500;
+    transition: color 0.2s;
+  }
+  body[lang="th"] nav .links a { font-family: var(--font-thai); }
+  nav .links a:hover { color: var(--terra); }
+  .lang-toggle {
+    display: inline-flex;
+    background: rgba(9,58,62,0.08);
+    border-radius: 100px; padding: 3px;
+  }
+  .lang-toggle button {
+    border: 0; background: transparent;
+    padding: 5px 12px; border-radius: 100px;
+    font-family: var(--font-mono); font-size: 10px;
+    color: var(--teal-2); cursor: none;
+    letter-spacing: 0.1em;
+    transition: all 0.25s;
+  }
+  .lang-toggle button.active { background: var(--teal); color: var(--cream); }
+  .nav-cta {
+    padding: 12px 22px; border-radius: 100px;
+    background: var(--teal); color: var(--cream) !important;
+    text-decoration: none;
+    font-weight: 600; font-size: 13px;
+    box-shadow: 0 4px 14px rgba(9,58,62,0.25);
+    transition: all 0.25s;
+  }
+  body[lang="th"] .nav-cta { font-family: var(--font-thai); }
+  .nav-cta:hover {
+    background: var(--terra);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 22px rgba(194,83,46,0.35);
+  }
+
+  /* ─── HERO ─────────────────────────────────────────────────── */
+  .hero {
+    padding: 140px 60px 100px;
+    display: grid; grid-template-columns: 1.1fr 1fr;
+    gap: 60px; align-items: center;
+    position: relative;
+  }
+  .hero-eye {
+    display: inline-flex; align-items: center; gap: 14px;
+    margin-bottom: 32px;
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.15em; color: var(--teal-2);
+    text-transform: uppercase;
+  }
+  .hero-eye .line {
+    width: 40px; height: 1px; background: var(--terra);
+  }
+  .hero-eye .badge {
+    background: var(--mango); color: var(--ink);
+    padding: 5px 12px; border-radius: 100px;
+    font-weight: 600; font-size: 10px;
+  }
+  .hero h1 {
+    font-family: var(--font-display);
+    font-size: clamp(64px, 9vw, 132px);
+    line-height: 0.96; font-weight: 400;
+    color: var(--teal); letter-spacing: -0.022em;
+    margin-bottom: 32px;
+  }
+  body[lang="th"] .hero h1 {
+    font-family: var(--font-thai); font-weight: 700;
+    font-size: clamp(50px, 7.4vw, 110px); line-height: 1.04;
+  }
+  .hero h1 em { font-style: italic; color: var(--terra); }
+  .hero h1 .line { display: block; overflow: hidden; }
+  .hero h1 .line span {
+    display: inline-block; transform: translateY(110%);
+    animation: rise 1.3s var(--ease) forwards;
+  }
+  .hero h1 .line:nth-child(1) span { animation-delay: 0.2s; }
+  .hero h1 .line:nth-child(2) span { animation-delay: 0.35s; }
+  .hero h1 .line:nth-child(3) span { animation-delay: 0.5s; }
+  @keyframes rise { to { transform: translateY(0); } }
+  .hero h1 .underline {
+    position: relative; display: inline-block;
+  }
+  .hero h1 .underline::after {
+    content: ""; position: absolute;
+    left: -2px; right: -2px; bottom: 0.08em;
+    height: 0.14em; background: var(--mango);
+    z-index: -1; border-radius: 4px;
+    animation: underline 1s var(--ease) 1.3s both;
+    transform-origin: left; transform: scaleX(0);
+  }
+  @keyframes underline { to { transform: scaleX(1); } }
+  .hero-deck {
+    font-size: 18px; line-height: 1.55;
+    color: var(--teal-2); max-width: 480px;
+    margin-bottom: 40px;
+  }
+  body[lang="th"] .hero-deck { font-family: var(--font-thai); font-weight: 400; }
+  .hero-deck strong { color: var(--teal); font-weight: 700; }
+
+  .hero-actions {
+    display: flex; gap: 16px; align-items: center;
+    margin-bottom: 56px;
+  }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 12px;
+    padding: 17px 30px; border-radius: 100px;
+    background: var(--terra); color: var(--cream);
+    text-decoration: none;
+    font-weight: 600; font-size: 15px;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.2) inset,
+      0 -1px 0 rgba(142,56,24,0.5) inset,
+      0 8px 22px rgba(194,83,46,0.35);
+    transition: all 0.3s var(--ease);
+    position: relative; overflow: hidden;
+  }
+  body[lang="th"] .btn-primary { font-family: var(--font-thai); }
+  .btn-primary::before {
+    content: ""; position: absolute; inset: 0;
+    background: var(--terra-d); transform: translateX(-101%);
+    transition: transform 0.4s var(--ease);
+  }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.2) inset,
+      0 -1px 0 rgba(142,56,24,0.5) inset,
+      0 14px 32px rgba(194,83,46,0.5);
+  }
+  .btn-primary:hover::before { transform: translateX(0); }
+  .btn-primary span { position: relative; z-index: 1; display: flex; align-items: center; gap: 12px; }
+  .btn-secondary {
+    color: var(--teal); font-size: 14px;
+    font-weight: 600; text-decoration: none;
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 16px 20px;
+    border-bottom: 2px solid var(--teal);
+    transition: all 0.25s;
+  }
+  body[lang="th"] .btn-secondary { font-family: var(--font-thai); }
+  .btn-secondary:hover { color: var(--terra); border-color: var(--terra); }
+
+  .hero-stats {
+    display: grid; grid-template-columns: repeat(4, auto);
+    gap: 48px; padding-top: 32px;
+    border-top: 1.5px dashed rgba(9,58,62,0.2);
+  }
+  .stat .n {
+    font-family: var(--font-display); font-style: italic;
+    font-size: 46px; line-height: 1; color: var(--teal);
+  }
+  .stat .l {
+    font-family: var(--font-mono); font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.15em;
+    color: var(--teal-2); margin-top: 8px;
+  }
+
+  /* ─── HERO RIGHT ───────────────────────────────────────────── */
+  .hero-right {
+    position: relative; height: 680px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  #stage3d { position: absolute; inset: 0; z-index: 1; }
+  #stage3d canvas { width: 100% !important; height: 100% !important; }
+
+  .preview-card {
+    position: relative; z-index: 2;
+    width: 440px; max-width: 100%;
+    background: var(--cream);
+    border: 2px solid var(--teal);
+    border-radius: 18px;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.5) inset,
+      8px 8px 0 var(--mango),
+      0 24px 48px rgba(43,24,16,0.18);
+    overflow: hidden;
+    transform: rotate(-2deg);
+    animation: floatY 6s ease-in-out infinite;
+  }
+  @keyframes floatY {
+    0%,100% { transform: rotate(-2deg) translateY(0); }
+    50% { transform: rotate(-1.5deg) translateY(-8px); }
+  }
+  .pv-bar {
+    padding: 11px 16px;
+    background: var(--teal); color: var(--cream);
+    display: flex; align-items: center; gap: 10px;
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.12em;
+  }
+  .pv-bar .dots { display: flex; gap: 5px; }
+  .pv-bar .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--cream-3); }
+  .pv-bar .dot:nth-child(1) { background: var(--terra-l); }
+  .pv-bar .dot:nth-child(2) { background: var(--mango); }
+  .pv-bar .dot:nth-child(3) { background: var(--gold); }
+  .pv-bar .path { flex: 1; text-align: center; color: var(--cream-3); }
+  .pv-bar .path strong { color: var(--mango); }
+  .pv-body { padding: 22px; }
+  .pv-tabs {
+    display: flex; gap: 0; margin-bottom: 18px;
+    border-bottom: 1.5px dashed rgba(9,58,62,0.2);
+  }
+  .pv-tab {
+    padding: 8px 14px;
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--teal-2); border-bottom: 2px solid transparent;
+    margin-bottom: -1.5px;
+  }
+  .pv-tab.active {
+    color: var(--terra); border-bottom-color: var(--terra);
+    font-weight: 600;
+  }
+  .pv-label {
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.14em; color: var(--terra);
+    text-transform: uppercase; margin-bottom: 14px;
+  }
+  .pv-beat {
+    padding: 12px 0;
+    display: grid; grid-template-columns: 46px 1fr; gap: 12px;
+    border-top: 1px dashed rgba(9,58,62,0.15);
+  }
+  .pv-beat:first-of-type { border-top: 0; padding-top: 0; }
+  .pv-beat .tc {
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--mango-d); padding-top: 2px;
+  }
+  .pv-beat .role {
+    font-family: var(--font-mono); font-size: 9px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--teal-2); margin-bottom: 4px;
+  }
+  .pv-beat .text {
+    font-family: var(--font-thai); font-size: 13px;
+    line-height: 1.5; color: var(--ink);
+  }
+  .pv-beat .text em { color: var(--terra); font-style: italic; font-weight: 600; }
+  .pv-footer {
+    margin-top: 14px; padding-top: 12px;
+    border-top: 1px dashed rgba(9,58,62,0.15);
+    display: flex; justify-content: space-between;
+    font-family: var(--font-mono); font-size: 10px;
+    color: var(--teal-2); letter-spacing: 0.08em;
+  }
+  .pv-footer .signal { color: var(--terra); font-weight: 600; }
+
+  .hero-note {
+    position: absolute; z-index: 3;
+    padding: 8px 16px; border-radius: 100px;
+    background: var(--cream);
+    border: 1.5px solid var(--teal);
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--teal); letter-spacing: 0.08em;
+    text-transform: uppercase;
+    box-shadow: 4px 4px 0 var(--mango);
+  }
+  .hn-1 { top: 6%; right: 4%; transform: rotate(2deg); }
+  .hn-2 { top: 50%; left: -8px; transform: rotate(-3deg); background: var(--mango); border-color: var(--ink); }
+  .hn-3 { bottom: 6%; right: 8%; transform: rotate(1deg); }
+
+  /* ─── SECTION HEAD ─────────────────────────────────────────── */
+  .section-head {
+    padding: 100px 60px 56px;
+    display: grid; grid-template-columns: 1.2fr 1fr;
+    gap: 60px; align-items: end;
+    border-bottom: 1.5px solid rgba(9,58,62,0.15);
+    max-width: 1500px; margin: 0 auto;
+  }
+  .section-head .eye {
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.18em; color: var(--terra);
+    text-transform: uppercase; margin-bottom: 16px;
+  }
+  .section-head h2 {
+    font-family: var(--font-display);
+    font-size: clamp(48px, 6.4vw, 92px);
+    font-weight: 400; letter-spacing: -0.025em;
+    line-height: 1; color: var(--teal);
+  }
+  body[lang="th"] .section-head h2 { font-family: var(--font-thai); font-weight: 700; line-height: 1.05; }
+  .section-head h2 em { font-style: italic; color: var(--terra); }
+  .section-head .sub {
+    font-size: 16px; line-height: 1.6; color: var(--teal-2);
+  }
+  body[lang="th"] .section-head .sub { font-family: var(--font-thai); }
+
+  /* ─── STUDIOS ──────────────────────────────────────────────── */
+  .studios-grid {
+    padding: 80px 60px 100px;
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 28px; max-width: 1400px; margin: 0 auto;
+  }
+  .studio {
+    padding: 44px 32px 36px;
+    background: var(--cream);
+    border: 2px solid var(--teal);
+    border-radius: 28px;
+    position: relative; overflow: hidden;
+    transition: all 0.3s var(--ease);
+  }
+  .studio::before {
+    content: ""; position: absolute; inset: 0;
+    background: radial-gradient(circle at 100% 0%, var(--mango), transparent 50%);
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .studio:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 24px 50px rgba(43,24,16,0.15),
+                10px 10px 0 var(--teal);
+  }
+  .studio:hover::before { opacity: 0.2; }
+  .studio > * { position: relative; z-index: 1; }
+  .studio-num {
+    font-family: var(--font-display); font-style: italic;
+    font-size: 26px; color: var(--terra);
+    margin-bottom: 22px;
+  }
+  .studio-icon-wrap {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    border: 2px solid var(--teal);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 28px;
+    position: relative;
+    box-shadow: 4px 4px 0 var(--teal);
+  }
+  .studio:nth-child(1) .studio-icon-wrap {
+    background: radial-gradient(circle at 35% 28%, #FFE5B4, var(--mango) 70%, var(--mango-d) 100%);
+  }
+  .studio:nth-child(2) .studio-icon-wrap {
+    background: radial-gradient(circle at 35% 28%, #F4C5B0, var(--terra-l) 70%, var(--terra) 100%);
+  }
+  .studio:nth-child(3) .studio-icon-wrap {
+    background: radial-gradient(circle at 35% 28%, #A8D5D2, var(--teal-3) 70%, var(--teal) 100%);
+  }
+  .studio-icon-wrap svg { width: 32px; height: 32px; color: var(--ink); }
+  .studio:nth-child(3) .studio-icon-wrap svg { color: var(--cream); }
+  .studio h3 {
+    font-family: var(--font-display); font-size: 34px;
+    font-weight: 400; letter-spacing: -0.02em;
+    margin-bottom: 4px; color: var(--teal);
+  }
+  body[lang="th"] .studio h3 { font-family: var(--font-thai); font-weight: 700; }
+  .studio h3 em { font-style: italic; color: var(--terra); }
+  .studio .sub {
+    font-family: var(--font-mono); font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.14em;
+    color: var(--terra); margin-bottom: 24px;
+    font-weight: 600;
+  }
+  .studio p {
+    font-size: 14px; line-height: 1.65;
+    color: var(--teal-2); margin-bottom: 24px;
+  }
+  body[lang="th"] .studio p { font-family: var(--font-thai); font-size: 15px; }
+  .studio ul {
+    list-style: none;
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--teal-2);
+    border-top: 1.5px dashed rgba(9,58,62,0.2);
+    padding-top: 16px;
+  }
+  .studio li {
+    padding: 6px 0; display: flex; gap: 10px;
+    align-items: center;
+  }
+  .studio li::before { content: "✶"; color: var(--mango); }
+  .studio-cta {
+    display: inline-flex; align-items: center; gap: 8px;
+    margin-top: 24px;
+    padding: 11px 20px; border-radius: 100px;
+    background: var(--teal); color: var(--cream);
+    text-decoration: none;
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    font-weight: 600;
+    transition: all 0.25s;
+  }
+  .studio-cta:hover {
+    background: var(--terra);
+    transform: translateY(-2px);
+  }
+
+  /* ─── SHOWCASE ─────────────────────────────────────────────── */
+  .showcase {
+    padding: 0 60px 100px;
+    background: linear-gradient(180deg, var(--cream) 0%, var(--cream-2) 100%);
+  }
+  .showcase-frame {
+    max-width: 1400px; margin: 0 auto;
+    background: var(--cream);
+    border: 2.5px solid var(--teal);
+    border-radius: 24px;
+    box-shadow:
+      12px 12px 0 var(--mango),
+      0 30px 70px rgba(43,24,16,0.18);
+    overflow: hidden;
+  }
+  .frame-bar {
+    padding: 14px 20px;
+    background: var(--teal); color: var(--cream);
+    display: flex; align-items: center; gap: 14px;
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.1em;
+  }
+  .frame-bar .dots { display: flex; gap: 6px; }
+  .frame-bar .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .frame-bar .dot:nth-child(1) { background: var(--terra-l); }
+  .frame-bar .dot:nth-child(2) { background: var(--mango); }
+  .frame-bar .dot:nth-child(3) { background: var(--gold); }
+  .frame-bar .path { flex: 1; text-align: center; color: var(--cream-3); }
+  .frame-bar .path strong { color: var(--mango); }
+  .frame-bar .tag {
+    background: var(--mango); color: var(--ink);
+    padding: 5px 12px; border-radius: 100px;
+    font-size: 10px; letter-spacing: 0.14em;
+    text-transform: uppercase; font-weight: 600;
+  }
+  .frame-body {
+    display: grid; grid-template-columns: 260px 1fr;
+    min-height: 600px;
+  }
+  .frame-side {
+    padding: 24px 16px;
+    border-right: 1.5px dashed rgba(9,58,62,0.15);
+    background: var(--cream-2);
+  }
+  .frame-side h6 {
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.2em; color: var(--terra);
+    text-transform: uppercase; margin: 0 8px 14px;
+    font-weight: 600;
+  }
+  .frame-side .item {
+    padding: 11px 14px; border-radius: 12px;
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--teal); display: flex;
+    align-items: center; gap: 10px;
+    margin-bottom: 4px; transition: all 0.2s;
+  }
+  .frame-side .item:hover { background: var(--cream); color: var(--terra); }
+  .frame-side .item.active {
+    background: var(--teal); color: var(--cream);
+    font-weight: 600;
+  }
+  .frame-side .item .ico { width: 14px; height: 14px; opacity: 0.7; }
+  .frame-side .item.active .ico { opacity: 1; }
+  .frame-side .sep {
+    height: 1.5px; background: rgba(9,58,62,0.15);
+    margin: 20px 8px;
+    background-image: linear-gradient(to right, rgba(9,58,62,0.4) 50%, transparent 50%);
+    background-size: 8px 1.5px; background-repeat: repeat-x;
+  }
+  .frame-side .badge {
+    margin-left: auto; padding: 2px 8px;
+    background: var(--mango); color: var(--ink);
+    border-radius: 100px; font-size: 9px;
+    letter-spacing: 0.1em; font-weight: 600;
+  }
+  .frame-main { padding: 32px; }
+  .frame-tabs {
+    display: flex; gap: 0; margin-bottom: 28px;
+    border-bottom: 1.5px dashed rgba(9,58,62,0.2);
+  }
+  .frame-tab {
+    padding: 12px 20px;
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--teal-2); border-bottom: 2px solid transparent;
+    margin-bottom: -1.5px;
+  }
+  .frame-tab.active {
+    color: var(--terra); border-bottom-color: var(--terra);
+    font-weight: 600;
+  }
+  .frame-form {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 16px; margin-bottom: 28px;
+  }
+  .frame-field label {
+    display: block;
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.16em; color: var(--terra);
+    text-transform: uppercase; margin-bottom: 8px;
+    font-weight: 600;
+  }
+  .frame-field .val {
+    background: var(--cream-2);
+    border: 1.5px solid var(--teal);
+    border-radius: 12px;
+    padding: 13px 16px;
+    font-family: var(--font-thai); font-size: 14px;
+    color: var(--ink); font-weight: 500;
+  }
+  .frame-out { border-top: 1.5px dashed rgba(9,58,62,0.2); padding-top: 24px; }
+  .out-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 18px; }
+  .out-card {
+    background: var(--cream-2);
+    border: 1.5px solid var(--teal);
+    border-radius: 14px; padding: 20px;
+  }
+  .out-card .head {
+    display: flex; justify-content: space-between;
+    margin-bottom: 16px;
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    font-weight: 600;
+  }
+  .out-card .head .name { color: var(--terra); }
+  .out-card .head .meta { color: var(--teal-2); }
+  .out-card .beat {
+    display: grid; grid-template-columns: 48px 1fr; gap: 12px;
+    padding: 10px 0;
+    border-top: 1px dashed rgba(9,58,62,0.18);
+  }
+  .out-card .beat:first-of-type { border-top: 0; padding-top: 0; }
+  .out-card .beat .tc {
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--mango-d); padding-top: 2px;
+  }
+  .out-card .beat .role {
+    font-family: var(--font-mono); font-size: 9px;
+    letter-spacing: 0.16em; color: var(--teal-2);
+    text-transform: uppercase; margin-bottom: 3px;
+    font-weight: 600;
+  }
+  .out-card .beat .text {
+    font-family: var(--font-thai); font-size: 13px;
+    line-height: 1.5; color: var(--ink);
+  }
+  .out-card .beat .text em { color: var(--terra); font-style: italic; font-weight: 600; }
+  .out-card .cap-text {
+    font-family: var(--font-thai); font-size: 13px;
+    line-height: 1.6; color: var(--ink); margin-bottom: 14px;
+  }
+  .out-card .cap-text em { color: var(--terra); font-style: italic; font-weight: 600; }
+  .out-card .tag-row {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    margin-top: 8px;
+  }
+  .out-card .tag {
+    font-family: var(--font-mono); font-size: 10px;
+    padding: 4px 10px; border-radius: 100px;
+    background: var(--cream);
+    border: 1px solid rgba(9,58,62,0.2);
+    color: var(--teal-2);
+  }
+  .frame-act {
+    margin-top: 24px; padding-top: 20px;
+    border-top: 1.5px dashed rgba(9,58,62,0.2);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .frame-act .meta {
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--teal-2); letter-spacing: 0.04em;
+  }
+  .frame-act .meta .gen { color: var(--terra); font-weight: 600; }
+  .frame-act .btn {
+    padding: 11px 22px; border-radius: 100px;
+    background: var(--terra); color: var(--cream);
+    border: 0;
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    font-weight: 600; cursor: none;
+    box-shadow: 0 4px 14px rgba(194,83,46,0.35);
+  }
+
+  /* ─── FEATURES ─────────────────────────────────────────────── */
+  .features { padding: 0 60px 100px; }
+  .features-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 24px; max-width: 1400px; margin: 0 auto;
+  }
+  .feature {
+    padding: 36px 32px;
+    background: var(--cream);
+    border: 1.5px solid rgba(9,58,62,0.2);
+    border-radius: 20px;
+    transition: all 0.3s var(--ease);
+  }
+  .feature:hover {
+    border-color: var(--teal);
+    transform: translateY(-4px);
+    box-shadow: 6px 6px 0 var(--mango);
+  }
+  .feature .num {
+    display: inline-flex;
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: var(--mango); color: var(--ink);
+    align-items: center; justify-content: center;
+    font-family: var(--font-display); font-style: italic;
+    font-size: 20px; margin-bottom: 20px;
+    border: 1.5px solid var(--ink);
+  }
+  .feature h4 {
+    font-family: var(--font-display); font-size: 28px;
+    font-weight: 400; letter-spacing: -0.022em;
+    margin-bottom: 12px; color: var(--teal);
+  }
+  body[lang="th"] .feature h4 { font-family: var(--font-thai); font-weight: 700; }
+  .feature h4 em { font-style: italic; color: var(--terra); }
+  .feature p {
+    font-size: 14px; line-height: 1.65; color: var(--teal-2);
+  }
+  body[lang="th"] .feature p { font-family: var(--font-thai); }
+
+  /* ─── QUOTE ────────────────────────────────────────────────── */
+  .quote-sec {
+    padding: 100px 60px;
+    background: linear-gradient(180deg, var(--cream-2) 0%, var(--cream) 100%);
+  }
+  .quote {
+    max-width: 1050px; margin: 0 auto;
+    padding: 56px 48px;
+    background: var(--teal); color: var(--cream);
+    border: 2px solid var(--teal);
+    border-radius: 32px;
+    box-shadow: 12px 12px 0 var(--mango);
+    display: grid; grid-template-columns: 80px 1fr;
+    gap: 32px;
+  }
+  .quote .mark {
+    font-family: var(--font-display); font-style: italic;
+    font-size: 160px; line-height: 0.7; color: var(--mango);
+  }
+  .quote-text {
+    font-family: var(--font-display);
+    font-size: clamp(28px, 3.6vw, 44px);
+    font-weight: 400; line-height: 1.25;
+    letter-spacing: -0.02em;
+    margin-bottom: 32px;
+  }
+  body[lang="th"] .quote-text { font-family: var(--font-thai); font-weight: 500; }
+  .quote-text em { color: var(--mango); font-style: italic; }
+  .quote-author {
+    display: flex; align-items: center; gap: 16px;
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.12em; color: var(--cream-3);
+    text-transform: uppercase;
+  }
+  .quote-author .avatar {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #FFE5B4, var(--mango) 60%, var(--terra));
+    border: 2px solid var(--cream);
+    box-shadow: 0 0 16px rgba(244,168,42,0.5);
+  }
+  .quote-author strong {
+    display: block; color: var(--cream); font-weight: 600;
+    margin-bottom: 2px;
+  }
+
+  /* ─── PRICING ──────────────────────────────────────────────── */
+  .pricing { padding: 0 60px 100px; }
+  .pricing-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 24px; max-width: 1200px; margin: 0 auto;
+  }
+  .plan {
+    padding: 44px 32px;
+    background: var(--cream);
+    border: 2px solid var(--teal);
+    border-radius: 24px;
+    display: flex; flex-direction: column;
+    position: relative;
+    transition: all 0.3s var(--ease);
+  }
+  .plan:hover {
+    transform: translateY(-6px);
+    box-shadow: 8px 8px 0 var(--teal);
+  }
+  .plan.featured {
+    background: var(--teal); color: var(--cream);
+    box-shadow: 10px 10px 0 var(--mango);
+  }
+  .plan.featured:hover {
+    transform: translateY(-8px);
+    box-shadow: 14px 14px 0 var(--mango);
+  }
+  .plan-badge {
+    position: absolute; top: -16px; left: 50%;
+    transform: translateX(-50%) rotate(-3deg);
+    padding: 7px 16px; border-radius: 100px;
+    background: var(--mango); color: var(--ink);
+    border: 2px solid var(--ink);
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    font-weight: 700;
+  }
+  .plan-name {
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.22em; color: var(--terra);
+    text-transform: uppercase; margin-bottom: 16px;
+    font-weight: 600;
+  }
+  .plan.featured .plan-name { color: var(--mango); }
+  .plan-price {
+    font-family: var(--font-display); font-size: 64px;
+    font-weight: 400; letter-spacing: -0.025em;
+    line-height: 1; margin-bottom: 6px;
+    display: flex; align-items: baseline; gap: 6px;
+    color: var(--teal);
+  }
+  .plan.featured .plan-price { color: var(--cream); }
+  .plan-price .cur { font-size: 22px; color: var(--terra); }
+  .plan-price .u {
+    font-family: var(--font-mono); font-size: 13px;
+    color: var(--teal-2); font-weight: 400;
+  }
+  .plan.featured .plan-price .u { color: var(--cream-3); }
+  .plan-desc {
+    color: var(--teal-2); font-size: 14px;
+    margin-bottom: 28px; line-height: 1.5;
+  }
+  .plan.featured .plan-desc { color: var(--cream-3); }
+  body[lang="th"] .plan-desc { font-family: var(--font-thai); }
+  .plan ul { list-style: none; flex: 1; margin-bottom: 28px; }
+  .plan li {
+    padding: 8px 0; font-size: 14px;
+    color: var(--ink);
+    display: flex; gap: 10px;
+  }
+  .plan.featured li { color: var(--cream); }
+  body[lang="th"] .plan li { font-family: var(--font-thai); }
+  .plan li::before { content: "✶"; color: var(--mango); flex-shrink: 0; }
+  .plan-cta {
+    display: block; text-align: center;
+    padding: 14px; border-radius: 100px;
+    background: transparent;
+    border: 2px solid var(--teal);
+    color: var(--teal); text-decoration: none;
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    font-weight: 600;
+    transition: all 0.25s;
+  }
+  .plan-cta:hover { background: var(--teal); color: var(--cream); }
+  .plan.featured .plan-cta {
+    background: var(--mango); border-color: var(--mango); color: var(--ink);
+  }
+  .plan.featured .plan-cta:hover {
+    background: var(--cream); border-color: var(--cream); color: var(--teal);
+  }
+
+  /* ─── FOOTER ───────────────────────────────────────────────── */
+  footer {
+    padding: 80px 60px 32px;
+    background: var(--teal); color: var(--cream);
+    border-top: 5px solid var(--mango);
+  }
+  .footer-top {
+    max-width: 1400px; margin: 0 auto;
+    display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+    gap: 40px; padding-bottom: 48px;
+    border-bottom: 1.5px dashed rgba(255,245,228,0.2);
+    margin-bottom: 32px;
+  }
+  .footer-brand {
+    font-family: var(--font-display); font-style: italic;
+    font-size: 56px; font-weight: 400;
+    letter-spacing: -0.025em; line-height: 1;
+    margin-bottom: 16px;
+  }
+  .footer-brand em { color: var(--mango); }
+  .footer-tag {
+    font-size: 14px; color: var(--cream-3);
+    max-width: 320px; line-height: 1.6; margin-bottom: 24px;
+  }
+  body[lang="th"] .footer-tag { font-family: var(--font-thai); }
+  .footer-nl {
+    display: flex;
+    background: rgba(255,245,228,0.1);
+    border: 1.5px solid var(--cream);
+    border-radius: 100px; padding: 4px;
+    max-width: 340px;
+  }
+  .footer-nl input {
+    flex: 1; background: transparent; border: 0;
+    padding: 10px 16px; color: var(--cream);
+    font-family: var(--font-mono); font-size: 12px;
+    outline: none;
+  }
+  .footer-nl input::placeholder { color: var(--cream-3); }
+  .footer-nl button {
+    background: var(--mango); color: var(--ink);
+    border: 0; padding: 10px 18px; border-radius: 100px;
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    font-weight: 600; cursor: none;
+  }
+  .footer-col h5 {
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.2em; color: var(--mango);
+    text-transform: uppercase; margin-bottom: 20px;
+    font-weight: 600;
+  }
+  .footer-col a {
+    display: block; color: var(--cream);
+    text-decoration: none; font-size: 14px;
+    padding: 5px 0; transition: color 0.2s;
+  }
+  .footer-col a:hover { color: var(--mango); }
+  .footer-bot {
+    max-width: 1400px; margin: 0 auto;
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: var(--font-mono); font-size: 10px;
+    color: var(--cream-3); letter-spacing: 0.15em;
+    text-transform: uppercase; padding-top: 24px;
+  }
+  .footer-bot .status {
+    display: flex; align-items: center; gap: 8px; color: var(--mango);
+  }
+  .footer-bot .status::before {
+    content: ""; width: 8px; height: 8px;
+    background: var(--mango); border-radius: 50%;
+    box-shadow: 0 0 10px var(--mango);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1;}50%{opacity:.5;} }
+
+  /* ─── RESPONSIVE ───────────────────────────────────────────── */
+  @media (max-width: 1024px) {
+    .hero, .section-head, .studios-grid, .features-grid,
+    .pricing-grid, .frame-body, .out-grid, .frame-form, .footer-top, .quote {
+      grid-template-columns: 1fr;
+    }
+    .frame-side { display: none; }
+    .hero { padding: 110px 24px 60px; }
+    .hero-right { height: 480px; }
+    .preview-card { width: 100%; max-width: 380px; }
+    .hero-stats { grid-template-columns: 1fr 1fr; gap: 24px; }
+    .section-head, .studios-grid, .showcase, .features, .pricing, .quote-sec, footer {
+      padding-left: 24px; padding-right: 24px;
+    }
+    nav { padding: 16px 20px; }
+    nav .links a:not(.nav-cta):not(.lang-toggle button) { display: none; }
+    body { cursor: auto; }
+  }
+</style>
+</head>
+<body lang="th">
+
+<div class="cursor" id="cursor"><span class="label" id="cursor-label"></span></div>
+
+<!-- ═══════════════ NAV ═══════════════ -->
+<nav>
+  <a href="#" class="brand">
+    <span class="brand-sun"></span>
+    Capduction
+    <span class="brand-meta">EST. 2026 · BKK</span>
+  </a>
+  <div class="links">
+    <a href="#studios">Studios</a>
+    <a href="#showcase">Workspace</a>
+    <a href="#features">Features</a>
+    <a href="#pricing">Pricing</a>
+    <div class="lang-toggle">
+      <button class="active hover-target" data-lang="th">TH</button>
+      <button class="hover-target" data-lang="en">EN</button>
+    </div>
+    <a href="#" class="nav-cta hover-target" data-cursor="start"><span data-i18n="nav.cta">เริ่มฟรี</span> →</a>
+  </div>
+</nav>
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<section class="hero">
+  <div>
+    <div class="hero-eye">
+      <span class="line"></span>
+      <span class="badge">EST. 2026 · BKK</span>
+      <span data-i18n="hero.eye">สตูดิโอเปิดแล้ว</span>
+    </div>
+    <h1>
+      <span class="line"><span data-i18n="hero.l1">เขียน<em>สคริปต์</em></span></span>
+      <span class="line"><span data-i18n="hero.l2">ปั้น<span class="underline">แคปชั่น</span></span></span>
+      <span class="line"><span data-i18n="hero.l3">ก่อนกด record.</span></span>
+    </h1>
+    <p class="hero-deck" data-i18n="hero.deck">
+      สตูดิโอ AI ที่เข้าใจวิดีโอสั้นสไตล์ไทย ตั้งแต่<strong>สคริปต์การพูด</strong>พร้อม timing ทุกวินาที ไปจนถึง<strong>แคปชั่นหน้าจอ</strong>ที่ปิดการขายได้จริง — ทุกอย่างพร้อมยิงในไฟล์เดียว
+    </p>
+    <div class="hero-actions">
+      <a href="#" class="btn-primary hover-target" data-cursor="start">
+        <span>
+          <span data-i18n="hero.cta1">เริ่มฟรี 10 ครั้ง</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+        </span>
+      </a>
+      <a href="#showcase" class="btn-secondary hover-target" data-cursor="watch" data-i18n="hero.cta2">ดู demo →</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><div class="n">2.8k</div><div class="l" data-i18n="s.1">creators · สัปดาห์ 19</div></div>
+      <div class="stat"><div class="n">07</div><div class="l" data-i18n="s.2">แพลตฟอร์ม</div></div>
+      <div class="stat"><div class="n">1.4s</div><div class="l" data-i18n="s.3">avg generation</div></div>
+      <div class="stat"><div class="n">98%</div><div class="l" data-i18n="s.4">กลับมาวันถัดไป</div></div>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div id="stage3d"></div>
+    <span class="hero-note hn-1">✦ Made in Bangkok</span>
+    <span class="hero-note hn-2">◐ Sunset Edition</span>
+    <span class="hero-note hn-3">✶ Studio · v1</span>
+    <div class="preview-card">
+      <div class="pv-bar">
+        <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+        <div class="path">capduction.app / <strong>script</strong></div>
+      </div>
+      <div class="pv-body">
+        <div class="pv-tabs">
+          <div class="pv-tab active">Script</div>
+          <div class="pv-tab">Caption</div>
+          <div class="pv-tab">Combo</div>
+        </div>
+        <div class="pv-label">✶ SCRIPT · TIKTOK · 30s · 4 BEATS</div>
+        <div class="pv-beat">
+          <div class="tc">00:00</div>
+          <div>
+            <div class="role">HOOK</div>
+            <div class="text" data-i18n="pv.s1">"ริมฝีปากแดงที่<em>คนหันมามอง</em> ติด 12 ชั่วโมง ไม่ต้องแตะเลย"</div>
+          </div>
+        </div>
+        <div class="pv-beat">
+          <div class="tc">00:05</div>
+          <div>
+            <div class="role">BODY</div>
+            <div class="text" data-i18n="pv.s2">"เนื้อแมตต์ เนียนไม่กินผิว สีคลาสสิคที่ใส่กับชุดอะไรก็ได้"</div>
+          </div>
+        </div>
+        <div class="pv-beat">
+          <div class="tc">00:25</div>
+          <div>
+            <div class="role">CTA</div>
+            <div class="text" data-i18n="pv.s3">"กดลิงก์ในโปรไฟล์ <em>ลด 20%</em> เฉพาะ 50 คนแรก"</div>
+          </div>
+        </div>
+        <div class="pv-footer">
+          <span>4 BEATS · 30s</span>
+          <span class="signal">✶ GENERATED 1.4s</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ STUDIOS ═══════════════ -->
+<div class="section-head" id="studios">
+  <div>
+    <div class="eye" data-i18n="ch1.eye">— 01 · THE STUDIOS</div>
+    <h2 data-i18n="ch1.h">สามสตูดิโอ<br/>หนึ่ง <em>workflow</em></h2>
+  </div>
+  <p class="sub" data-i18n="ch1.p">เลือกใช้ทีละโหมดได้ หรือเรียก Combo Mode เพื่อให้ปั้น script + caption พร้อมกันในครั้งเดียว ใช้ hook เดียวกัน ภาษาเดียวกัน</p>
+</div>
+<div class="studios-grid">
+  <div class="studio">
+    <div class="studio-num">— 01</div>
+    <div class="studio-icon-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <rect x="3" y="6" width="18" height="14" rx="1"/>
+        <path d="M3 10h18M7 6l-2 4M11 6l-2 4M15 6l-2 4M19 6l-2 4"/>
+      </svg>
+    </div>
+    <h3 data-i18n="st.1.n"><em>Script</em> Studio</h3>
+    <div class="sub">SPOKEN VIDEO SCRIPTS</div>
+    <p data-i18n="st.1.d">สคริปต์การพูดสำหรับวิดีโอสั้น พร้อม timing markers, B-roll cues และข้อความหน้าจอ แบ่ง hook · body · payoff · CTA ชัดเจน</p>
+    <ul>
+      <li>15s · 30s · 60s · 90s · long</li>
+      <li>timed beats / second</li>
+      <li>b-roll cue notation</li>
+      <li>on-screen text overlay</li>
+    </ul>
+    <a href="#" class="studio-cta hover-target" data-cursor="enter">เปิดสตูดิโอ →</a>
+  </div>
+  <div class="studio">
+    <div class="studio-num">— 02</div>
+    <div class="studio-icon-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/>
+        <path d="M12 3v3M12 18v3M21 12h-3M6 12H3"/>
+      </svg>
+    </div>
+    <h3 data-i18n="st.2.n"><em>Caption</em> Studio</h3>
+    <div class="sub">POST COPY · HOOKS · TAGS</div>
+    <p data-i18n="st.2.d">แคปชั่น 5 variants พร้อมใช้, hooks ดึงสายตา, hashtags 10 ตัว, CTA ปิดการขาย — ปรับโทนตามแพลตฟอร์มอัตโนมัติ</p>
+    <ul>
+      <li>5 captions copy-ready</li>
+      <li>5 scroll-stopping hooks</li>
+      <li>10 trend-matched tags</li>
+      <li>4 angles · 4 video ideas</li>
+    </ul>
+    <a href="#" class="studio-cta hover-target" data-cursor="enter">เปิดสตูดิโอ →</a>
+  </div>
+  <div class="studio">
+    <div class="studio-num">— 03</div>
+    <div class="studio-icon-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M12 2v20M2 12h20"/><circle cx="12" cy="12" r="9"/>
+      </svg>
+    </div>
+    <h3 data-i18n="st.3.n"><em>Combo</em> Mode</h3>
+    <div class="sub">SCRIPT + CAPTION ALIGNED</div>
+    <p data-i18n="st.3.d">สำหรับเวลาที่อยากได้ทั้งหมดในครั้งเดียว — ปั้น script และ caption บน hook เดียวกัน package พร้อมโพสต์ครบในไฟล์เดียว</p>
+    <ul>
+      <li>shared hook system</li>
+      <li>aligned messaging</li>
+      <li>thumbnail copy</li>
+      <li>posting checklist</li>
+    </ul>
+    <a href="#" class="studio-cta hover-target" data-cursor="enter">เปิดโหมด →</a>
+  </div>
+</div>
+
+<!-- ═══════════════ SHOWCASE ═══════════════ -->
+<div class="section-head">
+  <div>
+    <div class="eye" data-i18n="ch2.eye">— 02 · THE WORKSPACE</div>
+    <h2 data-i18n="ch2.h">ดูตอน <em>สตูดิโอ</em><br/>ทำงานจริง</h2>
+  </div>
+  <p class="sub" data-i18n="ch2.p">ใส่ชื่อสินค้า เลือกแพลตฟอร์ม กด Generate ได้ script + caption + hashtags ครบใน 1.4 วินาที — นี่คือหน้า workspace จริงของ Capduction</p>
+</div>
+<section class="showcase" id="showcase">
+  <div class="showcase-frame">
+    <div class="frame-bar">
+      <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+      <div class="path">capduction.app / workspace / <strong>combo</strong></div>
+      <div class="tag">LIVE</div>
+    </div>
+    <div class="frame-body">
+      <aside class="frame-side">
+        <h6>STUDIOS</h6>
+        <div class="item active">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v20M2 12h20"/><circle cx="12" cy="12" r="9"/></svg>
+          Combo Mode
+          <span class="badge">NEW</span>
+        </div>
+        <div class="item hover-target" data-cursor="open">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="6" width="18" height="14" rx="1"/><path d="M3 10h18"/></svg>
+          Script Studio
+        </div>
+        <div class="item hover-target" data-cursor="open">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/></svg>
+          Caption Studio
+        </div>
+        <div class="sep"></div>
+        <h6>PROJECTS</h6>
+        <div class="item hover-target" data-cursor="open">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 7l9-4 9 4-9 4-9-4z"/></svg>
+          Matte Red Lipstick
+        </div>
+        <div class="item hover-target" data-cursor="open">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 7l9-4 9 4-9 4-9-4z"/></svg>
+          Summer Campaign 26
+        </div>
+        <div class="sep"></div>
+        <h6>RESOURCES</h6>
+        <div class="item hover-target" data-cursor="open">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/></svg>
+          Brand Voice
+        </div>
+        <div class="item hover-target" data-cursor="open">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3h18v18H3z"/></svg>
+          History
+        </div>
+      </aside>
+      <main class="frame-main">
+        <div class="frame-tabs">
+          <div class="frame-tab active">Input</div>
+          <div class="frame-tab hover-target" data-cursor="switch">Output</div>
+          <div class="frame-tab hover-target" data-cursor="switch">Export</div>
+        </div>
+        <div class="frame-form">
+          <div class="frame-field"><label>PRODUCT</label><div class="val">ลิปสติกสีแดง เนื้อแมตต์ ติดทน 12 ชั่วโมง</div></div>
+          <div class="frame-field"><label>PLATFORM · DURATION</label><div class="val">TikTok · 30 seconds</div></div>
+          <div class="frame-field"><label>TARGET CUSTOMER</label><div class="val">ผู้หญิงวัย 18-35 ที่ชอบแต่งหน้า</div></div>
+          <div class="frame-field"><label>TONE</label><div class="val">Persuasive · โน้มน้าวสไตล์แม่ค้าไทย</div></div>
+        </div>
+        <div class="frame-out">
+          <div class="out-grid">
+            <div class="out-card">
+              <div class="head">
+                <span class="name">✶ SCRIPT · 4 BEATS · 30s</span>
+                <span class="meta">SPOKEN VIDEO</span>
+              </div>
+              <div class="beat">
+                <div class="tc">00:00</div>
+                <div>
+                  <div class="role">HOOK</div>
+                  <div class="text">"ริมฝีปากแดงที่<em>คนหันมามอง</em> — ติด 12 ชั่วโมง ไม่ต้องแตะเลย"</div>
+                </div>
+              </div>
+              <div class="beat">
+                <div class="tc">00:05</div>
+                <div>
+                  <div class="role">BODY</div>
+                  <div class="text">"เนื้อแมตต์เนียนแบบไม่กินผิว สีแดงคลาสสิคที่ใส่กับชุดอะไรก็ได้ ลองทาช่วงเช้า เที่ยงยังอยู่ เย็นยังสวย"</div>
+                </div>
+              </div>
+              <div class="beat">
+                <div class="tc">00:18</div>
+                <div>
+                  <div class="role">PROOF</div>
+                  <div class="text">"รีวิวล้น <em>2,000+ ลูกค้า</em> ส่งฟรี ส่งเร็วทั่วประเทศ"</div>
+                </div>
+              </div>
+              <div class="beat">
+                <div class="tc">00:25</div>
+                <div>
+                  <div class="role">CTA</div>
+                  <div class="text">"กดลิงก์ในโปรไฟล์ <em>สั่งวันนี้ลด 20%</em> เฉพาะ 50 คนแรก"</div>
+                </div>
+              </div>
+            </div>
+            <div class="out-card">
+              <div class="head">
+                <span class="name">✶ CAPTION · V1/5</span>
+                <span class="meta">POST COPY</span>
+              </div>
+              <div class="cap-text">
+                ลิปสีแดงที่ไม่ทำให้ผิดหวัง <em>เนื้อแมตต์เนียน ติด 12 ชั่วโมง</em> ราคา ฿299 ส่งฟรี กดลิงก์โปรไฟล์ทักเลย ✨
+              </div>
+              <div class="head" style="margin-top: 20px;"><span class="name">✶ HASHTAGS · 10</span></div>
+              <div class="tag-row">
+                <span class="tag">#ลิปสติก</span>
+                <span class="tag">#ลิปแดง</span>
+                <span class="tag">#mattelip</span>
+                <span class="tag">#รีวิวลิป</span>
+                <span class="tag">#ลิปติดทน</span>
+                <span class="tag">#แต่งหน้า</span>
+                <span class="tag">#TikTokShop</span>
+                <span class="tag">#ของมันต้องมี</span>
+                <span class="tag">#ลิปไทย</span>
+                <span class="tag">#freeshipping</span>
+              </div>
+            </div>
+          </div>
+          <div class="frame-act">
+            <span class="meta">✶ <span class="gen">GENERATED 1.4s</span> · 4 BEATS · 5 VARIANTS · 10 TAGS</span>
+            <button class="btn hover-target" data-cursor="export">Export Pack →</button>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ FEATURES ═══════════════ -->
+<div class="section-head" id="features">
+  <div>
+    <div class="eye" data-i18n="ch3.eye">— 03 · WHY CAPDUCTION</div>
+    <h2 data-i18n="ch3.h">เครื่องมือ <em>ครบ</em><br/>ทุกขั้นของผลิตคอนเทนต์</h2>
+  </div>
+  <p class="sub" data-i18n="ch3.p">Capduction ไม่ใช่แค่ caption generator แต่เป็นสตูดิโอที่จับมือคุณตั้งแต่ idea แรกจนถึงคลิปที่พร้อมอัปโหลด — built for Thai short-form creators</p>
+</div>
+<section class="features">
+  <div class="features-grid">
+    <div class="feature"><div class="num">1</div><h4 data-i18n="f.1.h">ภาษาไทย <em>ที่ขายได้จริง</em></h4><p data-i18n="f.1.p">โทนแม่ค้าไทยผสมศัพท์ TikTok ใช้คำที่คนซื้อจริงเข้าใจ ไม่ใช่ภาษาแปลกๆ จาก AI</p></div>
+    <div class="feature"><div class="num">2</div><h4 data-i18n="f.2.h">Script ที่มี <em>timing</em></h4><p data-i18n="f.2.p">รู้ว่าวินาทีไหนพูดอะไร B-roll เมื่อไหร่ เปลี่ยน shot ตอนไหน ปิดยังไง — director's plan</p></div>
+    <div class="feature"><div class="num">3</div><h4 data-i18n="f.3.h">Brand Voice <em>Memory</em></h4><p data-i18n="f.3.p">สอน AI ให้รู้จักโทนแบรนด์คุณ ใส่ตัวอย่าง 3 โพสต์ มันจะปั้นในเสียงคุณตลอดไป</p></div>
+    <div class="feature"><div class="num">4</div><h4 data-i18n="f.4.h">Project <em>Workspaces</em></h4><p data-i18n="f.4.p">รวม script + caption + asset ของแต่ละสินค้า/แคมเปญในโฟลเดอร์เดียว ไม่กระจาย</p></div>
+    <div class="feature"><div class="num">5</div><h4 data-i18n="f.5.h">7 platforms · <em>6 tones</em></h4><p data-i18n="f.5.p">TikTok, IG, FB, Shopee, Lazada, LINE, YouTube — โทนปรับอัตโนมัติตามที่เลือก</p></div>
+    <div class="feature"><div class="num">6</div><h4 data-i18n="f.6.h">Export <em>Pack</em></h4><p data-i18n="f.6.p">ดาวน์โหลดเป็น .pdf .txt หรือ copy เป็น batch ส่งทีมตัดต่อ พร้อม notes ทุก beat</p></div>
+  </div>
+</section>
+
+<!-- ═══════════════ QUOTE ═══════════════ -->
+<section class="quote-sec">
+  <div class="quote">
+    <div class="mark">"</div>
+    <div>
+      <p class="quote-text" data-i18n="q.text">
+        ก่อนใช้ Capduction ใช้เวลา <em>2 ชั่วโมง</em>ต่อโพสต์ เขียน-แก้-ลบ-เขียนใหม่ ตอนนี้ใช้ <em>5 นาที</em>ได้ script + caption + hashtags ครบ
+      </p>
+      <div class="quote-author">
+        <div class="avatar"></div>
+        <div>
+          <strong>Khun Nam</strong>
+          <span data-i18n="q.role">เจ้าของร้านเครื่องสำอาง · 47K followers · TikTok</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ PRICING ═══════════════ -->
+<div class="section-head" id="pricing">
+  <div>
+    <div class="eye" data-i18n="ch4.eye">— 04 · PRICING</div>
+    <h2 data-i18n="ch4.h">ราคา <em>ตรงไปตรงมา</em></h2>
+  </div>
+  <p class="sub" data-i18n="ch4.p">เริ่มฟรี 10 ครั้ง อัปเกรดเมื่อพร้อม ยกเลิกได้ตลอดเวลา</p>
+</div>
+<section class="pricing">
+  <div class="pricing-grid">
+    <div class="plan">
+      <div class="plan-name">FREE</div>
+      <div class="plan-price"><span class="cur">฿</span>0<span class="u">/mo</span></div>
+      <div class="plan-desc" data-i18n="pl.free.d">ทดลองทุก studio ก่อนตัดสินใจ ไม่ต้องใส่บัตรเครดิต</div>
+      <ul>
+        <li>10 generations/เดือน</li>
+        <li>ทุก studio ทุกแพลตฟอร์ม</li>
+        <li>ประวัติย้อนหลัง 7 วัน</li>
+        <li>Community support</li>
+      </ul>
+      <a href="#" class="plan-cta hover-target" data-cursor="start">เริ่มฟรี</a>
+    </div>
+    <div class="plan featured">
+      <div class="plan-badge">★ RECOMMENDED</div>
+      <div class="plan-name">STUDIO</div>
+      <div class="plan-price"><span class="cur">฿</span>349<span class="u">/mo</span></div>
+      <div class="plan-desc" data-i18n="pl.studio.d">สำหรับ creator และร้านค้าที่โพสต์ทุกวัน คุ้มที่สุดในเซต</div>
+      <ul>
+        <li>500 generations/เดือน</li>
+        <li>Brand Voice Memory</li>
+        <li>Project workspaces</li>
+        <li>Export pack (.pdf .txt)</li>
+        <li>ประวัติไม่จำกัด</li>
+        <li>Priority support · 4hr</li>
+      </ul>
+      <a href="#" class="plan-cta hover-target" data-cursor="upgrade">อัปเกรดเป็น Studio</a>
+    </div>
+    <div class="plan">
+      <div class="plan-name">AGENCY</div>
+      <div class="plan-price"><span class="cur">฿</span>1,290<span class="u">/mo</span></div>
+      <div class="plan-desc" data-i18n="pl.agency.d">สำหรับเอเจนซี่และทีมที่ดูแลหลายแบรนด์พร้อมกัน</div>
+      <ul>
+        <li>Unlimited generations</li>
+        <li>10 brand voices</li>
+        <li>Team · 5 seats</li>
+        <li>API access</li>
+        <li>White-label export</li>
+        <li>Dedicated CSM</li>
+      </ul>
+      <a href="#" class="plan-cta hover-target" data-cursor="contact">ติดต่อทีมขาย</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ FOOTER ═══════════════ -->
+<footer>
+  <div class="footer-top">
+    <div>
+      <div class="footer-brand">Capduction<em>.</em></div>
+      <p class="footer-tag" data-i18n="ft.tag">สตูดิโอ AI ระหว่างไอเดียกับการกดอัปโหลด — สร้างในบางกอก เพื่อ creator ไทยทั่วประเทศ</p>
+      <div class="footer-nl">
+        <input type="email" placeholder="your@email.com" />
+        <button class="hover-target" data-cursor="join">JOIN</button>
+      </div>
+    </div>
+    <div class="footer-col"><h5>PRODUCT</h5><a href="#" class="hover-target" data-cursor="enter">Script Studio</a><a href="#" class="hover-target" data-cursor="enter">Caption Studio</a><a href="#" class="hover-target" data-cursor="enter">Combo Mode</a><a href="#" class="hover-target" data-cursor="enter">Brand Voice</a><a href="#" class="hover-target" data-cursor="enter">Export Pack</a></div>
+    <div class="footer-col"><h5>RESOURCES</h5><a href="#" class="hover-target" data-cursor="read">Documentation</a><a href="#" class="hover-target" data-cursor="read">Brand Voice Guide</a><a href="#" class="hover-target" data-cursor="read">Changelog</a><a href="#" class="hover-target" data-cursor="read">Status</a><a href="#" class="hover-target" data-cursor="read">API Docs</a></div>
+    <div class="footer-col"><h5>COMPANY</h5><a href="#" class="hover-target" data-cursor="read">About</a><a href="#" class="hover-target" data-cursor="read">Manifesto</a><a href="#" class="hover-target" data-cursor="read">Careers</a><a href="#" class="hover-target" data-cursor="read">Press</a><a href="#" class="hover-target" data-cursor="enter">Contact</a></div>
+    <div class="footer-col"><h5>LEGAL</h5><a href="#" class="hover-target" data-cursor="read">Privacy</a><a href="#" class="hover-target" data-cursor="read">Terms</a><a href="#" class="hover-target" data-cursor="read">Cookies</a><a href="#" class="hover-target" data-cursor="read">DPA</a></div>
+  </div>
+  <div class="footer-bot">
+    <span>© 2026 CAPDUCTION · MADE IN BANGKOK</span>
+    <span class="status">All systems operational · 99.98%</span>
+    <span>SUNSET V1.0 · BUILD 2026.05.16</span>
+  </div>
+</footer>
+
+<!-- ═══════════════ THREE.JS ═══════════════ -->
+<script type="module">
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+const stage = document.getElementById('stage3d');
+const scene = new THREE.Scene();
+const cam = new THREE.PerspectiveCamera(38, stage.clientWidth/stage.clientHeight, 0.1, 100);
+cam.position.set(0, 0.3, 5.5);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(stage.clientWidth, stage.clientHeight);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.15;
+stage.appendChild(renderer.domElement);
+
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+
+// Sun: warm glowing sphere
+const sunMat = new THREE.MeshStandardMaterial({
+  color: 0xF4A82A, emissive: 0xC2532E,
+  emissiveIntensity: 0.7, metalness: 0.5, roughness: 0.4,
+});
+const sun = new THREE.Mesh(new THREE.SphereGeometry(1.2, 64, 64), sunMat);
+sun.position.set(-0.3, 0.4, 0);
+scene.add(sun);
+
+// Sun halo
+const haloMat = new THREE.MeshBasicMaterial({
+  color: 0xFFD89F, transparent: true, opacity: 0.2, side: THREE.BackSide
+});
+const halo = new THREE.Mesh(new THREE.SphereGeometry(1.7, 32, 32), haloMat);
+halo.position.copy(sun.position);
+scene.add(halo);
+
+// Outer glow halo
+const halo2Mat = new THREE.MeshBasicMaterial({
+  color: 0xFFAF6F, transparent: true, opacity: 0.1, side: THREE.BackSide
+});
+const halo2 = new THREE.Mesh(new THREE.SphereGeometry(2.2, 32, 32), halo2Mat);
+halo2.position.copy(sun.position);
+scene.add(halo2);
+
+// Teal cloud blob cluster
+const cloudMat = new THREE.MeshStandardMaterial({
+  color: 0x093A3E, metalness: 0.35, roughness: 0.4
+});
+const cloudGroup = new THREE.Group();
+const blobs = [
+  { x: 1.7, y: -0.6, z: 0.5, r: 0.75 },
+  { x: 2.2, y: -0.4, z: 0.2, r: 0.58 },
+  { x: 1.4, y: -0.9, z: 0.6, r: 0.5 },
+  { x: 2.5, y: -0.75, z: 0.0, r: 0.46 },
+  { x: 0.9, y: -1.1, z: 0.4, r: 0.32 },
+];
+blobs.forEach(b => {
+  const s = new THREE.Mesh(new THREE.SphereGeometry(b.r, 32, 32), cloudMat);
+  s.position.set(b.x, b.y, b.z);
+  cloudGroup.add(s);
+});
+scene.add(cloudGroup);
+
+// Mango ring around sun
+const ringMat = new THREE.MeshStandardMaterial({
+  color: 0xF4A82A, metalness: 0.7, roughness: 0.18
+});
+const ring = new THREE.Mesh(new THREE.TorusGeometry(1.5, 0.06, 16, 64), ringMat);
+ring.position.copy(sun.position);
+ring.rotation.x = 1.2;
+ring.rotation.y = 0.4;
+scene.add(ring);
+
+// Inner thin ring
+const ring2 = new THREE.Mesh(new THREE.TorusGeometry(1.35, 0.025, 12, 48),
+  new THREE.MeshStandardMaterial({ color: 0xD4A946, metalness: 0.8, roughness: 0.2 }));
+ring2.position.copy(sun.position);
+ring2.rotation.x = 0.9;
+ring2.rotation.y = 0.2;
+scene.add(ring2);
+
+// Floating terracotta orb
+const accMat = new THREE.MeshStandardMaterial({
+  color: 0xE37468, metalness: 0.5, roughness: 0.3,
+  emissive: 0xC2532E, emissiveIntensity: 0.15
+});
+const acc = new THREE.Mesh(new THREE.SphereGeometry(0.32, 32, 32), accMat);
+acc.position.set(-1.8, 1.5, 0.6);
+scene.add(acc);
+
+// Small accent dot
+const dotMat = new THREE.MeshStandardMaterial({
+  color: 0xFFE5B4, emissive: 0xFFE5B4, emissiveIntensity: 0.4
+});
+const dot = new THREE.Mesh(new THREE.SphereGeometry(0.14, 24, 24), dotMat);
+dot.position.set(-2.4, 0.2, 1);
+scene.add(dot);
+
+// Particles (warm flecks)
+const particleGroup = new THREE.Group();
+for (let i=0; i<10; i++) {
+  const p = new THREE.Mesh(
+    new THREE.SphereGeometry(0.04 + Math.random()*0.05, 16, 16),
+    new THREE.MeshStandardMaterial({
+      color: i%2===0 ? 0xF4A82A : 0xE37468,
+      emissive: i%2===0 ? 0xF4A82A : 0xE37468,
+      emissiveIntensity: 0.3
+    })
+  );
+  p.position.set(
+    (Math.random()-0.5) * 7,
+    (Math.random()-0.5) * 5,
+    (Math.random()-0.5) * 2 + 1
+  );
+  p.userData = { speed: 0.3 + Math.random()*0.7, off: Math.random()*Math.PI*2 };
+  particleGroup.add(p);
+}
+scene.add(particleGroup);
+
+// Lights
+const key = new THREE.DirectionalLight(0xFFD89F, 1.5); key.position.set(3, 4, 4); scene.add(key);
+const fill = new THREE.DirectionalLight(0xE37468, 0.7); fill.position.set(-3, -1, 3); scene.add(fill);
+const rim = new THREE.PointLight(0xF4A82A, 3, 10); rim.position.set(0, 0, -2); scene.add(rim);
+scene.add(new THREE.AmbientLight(0xffffff, 0.3));
+
+let mx=0, my=0;
+const target = { x: 0, y: 0 };
+window.addEventListener('mousemove', e => {
+  target.x = (e.clientX/innerWidth - 0.5) * 0.3;
+  target.y = (e.clientY/innerHeight - 0.5) * 0.3;
+});
+
+let t=0;
+function loop(){
+  t += 0.006;
+  mx += (target.x - mx) * 0.04;
+  my += (target.y - my) * 0.04;
+
+  sun.rotation.y = t * 0.2;
+  sun.scale.setScalar(1 + Math.sin(t*0.6)*0.02);
+  ring.rotation.z = t * 0.3;
+  ring2.rotation.z = -t * 0.4;
+  cloudGroup.rotation.y = mx * 0.5 + Math.sin(t*0.3)*0.08;
+  cloudGroup.position.y = Math.sin(t*0.5)*0.1;
+  acc.position.y = 1.5 + Math.sin(t*0.8)*0.15;
+  acc.rotation.y = t;
+  dot.position.x = -2.4 + Math.sin(t*1.2)*0.1;
+
+  particleGroup.children.forEach(p => {
+    p.position.y += Math.sin(t * p.userData.speed + p.userData.off) * 0.005;
+    p.rotation.y = t * p.userData.speed;
+  });
+
+  scene.rotation.y = mx * 0.15;
+  scene.rotation.x = my * 0.1;
+
+  renderer.render(scene, cam);
+  requestAnimationFrame(loop);
+}
+loop();
+window.addEventListener('resize', () => {
+  cam.aspect = stage.clientWidth/stage.clientHeight;
+  cam.updateProjectionMatrix();
+  renderer.setSize(stage.clientWidth, stage.clientHeight);
+});
+</script>
+
+<!-- ═══════════════ CURSOR + i18n ═══════════════ -->
+<script>
+const cursor = document.getElementById('cursor');
+const cLabel = document.getElementById('cursor-label');
+const target = { x: 0, y: 0 };
+const actual = { x: 0, y: 0 };
+window.addEventListener('mousemove', e => { target.x = e.clientX; target.y = e.clientY; });
+function loopC(){
+  actual.x += (target.x - actual.x) * 0.22;
+  actual.y += (target.y - actual.y) * 0.22;
+  cursor.style.left = actual.x + 'px';
+  cursor.style.top = actual.y + 'px';
+  requestAnimationFrame(loopC);
+}
+loopC();
+const labels = { enter: '→', start: 'GO', upgrade: '↑', contact: '@', watch: '▶',
+  read: '✶', export: '↓', join: '☼', open: '◐', switch: '⇄' };
+document.querySelectorAll('.hover-target').forEach(el => {
+  el.addEventListener('mouseenter', () => {
+    cursor.classList.add('target');
+    cLabel.textContent = labels[el.dataset.cursor] || '→';
+  });
+  el.addEventListener('mouseleave', () => cursor.classList.remove('target'));
+});
+
+const dict = {
+  th: {
+    "nav.cta":"เริ่มฟรี",
+    "hero.eye":"สตูดิโอเปิดแล้ว",
+    "hero.l1":"เขียน<em>สคริปต์</em>",
+    "hero.l2":"ปั้น<span class='underline'>แคปชั่น</span>",
+    "hero.l3":"ก่อนกด record.",
+    "hero.deck":"สตูดิโอ AI ที่เข้าใจวิดีโอสั้นสไตล์ไทย ตั้งแต่<strong>สคริปต์การพูด</strong>พร้อม timing ทุกวินาที ไปจนถึง<strong>แคปชั่นหน้าจอ</strong>ที่ปิดการขายได้จริง — ทุกอย่างพร้อมยิงในไฟล์เดียว",
+    "hero.cta1":"เริ่มฟรี 10 ครั้ง","hero.cta2":"ดู demo →",
+    "s.1":"creators · สัปดาห์ 19","s.2":"แพลตฟอร์ม","s.3":"avg generation","s.4":"กลับมาวันถัดไป",
+    "pv.s1":"\"ริมฝีปากแดงที่<em>คนหันมามอง</em> ติด 12 ชั่วโมง ไม่ต้องแตะเลย\"",
+    "pv.s2":"\"เนื้อแมตต์ เนียนไม่กินผิว สีคลาสสิคที่ใส่กับชุดอะไรก็ได้\"",
+    "pv.s3":"\"กดลิงก์ในโปรไฟล์ <em>ลด 20%</em> เฉพาะ 50 คนแรก\"",
+    "ch1.eye":"— 01 · THE STUDIOS",
+    "ch1.h":"สามสตูดิโอ<br/>หนึ่ง <em>workflow</em>",
+    "ch1.p":"เลือกใช้ทีละโหมดได้ หรือเรียก Combo Mode เพื่อให้ปั้น script + caption พร้อมกันในครั้งเดียว ใช้ hook เดียวกัน ภาษาเดียวกัน",
+    "st.1.n":"<em>Script</em> Studio",
+    "st.1.d":"สคริปต์การพูดสำหรับวิดีโอสั้น พร้อม timing markers, B-roll cues และข้อความหน้าจอ แบ่ง hook · body · payoff · CTA ชัดเจน",
+    "st.2.n":"<em>Caption</em> Studio",
+    "st.2.d":"แคปชั่น 5 variants พร้อมใช้, hooks ดึงสายตา, hashtags 10 ตัว, CTA ปิดการขาย — ปรับโทนตามแพลตฟอร์มอัตโนมัติ",
+    "st.3.n":"<em>Combo</em> Mode",
+    "st.3.d":"สำหรับเวลาที่อยากได้ทั้งหมดในครั้งเดียว — ปั้น script และ caption บน hook เดียวกัน package พร้อมโพสต์ครบในไฟล์เดียว",
+    "ch2.eye":"— 02 · THE WORKSPACE",
+    "ch2.h":"ดูตอน <em>สตูดิโอ</em><br/>ทำงานจริง",
+    "ch2.p":"ใส่ชื่อสินค้า เลือกแพลตฟอร์ม กด Generate ได้ script + caption + hashtags ครบใน 1.4 วินาที — นี่คือหน้า workspace จริงของ Capduction",
+    "ch3.eye":"— 03 · WHY CAPDUCTION",
+    "ch3.h":"เครื่องมือ <em>ครบ</em><br/>ทุกขั้นของผลิตคอนเทนต์",
+    "ch3.p":"Capduction ไม่ใช่แค่ caption generator แต่เป็นสตูดิโอที่จับมือคุณตั้งแต่ idea แรกจนถึงคลิปที่พร้อมอัปโหลด — built for Thai short-form creators",
+    "f.1.h":"ภาษาไทย <em>ที่ขายได้จริง</em>","f.1.p":"โทนแม่ค้าไทยผสมศัพท์ TikTok ใช้คำที่คนซื้อจริงเข้าใจ ไม่ใช่ภาษาแปลกๆ จาก AI",
+    "f.2.h":"Script ที่มี <em>timing</em>","f.2.p":"รู้ว่าวินาทีไหนพูดอะไร B-roll เมื่อไหร่ เปลี่ยน shot ตอนไหน ปิดยังไง — director's plan",
+    "f.3.h":"Brand Voice <em>Memory</em>","f.3.p":"สอน AI ให้รู้จักโทนแบรนด์คุณ ใส่ตัวอย่าง 3 โพสต์ มันจะปั้นในเสียงคุณตลอดไป",
+    "f.4.h":"Project <em>Workspaces</em>","f.4.p":"รวม script + caption + asset ของแต่ละสินค้า/แคมเปญในโฟลเดอร์เดียว ไม่กระจาย",
+    "f.5.h":"7 platforms · <em>6 tones</em>","f.5.p":"TikTok, IG, FB, Shopee, Lazada, LINE, YouTube — โทนปรับอัตโนมัติตามที่เลือก",
+    "f.6.h":"Export <em>Pack</em>","f.6.p":"ดาวน์โหลดเป็น .pdf .txt หรือ copy เป็น batch ส่งทีมตัดต่อ พร้อม notes ทุก beat",
+    "q.text":"ก่อนใช้ Capduction ใช้เวลา <em>2 ชั่วโมง</em>ต่อโพสต์ เขียน-แก้-ลบ-เขียนใหม่ ตอนนี้ใช้ <em>5 นาที</em>ได้ script + caption + hashtags ครบ",
+    "q.role":"เจ้าของร้านเครื่องสำอาง · 47K followers · TikTok",
+    "ch4.eye":"— 04 · PRICING",
+    "ch4.h":"ราคา <em>ตรงไปตรงมา</em>","ch4.p":"เริ่มฟรี 10 ครั้ง อัปเกรดเมื่อพร้อม ยกเลิกได้ตลอดเวลา",
+    "pl.free.d":"ทดลองทุก studio ก่อนตัดสินใจ ไม่ต้องใส่บัตรเครดิต",
+    "pl.studio.d":"สำหรับ creator และร้านค้าที่โพสต์ทุกวัน คุ้มที่สุดในเซต",
+    "pl.agency.d":"สำหรับเอเจนซี่และทีมที่ดูแลหลายแบรนด์พร้อมกัน",
+    "ft.tag":"สตูดิโอ AI ระหว่างไอเดียกับการกดอัปโหลด — สร้างในบางกอก เพื่อ creator ไทยทั่วประเทศ",
+  },
+  en: {
+    "nav.cta":"Start free",
+    "hero.eye":"Studio now live",
+    "hero.l1":"Write <em>scripts.</em>",
+    "hero.l2":"Craft <span class='underline'>captions.</span>",
+    "hero.l3":"Before you hit record.",
+    "hero.deck":"An AI studio for Thai short-form creators — from <strong>spoken scripts</strong> with second-by-second timing to <strong>on-screen captions</strong> that actually convert. All in one file, ready to ship.",
+    "hero.cta1":"Try 10 free","hero.cta2":"see demo →",
+    "s.1":"creators · week 19","s.2":"platforms","s.3":"avg generation","s.4":"return next day",
+    "pv.s1":"\"Red lips that <em>turn heads</em> — 12hr hold, zero touch-ups\"",
+    "pv.s2":"\"Matte finish, never dry. Classic red that pairs with anything.\"",
+    "pv.s3":"\"Tap link in bio — <em>20% off</em>, first 50 only.\"",
+    "ch1.eye":"— 01 · THE STUDIOS",
+    "ch1.h":"Three studios,<br/>one <em>workflow</em>",
+    "ch1.p":"Use modes individually, or call Combo Mode to align script and caption on one hook.",
+    "st.1.n":"<em>Script</em> Studio",
+    "st.1.d":"Spoken video scripts with second-by-second timing, B-roll cues, and on-screen text. Clean hook · body · proof · CTA breakdown.",
+    "st.2.n":"<em>Caption</em> Studio",
+    "st.2.d":"5 caption variants, 5 hooks, 10 trend-matched hashtags, 5 CTAs — tone auto-tunes per platform.",
+    "st.3.n":"<em>Combo</em> Mode",
+    "st.3.d":"Everything in one shot — script and caption on the same hook, ready-to-post package, one file.",
+    "ch2.eye":"— 02 · THE WORKSPACE",
+    "ch2.h":"Watch the <em>studio</em><br/>at work",
+    "ch2.p":"Type product, pick platform, hit Generate — get script + caption + hashtags in 1.4 seconds. This is the real Capduction workspace.",
+    "ch3.eye":"— 03 · WHY CAPDUCTION",
+    "ch3.h":"Tools for <em>every</em><br/>step of production",
+    "ch3.p":"Capduction isn't just a caption generator — it's the studio that takes you from first idea to ready-to-upload clip. Built for Thai short-form creators.",
+    "f.1.h":"Thai that <em>actually sells</em>","f.1.p":"Real seller voice mixed with TikTok-native phrasing. Words real buyers use.",
+    "f.2.h":"Scripts with <em>timing</em>","f.2.p":"Know what to say at each second, when B-roll lands, when to close.",
+    "f.3.h":"Brand Voice <em>Memory</em>","f.3.p":"Teach the AI your brand. Feed 3 posts. It writes in your voice forever.",
+    "f.4.h":"Project <em>Workspaces</em>","f.4.p":"Group scripts, captions, assets per product or campaign — no scattered tabs.",
+    "f.5.h":"7 platforms · <em>6 tones</em>","f.5.p":"TikTok, IG, FB, Shopee, Lazada, LINE, YouTube — tone auto-adjusts per channel.",
+    "f.6.h":"Export <em>Pack</em>","f.6.p":"Download as .pdf or .txt. Batch-copy with notes on every beat.",
+    "q.text":"Before Capduction I spent <em>2 hours</em> per post — writing, deleting, rewriting. Now <em>5 minutes</em> gets me script + caption + hashtags.",
+    "q.role":"Cosmetics shop owner · 47K followers · TikTok",
+    "ch4.eye":"— 04 · PRICING",
+    "ch4.h":"Pricing, <em>plainly stated</em>","ch4.p":"Start free with 10 generations. Upgrade when you're ready. Cancel anytime.",
+    "pl.free.d":"Try every studio before you commit. No credit card required.",
+    "pl.studio.d":"For creators and shops posting daily. Best value in the set.",
+    "pl.agency.d":"For agencies and teams managing multiple brands at once.",
+    "ft.tag":"The AI studio between idea and upload — built in Bangkok, for Thai creators everywhere.",
+  }
+};
+document.querySelectorAll('.lang-toggle button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.lang-toggle button').forEach(x => x.classList.remove('active'));
+    btn.classList.add('active');
+    const lang = btn.dataset.lang;
+    document.body.lang = lang;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.dataset.i18n;
+      if (dict[lang][key]) el.innerHTML = dict[lang][key];
+    });
+  });
+});
+</script>
+</body>
+</html>

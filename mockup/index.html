@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Capduction — Theme Gallery V3 (Cinematic Edition)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400;1,9..144,500&family=Cormorant+Garamond:ital,wght@0,500;1,500&family=Geist:wght@500;600;700&family=Inter:wght@600;700&family=Playfair+Display:ital,wght@1,500&family=Manrope:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Sarabun:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #F5F1E8;
+    --paper-2: #EFEADB;
+    --ink: #0B0B0B;
+    --smoke: #6B6760;
+    --fog: #E8E3D6;
+    --signal: #D4FF3F;
+    --ember: #C45A1A;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--paper); color: var(--ink);
+    font-family: 'Manrope', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh; padding: 60px 32px 80px;
+    cursor: none; position: relative;
+  }
+  body::after {
+    content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 9998;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: 0.04; mix-blend-mode: multiply;
+  }
+  body::before {
+    content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background:
+      radial-gradient(ellipse at top, rgba(196,90,26,0.05), transparent 60%),
+      radial-gradient(ellipse at bottom right, rgba(11,11,11,0.06), transparent 55%);
+  }
+
+  .cursor {
+    position: fixed; pointer-events: none; z-index: 10000;
+    width: 14px; height: 14px;
+    background: var(--ink); border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.25s, height 0.25s, background 0.25s;
+    mix-blend-mode: difference;
+  }
+  .cursor.target {
+    width: 64px; height: 64px;
+    background: var(--signal); mix-blend-mode: normal;
+  }
+  .cursor::after {
+    content: attr(data-label);
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 9px;
+    color: var(--ink); letter-spacing: 0.12em; text-transform: uppercase;
+  }
+  @media (max-width: 768px) { body { cursor: auto; } .cursor { display: none; } }
+  a, button, .hover-target { cursor: none; }
+
+  .wrap { max-width: 1500px; margin: 0 auto; position: relative; z-index: 1; }
+
+  header { text-align: center; margin-bottom: 80px; }
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.22em;
+    color: var(--smoke); text-transform: uppercase;
+    margin-bottom: 28px;
+    display: inline-flex; align-items: center; gap: 14px;
+  }
+  .eyebrow::before, .eyebrow::after {
+    content: ""; width: 40px; height: 1px; background: var(--ember);
+  }
+  .eyebrow .dot {
+    width: 7px; height: 7px; background: var(--signal);
+    border-radius: 50%; box-shadow: 0 0 12px var(--signal);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1;}50%{opacity:.5;} }
+  header h1 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(48px, 7vw, 96px);
+    font-weight: 400; font-variation-settings: 'opsz' 144;
+    letter-spacing: -0.035em; line-height: 0.98;
+    margin-bottom: 24px;
+  }
+  header h1 em { font-style: italic; color: var(--ember); }
+  header p {
+    font-size: 17px; color: var(--smoke);
+    max-width: 720px; margin: 0 auto;
+    line-height: 1.55;
+  }
+  header .meta {
+    margin-top: 28px;
+    display: inline-flex; gap: 24px; flex-wrap: wrap;
+    justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: 0.18em;
+    color: var(--smoke); text-transform: uppercase;
+  }
+  header .meta span strong { color: var(--ink); font-weight: 600; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(440px, 1fr));
+    gap: 28px;
+  }
+  .card {
+    background: white;
+    border-radius: 24px; overflow: hidden;
+    border: 1px solid var(--fog);
+    transition: all 0.4s cubic-bezier(0.22,1,0.36,1);
+    display: flex; flex-direction: column;
+    text-decoration: none; color: var(--ink);
+    position: relative;
+  }
+  .card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 36px 80px rgba(11,11,11,0.18);
+    border-color: transparent;
+  }
+  .card-preview {
+    aspect-ratio: 16/10; position: relative; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    padding: 36px;
+  }
+
+  /* ─── Preview A: Director's Lens (dusk amber serif) ───────── */
+  .preview-a {
+    background:
+      radial-gradient(ellipse 60% 50% at 50% 0%, rgba(232,181,122,0.22), transparent 55%),
+      linear-gradient(180deg, #0E1A33 0%, #0A1628 70%, #050B16 100%);
+    color: #F4EDE0;
+    overflow: hidden;
+  }
+  .preview-a::before {
+    content: ""; position: absolute; inset: 0;
+    background-image:
+      radial-gradient(1px 1px at 18% 22%, rgba(244,237,224,0.7), transparent),
+      radial-gradient(1px 1px at 36% 16%, rgba(244,237,224,0.6), transparent),
+      radial-gradient(1.2px 1.2px at 62% 24%, rgba(244,237,224,0.8), transparent),
+      radial-gradient(1px 1px at 82% 18%, rgba(244,237,224,0.6), transparent),
+      radial-gradient(1px 1px at 25% 38%, rgba(244,237,224,0.5), transparent);
+  }
+  .preview-a::after {
+    content: ""; position: absolute; bottom: 0; left: 0; right: 0;
+    height: 30%;
+    background: linear-gradient(180deg, transparent, rgba(5,11,22,0.8));
+    clip-path: polygon(0 50%, 15% 30%, 35% 45%, 55% 20%, 75% 40%, 100% 30%, 100% 100%, 0 100%);
+    background-color: #050B16;
+  }
+  .preview-a .demo-pill {
+    position: absolute; top: 20px; left: 20px;
+    background: rgba(244,237,224,0.1); backdrop-filter: blur(20px);
+    border: 1px solid rgba(244,237,224,0.18);
+    padding: 6px 12px 6px 7px;
+    border-radius: 100px;
+    font-family: 'Manrope', sans-serif; font-size: 11px;
+    display: flex; align-items: center; gap: 6px;
+    z-index: 2;
+  }
+  .preview-a .demo-pill .avs {
+    display: flex;
+  }
+  .preview-a .demo-pill .av {
+    width: 18px; height: 18px; border-radius: 50%;
+    border: 2px solid #0E1A33; margin-left: -6px;
+  }
+  .preview-a .demo-pill .av:first-child { margin: 0; background: linear-gradient(135deg, #E8B57A, #C45A1A); }
+  .preview-a .demo-pill .av:nth-child(2) { background: linear-gradient(135deg, #5DD5DA, #2A7B82); }
+  .preview-a .demo-pill .av:nth-child(3) { background: linear-gradient(135deg, #B58FFF, #5E4F8A); }
+  .preview-a .demo-h {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 52px; line-height: 1; font-weight: 500;
+    text-align: center; position: relative; z-index: 1;
+    letter-spacing: -0.025em;
+  }
+  .preview-a .demo-h em { font-style: italic; color: #E8B57A; }
+
+  /* ─── Preview B: Volumetric Rush (orange tunnel + sunburst) ───── */
+  .preview-b {
+    background: #0A0604;
+    overflow: hidden;
+  }
+  .preview-b::before {
+    content: ""; position: absolute; inset: 0;
+    background:
+      radial-gradient(circle at 50% 50%, rgba(255,87,34,0.6), transparent 50%),
+      radial-gradient(circle at 30% 30%, rgba(176,52,26,0.4), transparent 40%),
+      radial-gradient(circle at 70% 70%, rgba(255,169,77,0.3), transparent 45%);
+  }
+  /* Voxel cards illusion */
+  .preview-b::after {
+    content: ""; position: absolute; inset: 0;
+    background:
+      linear-gradient(45deg, transparent 30%, rgba(255,87,34,0.3) 30% 32%, transparent 32% 48%, rgba(176,52,26,0.4) 48% 50%, transparent 50%),
+      linear-gradient(-45deg, transparent 35%, rgba(255,169,77,0.2) 35% 37%, transparent 37% 53%, rgba(255,87,34,0.3) 53% 55%, transparent 55%);
+    opacity: 0.6;
+  }
+  .preview-b .sunburst {
+    position: relative; z-index: 1;
+    width: 80px; height: 80px;
+  }
+  .preview-b .sunburst svg { width: 100%; height: 100%; }
+  .preview-b .demo-h {
+    position: absolute; bottom: 28px; left: 0; right: 0;
+    text-align: center;
+    font-family: 'Geist', sans-serif;
+    font-size: 38px; font-weight: 600;
+    background: linear-gradient(180deg, rgba(255,232,214,0.85), rgba(255,169,77,0.6));
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.03em; line-height: 0.9;
+    z-index: 1;
+  }
+  .preview-b .demo-chip {
+    position: absolute; top: 20px; left: 20px;
+    font-family: 'Geist Mono', monospace; font-size: 9px;
+    color: #FFE8D6; opacity: 0.7;
+    letter-spacing: 0.28em; text-transform: uppercase;
+    z-index: 2;
+  }
+
+  /* ─── Preview C: Studio Console (cosmic + app icon) ───────── */
+  .preview-c {
+    background: #0A0612;
+    overflow: hidden;
+  }
+  .preview-c::before {
+    content: ""; position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 60% 30% at 50% 0%, rgba(139,127,255,0.3), transparent 70%),
+      radial-gradient(1px 1px at 14% 24%, rgba(245,240,255,0.6), transparent),
+      radial-gradient(1px 1px at 32% 18%, rgba(245,240,255,0.5), transparent),
+      radial-gradient(1.5px 1.5px at 56% 36%, rgba(139,127,255,0.7), transparent),
+      radial-gradient(1px 1px at 78% 22%, rgba(245,240,255,0.6), transparent),
+      radial-gradient(1px 1px at 88% 48%, rgba(255,208,138,0.6), transparent);
+  }
+  .preview-c .app-icon {
+    position: relative; z-index: 1;
+    width: 84px; height: 84px;
+    border-radius: 20px;
+    background: linear-gradient(180deg, rgba(245,240,255,0.5) 0%, #B5A8FF 40%, #8B7FFF 100%);
+    box-shadow:
+      inset 0 2px 0 rgba(255,255,255,0.5),
+      inset 0 -2px 0 rgba(94,79,138,0.5),
+      0 16px 36px rgba(139,127,255,0.5),
+      0 0 50px rgba(139,127,255,0.3);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 18px;
+    position: relative;
+  }
+  .preview-c .app-icon::after {
+    content: ""; position: absolute;
+    top: 8px; left: 16px; width: 24px; height: 8px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.6), transparent);
+    border-radius: 50%; transform: rotate(-25deg);
+  }
+  .preview-c .app-icon svg { width: 36px; height: 36px; color: #F5F0FF; }
+  .preview-c .demo-stack { position: relative; z-index: 1; text-align: center; }
+  .preview-c .demo-h {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700; font-size: 32px;
+    color: #F5F0FF; letter-spacing: -0.03em;
+    line-height: 1.05;
+  }
+  .preview-c .demo-h .gr {
+    background: linear-gradient(135deg, #B5A8FF, #8B7FFF, #FF6B9E);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .preview-c .demo-chip {
+    position: absolute; top: 20px; right: 20px;
+    background: linear-gradient(180deg, #8B7FFF, #5A4CC4);
+    padding: 5px 12px; border-radius: 8px;
+    color: #F5F0FF; font-size: 10px;
+    font-weight: 600;
+    box-shadow: 0 4px 14px rgba(139,127,255,0.4);
+    z-index: 2;
+  }
+
+  /* ─── Preview D: Daybreak Studio (landscape + sun) ───────── */
+  .preview-d {
+    background: linear-gradient(180deg, #1A2C42 0%, #5C4D5F 50%, #E8B59A 100%);
+    overflow: hidden;
+  }
+  .preview-d::before {
+    content: ""; position: absolute;
+    bottom: 25%; left: 50%; transform: translateX(-50%);
+    width: 60px; height: 60px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #FFF5E8, #F4D2A0 30%, #E8B59A 60%, #C8957A);
+    box-shadow: 0 0 30px rgba(232,181,154,0.6);
+    z-index: 0;
+  }
+  .preview-d::after {
+    content: ""; position: absolute; bottom: 0; left: 0; right: 0;
+    height: 40%;
+    background-color: #1A2C42;
+    clip-path: polygon(0 60%, 12% 40%, 28% 55%, 48% 35%, 68% 50%, 85% 30%, 100% 45%, 100% 100%, 0 100%);
+  }
+  .preview-d .demo-pill {
+    position: absolute; top: 20px; left: 20px;
+    background: rgba(255,245,232,0.18); backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,245,232,0.2);
+    padding: 5px 12px 5px 10px;
+    border-radius: 100px;
+    font-family: 'Manrope', sans-serif; font-size: 11px;
+    color: #FFF5E8;
+    display: inline-flex; align-items: center; gap: 6px;
+    z-index: 2;
+  }
+  .preview-d .demo-pill::before { content: "✦"; color: #F4A65B; }
+  .preview-d .demo-h {
+    font-family: 'Playfair Display', serif;
+    font-style: italic; font-weight: 500;
+    font-size: 44px; line-height: 1;
+    color: #FFF5E8; text-align: center;
+    text-shadow: 0 4px 16px rgba(0,0,0,0.4);
+    letter-spacing: -0.025em;
+    position: relative; z-index: 1;
+  }
+  .preview-d .demo-h em { font-style: italic; color: #FFF5E8; font-weight: 400; }
+
+  /* ─── Preview E: Aperture Cinema (3D iris + black) ───────── */
+  .preview-e {
+    background: #050505;
+    overflow: hidden;
+  }
+  .preview-e::before {
+    content: ""; position: absolute; inset: 0;
+    background: radial-gradient(ellipse 70% 60% at 50% 50%, rgba(229,165,71,0.15), transparent 70%);
+  }
+  /* Letterbox bars */
+  .preview-e .lb-t { position: absolute; top: 0; left: 0; right: 0; height: 8px; background: #050505; border-bottom: 1px solid rgba(229,165,71,0.2); z-index: 2; }
+  .preview-e .lb-b { position: absolute; bottom: 0; left: 0; right: 0; height: 8px; background: #050505; border-top: 1px solid rgba(229,165,71,0.2); z-index: 2; }
+  /* CSS-only iris */
+  .preview-e .iris {
+    width: 130px; height: 130px;
+    border-radius: 50%;
+    border: 2px solid #C8BFB0;
+    box-shadow:
+      0 0 0 1px rgba(229,165,71,0.3),
+      inset 0 0 0 8px #1A1612,
+      inset 0 0 0 12px #C8BFB0,
+      0 0 60px rgba(229,165,71,0.3);
+    position: relative; z-index: 1;
+    display: flex; align-items: center; justify-content: center;
+    animation: irisBreath 3s ease-in-out infinite;
+  }
+  @keyframes irisBreath {
+    0%,100% { transform: scale(1); }
+    50% { transform: scale(1.04); }
+  }
+  .preview-e .iris::before {
+    content: ""; width: 36px; height: 36px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #FBD891, #E5A547 50%, #B97F25);
+    box-shadow: 0 0 20px rgba(229,165,71,0.7);
+  }
+  .preview-e .iris .blades {
+    position: absolute; inset: 12px;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, #1A1612 0deg 30deg, transparent 30deg 60deg, #1A1612 60deg 90deg, transparent 90deg 120deg, #1A1612 120deg 150deg, transparent 150deg 180deg, #1A1612 180deg 210deg, transparent 210deg 240deg, #1A1612 240deg 270deg, transparent 270deg 300deg, #1A1612 300deg 330deg, transparent 330deg 360deg);
+    opacity: 0.6;
+  }
+  .preview-e .corner {
+    position: absolute; width: 18px; height: 18px;
+    border-color: #E5A547; opacity: 0.5;
+    z-index: 2;
+  }
+  .preview-e .corner.tl { top: 14px; left: 14px; border-top: 1px solid; border-left: 1px solid; }
+  .preview-e .corner.tr { top: 14px; right: 14px; border-top: 1px solid; border-right: 1px solid; }
+  .preview-e .corner.bl { bottom: 14px; left: 14px; border-bottom: 1px solid; border-left: 1px solid; }
+  .preview-e .corner.br { bottom: 14px; right: 14px; border-bottom: 1px solid; border-right: 1px solid; }
+  .preview-e .demo-h {
+    position: absolute; bottom: 32px; left: 0; right: 0;
+    text-align: center; z-index: 1;
+    font-family: 'Fraunces', serif;
+    font-size: 36px; line-height: 1;
+    font-variation-settings: 'opsz' 144;
+    font-weight: 300; color: #F2EBD8;
+    letter-spacing: -0.025em;
+  }
+  .preview-e .demo-h em { font-style: italic; color: #E5A547; }
+
+  /* Card meta */
+  .card-meta {
+    padding: 28px 32px 30px;
+    border-top: 1px solid var(--fog);
+    flex: 1;
+    display: flex; flex-direction: column;
+  }
+  .card-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.22em;
+    color: var(--smoke); text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .card-name {
+    font-family: 'Fraunces', serif; font-size: 32px;
+    font-weight: 500; font-variation-settings: 'opsz' 96;
+    letter-spacing: -0.022em; margin-bottom: 10px; line-height: 1.05;
+  }
+  .card-name em { font-style: italic; color: var(--ember); font-weight: 400; }
+  .card-ref {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    letter-spacing: 0.16em; color: var(--ember);
+    text-transform: uppercase; margin-bottom: 16px;
+  }
+  .card-desc {
+    font-family: 'Manrope', sans-serif;
+    font-size: 14.5px; line-height: 1.6;
+    color: var(--smoke); margin-bottom: 22px;
+    flex: 1;
+  }
+  .card-tags {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    margin-bottom: 24px;
+  }
+  .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; padding: 4px 10px;
+    border: 1px solid var(--fog); border-radius: 100px;
+    color: var(--smoke); text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .card-tags .hl {
+    background: var(--ink); color: var(--paper); border-color: var(--ink);
+  }
+  .card-actions {
+    display: flex; gap: 12px;
+    padding-top: 16px;
+    border-top: 1px dashed var(--fog);
+  }
+  .btn-open {
+    flex: 1; text-align: center;
+    padding: 14px;
+    background: var(--ink); color: var(--paper);
+    border-radius: 100px; text-decoration: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.14em;
+    text-transform: uppercase; font-weight: 500;
+    transition: all 0.25s;
+    position: relative; overflow: hidden;
+  }
+  .btn-open::before {
+    content: ""; position: absolute; inset: 0;
+    background: var(--signal); transform: translateY(101%);
+    transition: transform 0.3s;
+  }
+  .btn-open:hover { color: var(--ink); }
+  .btn-open:hover::before { transform: translateY(0); }
+  .btn-open span { position: relative; z-index: 1; }
+
+  footer {
+    margin-top: 100px;
+    padding-top: 48px;
+    border-top: 1px solid var(--fog);
+    text-align: center;
+  }
+  footer .ft-eye {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.2em;
+    color: var(--smoke); text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  footer h3 {
+    font-family: 'Fraunces', serif; font-size: 40px;
+    font-variation-settings: 'opsz' 144; font-style: italic;
+    color: var(--ink); margin-bottom: 14px;
+    letter-spacing: -0.025em; font-weight: 400;
+  }
+  footer h3 em { color: var(--ember); }
+  footer p {
+    font-size: 15px; color: var(--smoke);
+    max-width: 620px; margin: 0 auto;
+    line-height: 1.55;
+  }
+  .quick-ref {
+    margin-top: 36px;
+    display: inline-flex; gap: 24px; flex-wrap: wrap; justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .quick-ref a {
+    color: var(--ink); text-decoration: none;
+    border-bottom: 1px solid var(--fog);
+    padding-bottom: 3px;
+    transition: all 0.2s;
+  }
+  .quick-ref a:hover { border-color: var(--ember); color: var(--ember); }
+  .build-stamp {
+    margin-top: 56px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: 0.18em;
+    color: var(--smoke); text-transform: uppercase;
+  }
+
+  @media (max-width: 768px) {
+    body { padding: 40px 20px 60px; }
+    .grid { grid-template-columns: 1fr; }
+    header h1 { font-size: 40px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">
+      <span>CAPDUCTION</span>
+      <span class="dot"></span>
+      <span>GALLERY V3 · CINEMATIC EDITION</span>
+    </div>
+    <h1>เลือก<em>ทิศทาง</em>ที่จดจำได้</h1>
+    <p>5 themes ใหม่ — แต่ละอันได้แรงบันดาลใจจาก reference เว็บระดับโลก (meditation app / Ascendia AI / Volectra / Finova / cinema reference) แต่มี <strong>identity ของ Capduction</strong> ของตัวเองที่ผู้ใช้จำได้แน่นอน</p>
+    <div class="meta">
+      <span><strong>5</strong> NEW THEMES</span>
+      <span><strong>3D + GLASS</strong> EVERYWHERE</span>
+      <span><strong>TH/EN</strong> BILINGUAL</span>
+      <span><strong>FRONTEND-DESIGN</strong> SKILL FULLY APPLIED</span>
+    </div>
+  </header>
+
+  <div class="grid">
+
+    <!-- THEME A -->
+    <a href="theme-1-directors-lens.html" class="card hover-target" data-cursor="open" target="_blank">
+      <div class="card-preview preview-a">
+        <div class="demo-pill">
+          <div class="avs"><div class="av"></div><div class="av"></div><div class="av"></div></div>
+          <span><strong>7k</strong> creators</span>
+        </div>
+        <div class="demo-h">
+          Capture before<br/>
+          <em>the moment fades</em>
+        </div>
+      </div>
+      <div class="card-meta">
+        <div class="card-num">— THEME A · V3</div>
+        <div class="card-name"><em>Director's</em> Lens</div>
+        <div class="card-ref">REF: MEDITATION APP · CINEMATIC PHOTO</div>
+        <p class="card-desc">Cinematic dusk hero — gradient navy sky + twinkling stars + warm amber light shaft + mountain silhouettes + 60 floating particles. Glass pill nav split (brand/center/lang+CTA). Big Cormorant Garamond italic headline. Email pill CTA. 4 testimonial cards from TikTok/Google/Shopee/Trustpilot with avatar + rating + stars carousel.</p>
+        <div class="card-tags">
+          <span class="tag hl">DUSK CINEMATIC</span>
+          <span class="tag">CORMORANT</span>
+          <span class="tag">AMBER GLOW</span>
+          <span class="tag">TESTIMONIALS</span>
+          <span class="tag">3D PARTICLES</span>
+        </div>
+        <div class="card-actions">
+          <a href="theme-1-directors-lens.html" class="btn-open hover-target" data-cursor="open" target="_blank"><span>เปิด Theme A →</span></a>
+        </div>
+      </div>
+    </a>
+
+    <!-- THEME B -->
+    <a href="theme-2-volumetric.html" class="card hover-target" data-cursor="open" target="_blank">
+      <div class="card-preview preview-b">
+        <div class="demo-chip">CAPDUCTION STUDIO V3</div>
+        <div class="sunburst">
+          <svg viewBox="0 0 80 80" fill="none">
+            <g stroke="#FFE8D6" stroke-width="2" stroke-linecap="round">
+              <circle cx="40" cy="40" r="3" fill="#FFE8D6"/>
+              <line x1="40" y1="14" x2="40" y2="22"/>
+              <circle cx="40" cy="10" r="2" fill="#FFE8D6"/>
+              <line x1="40" y1="66" x2="40" y2="58"/>
+              <circle cx="40" cy="70" r="2" fill="#FFE8D6"/>
+              <line x1="14" y1="40" x2="22" y2="40"/>
+              <circle cx="10" cy="40" r="2" fill="#FFE8D6"/>
+              <line x1="66" y1="40" x2="58" y2="40"/>
+              <circle cx="70" cy="40" r="2" fill="#FFE8D6"/>
+              <g transform="rotate(45 40 40)">
+                <line x1="40" y1="14" x2="40" y2="22"/>
+                <circle cx="40" cy="10" r="2" fill="#FFE8D6"/>
+                <line x1="40" y1="66" x2="40" y2="58"/>
+                <circle cx="40" cy="70" r="2" fill="#FFE8D6"/>
+                <line x1="14" y1="40" x2="22" y2="40"/>
+                <circle cx="10" cy="40" r="2" fill="#FFE8D6"/>
+                <line x1="66" y1="40" x2="58" y2="40"/>
+                <circle cx="70" cy="40" r="2" fill="#FFE8D6"/>
+              </g>
+            </g>
+          </svg>
+        </div>
+        <div class="demo-h">Built For Faster Scripts</div>
+      </div>
+      <div class="card-meta">
+        <div class="card-num">— THEME B · V3</div>
+        <div class="card-name"><em>Volumetric</em> Rush</div>
+        <div class="card-ref">REF: ASCENDIA AI · 3D VOXEL TUNNEL</div>
+        <p class="card-desc">3D voxel tunnel hero — 80 ember script/caption cards พุ่งเข้ากล้องแบบ infinite scroll พร้อม edge wireframes สีครีม. Sunburst aperture mark SVG หมุน 60s loop ใจกลาง. Sandblasted Geist headline 160px gradient cream → amber. Cream CTA pill + ember icon arrow + ember glow shadow ใหญ่.</p>
+        <div class="card-tags">
+          <span class="tag hl">VOXEL 3D</span>
+          <span class="tag">EMBER FIRE</span>
+          <span class="tag">SUNBURST</span>
+          <span class="tag">SANDBLASTED</span>
+          <span class="tag">CREAM CTA</span>
+        </div>
+        <div class="card-actions">
+          <a href="theme-2-volumetric.html" class="btn-open hover-target" data-cursor="open" target="_blank"><span>เปิด Theme B →</span></a>
+        </div>
+      </div>
+    </a>
+
+    <!-- THEME C -->
+    <a href="theme-3-studio-console.html" class="card hover-target" data-cursor="open" target="_blank">
+      <div class="card-preview preview-c">
+        <div class="demo-chip">Beta</div>
+        <div class="demo-stack">
+          <div class="app-icon" style="margin: 0 auto 14px;">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M6 4l12 8-12 8V4z" fill="currentColor"/></svg>
+          </div>
+          <div class="demo-h">
+            Smart Scripts,<br/>
+            <span class="gr">Built By Creators</span>
+          </div>
+        </div>
+      </div>
+      <div class="card-meta">
+        <div class="card-num">— THEME C · V3</div>
+        <div class="card-name"><em>Studio</em> Console</div>
+        <div class="card-ref">REF: VOLECTRA · COSMIC + DASHBOARD</div>
+        <p class="card-desc">Cosmic violet hero — 15 stars + spotlight cone + wave lines SVG. 3D glossy app icon floating with reflection highlight. Gradient bold Inter headline. Email + violet gradient waitlist CTA. <strong>HUGE rotated dashboard preview</strong> ใต้ hero — sidebar 9 items + tabs + search ⌘K + Demo badge + Create button (เหมือนหน้าจริง Capduction).</p>
+        <div class="card-tags">
+          <span class="tag hl">COSMIC PURPLE</span>
+          <span class="tag">3D APP ICON</span>
+          <span class="tag">DASHBOARD PREVIEW</span>
+          <span class="tag">SPARKLES</span>
+          <span class="tag">VIOLET GRADIENT</span>
+        </div>
+        <div class="card-actions">
+          <a href="theme-3-studio-console.html" class="btn-open hover-target" data-cursor="open" target="_blank"><span>เปิด Theme C →</span></a>
+        </div>
+      </div>
+    </a>
+
+    <!-- THEME D -->
+    <a href="theme-4-daybreak.html" class="card hover-target" data-cursor="open" target="_blank">
+      <div class="card-preview preview-d">
+        <div class="demo-pill">EST. 2026 · BKK</div>
+        <div class="demo-h">
+          Next-Gen Studio<br/>
+          <em>for a New Era</em>
+        </div>
+      </div>
+      <div class="card-meta">
+        <div class="card-num">— THEME D · V3</div>
+        <div class="card-name"><em>Daybreak</em> Studio</div>
+        <div class="card-ref">REF: FINOVA · LANDSCAPE + PHONE MOCKUP</div>
+        <p class="card-desc">Cinematic dawn landscape — sky gradient (navy→dusk→peach→cream) + sun glow + 3-layer mountain silhouettes + cloud blur. Playfair Display italic headline. <strong>HUGE 280×560px phone mockup</strong> center ของ Capduction app + 2 floating data cards (Script preview ซ้าย + Studio Plan ขวา). Platform logos bar (TikTok/IG/FB/Shopee/Lazada/LINE/YouTube).</p>
+        <div class="card-tags">
+          <span class="tag hl">DAWN LANDSCAPE</span>
+          <span class="tag">PLAYFAIR</span>
+          <span class="tag">PHONE MOCKUP</span>
+          <span class="tag">FLOATING CARDS</span>
+          <span class="tag">PLATFORM BAR</span>
+        </div>
+        <div class="card-actions">
+          <a href="theme-4-daybreak.html" class="btn-open hover-target" data-cursor="open" target="_blank"><span>เปิด Theme D →</span></a>
+        </div>
+      </div>
+    </a>
+
+    <!-- THEME E -->
+    <a href="theme-5-aperture.html" class="card hover-target" data-cursor="open" target="_blank">
+      <div class="card-preview preview-e">
+        <div class="lb-t"></div>
+        <div class="lb-b"></div>
+        <div class="corner tl"></div>
+        <div class="corner tr"></div>
+        <div class="corner bl"></div>
+        <div class="corner br"></div>
+        <div class="iris">
+          <div class="blades"></div>
+        </div>
+        <div class="demo-h">
+          Open the <em>aperture.</em><br/>
+          Capture the <em>moment.</em>
+        </div>
+      </div>
+      <div class="card-meta">
+        <div class="card-num">— THEME E · V3 · ORIGINAL</div>
+        <div class="card-name"><em>Aperture</em> Cinema</div>
+        <div class="card-ref">ORIGINAL · 35MM FILM AESTHETIC</div>
+        <p class="card-desc">Premium cinema — letterbox bars + viewfinder corner brackets + film grain + vignette. <strong>3D iris lens</strong> หมุนหายใจกลาง hero (housing + 8 blades + amber glowing center + 12 chrome dots + 3 floating accent rings). Fraunces variable serif italic 132px. Film strip showcase กับ perforations top+bottom — 3 frames (Hook/Body/Payoff). "ACT III · THE INVITATION" structure.</p>
+        <div class="card-tags">
+          <span class="tag hl">35MM CINEMA</span>
+          <span class="tag">3D IRIS LENS</span>
+          <span class="tag">FRAUNCES VARIABLE</span>
+          <span class="tag">FILM STRIP</span>
+          <span class="tag">LETTERBOX</span>
+        </div>
+        <div class="card-actions">
+          <a href="theme-5-aperture.html" class="btn-open hover-target" data-cursor="open" target="_blank"><span>เปิด Theme E →</span></a>
+        </div>
+      </div>
+    </a>
+  </div>
+
+  <footer>
+    <div class="ft-eye">— GALLERY · V3 · BUILD 2026.05.16</div>
+    <h3>กดเปิดเทียบกัน · <em>เลือกอันที่ใช่</em></h3>
+    <p>เปิดทุก theme ในแท็บใหม่ ลองเลื่อนเมาส์ดู custom cursor แต่ละแบบ ลอง toggle TH/EN — แล้วบอกผมเบอร์ที่ชอบ (หรือ mix-and-match ได้) ผมจะใช้ direction นั้นปั้น production Next.js app ต่อ</p>
+    <div class="quick-ref">
+      <a href="theme-1-directors-lens.html" target="_blank" class="hover-target" data-cursor="A">A · Director's Lens</a>
+      <a href="theme-2-volumetric.html" target="_blank" class="hover-target" data-cursor="B">B · Volumetric Rush</a>
+      <a href="theme-3-studio-console.html" target="_blank" class="hover-target" data-cursor="C">C · Studio Console</a>
+      <a href="theme-4-daybreak.html" target="_blank" class="hover-target" data-cursor="D">D · Daybreak Studio</a>
+      <a href="theme-5-aperture.html" target="_blank" class="hover-target" data-cursor="E">E · Aperture Cinema</a>
+    </div>
+    <div class="build-stamp">
+      CAPDUCTION © 2026 · MADE IN BANGKOK · GALLERY V3 · ALL SYSTEMS OPERATIONAL
+    </div>
+  </footer>
+</div>
+
+<script>
+const cursor = document.getElementById('cursor');
+const target = { x: 0, y: 0 };
+const actual = { x: 0, y: 0 };
+window.addEventListener('mousemove', e => { target.x = e.clientX; target.y = e.clientY; });
+function loopC(){
+  actual.x += (target.x - actual.x) * 0.22;
+  actual.y += (target.y - actual.y) * 0.22;
+  cursor.style.left = actual.x + 'px';
+  cursor.style.top = actual.y + 'px';
+  requestAnimationFrame(loopC);
+}
+loopC();
+document.querySelectorAll('.hover-target').forEach(el => {
+  el.addEventListener('mouseenter', () => {
+    cursor.classList.add('target');
+    cursor.dataset.label = el.dataset.cursor === 'open' ? 'OPEN →' : (el.dataset.cursor || 'OPEN');
+  });
+  el.addEventListener('mouseleave', () => cursor.classList.remove('target'));
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Capduction · Rosé Daydream — Where Scripts Bloom</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=Geist+Mono:wght@400;500&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blush:   #FFE0D6;
+    --peach:   #FFD0B5;
+    --rose:    #FFC4D6;
+    --coral:   #FFA38F;
+    --cream:   #FFF2E5;
+    --sun:     #FFE5A8;
+    --pink:    #FF7AA8;
+    --coral-d: #E8625D;
+    --plum:    #B85577;
+    --mauve:   #8B4A6B;
+    --ink:     #4A2538;
+    --ink-2:   #6B3550;
+    --slate:   #9C7088;
+    --bg:      #FFFAF5;
+    --bg-2:    #FFF4ED;
+    --line:    rgba(184,85,119,0.1);
+    --line-2:  rgba(184,85,119,0.16);
+    --font-display: 'Inter', sans-serif;
+    --font-serif:   'Instrument Serif', serif;
+    --font-thai:    'Sarabun', sans-serif;
+    --font-mono:    'Geist Mono', monospace;
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg); color: var(--ink);
+    font-family: var(--font-display); font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden; min-height: 100vh; position: relative;
+    cursor: none;
+  }
+  body[lang="th"] { font-family: var(--font-thai); }
+
+  /* Rosé iridescent mesh — warm pink/peach/coral lean */
+  body::before {
+    content: ""; position: fixed; inset: 0; z-index: -2;
+    background:
+      radial-gradient(circle at 12% 18%, var(--rose) 0%, transparent 38%),
+      radial-gradient(circle at 85% 12%, var(--peach) 0%, transparent 42%),
+      radial-gradient(circle at 50% 50%, var(--blush) 0%, transparent 60%),
+      radial-gradient(circle at 75% 78%, var(--sun) 0%, transparent 40%),
+      radial-gradient(circle at 15% 82%, var(--coral) 0%, transparent 35%);
+    filter: saturate(1.15);
+    animation: drift 38s ease-in-out infinite;
+  }
+  @keyframes drift {
+    0%,100% { transform: scale(1) rotate(0deg); }
+    50% { transform: scale(1.06) rotate(-0.5deg); }
+  }
+  body::after {
+    content: ""; position: fixed; inset: 0; z-index: -1;
+    background: rgba(255,250,245,0.5);
+    backdrop-filter: blur(50px);
+  }
+
+  /* Cursor (rosé orb) */
+  .cursor {
+    position: fixed; pointer-events: none; z-index: 10000;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%,
+      white, var(--rose) 40%, var(--pink) 80%, var(--plum));
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.7),
+      0 4px 16px rgba(255,122,168,0.4),
+      inset 0 -2px 4px rgba(184,85,119,0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.3s var(--ease), height 0.3s var(--ease);
+  }
+  .cursor.target {
+    width: 64px; height: 64px;
+    background: radial-gradient(circle at 35% 30%,
+      white, var(--peach) 25%, var(--pink) 60%, var(--mauve));
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.8),
+      0 12px 36px rgba(255,122,168,0.5);
+  }
+  .cursor .label {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono); font-size: 9px;
+    color: white; letter-spacing: 0.1em;
+    text-transform: uppercase; opacity: 0;
+    transition: opacity 0.2s; font-weight: 600;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  }
+  .cursor.target .label { opacity: 1; }
+  @media (max-width: 768px) { body { cursor: auto; } .cursor { display: none; } }
+  a, button, .hover-target { cursor: none; }
+
+  /* Wave decoration */
+  .hero-wave {
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 70vh; pointer-events: none; z-index: 1;
+    opacity: 0.45;
+  }
+  .hero-wave svg { width: 100%; height: 100%; }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 20px; left: 20px; right: 20px;
+    z-index: 100;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 14px 12px 22px;
+    background: rgba(255,255,255,0.6);
+    backdrop-filter: blur(30px) saturate(1.6);
+    border: 1px solid rgba(255,255,255,0.85);
+    border-radius: 18px;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.95) inset,
+      0 -1px 0 rgba(184,85,119,0.15) inset,
+      0 14px 40px rgba(184,85,119,0.12);
+  }
+  .brand {
+    display: flex; align-items: center; gap: 12px;
+    color: var(--ink); text-decoration: none;
+  }
+  .brand-icon {
+    width: 36px; height: 36px;
+    border-radius: 11px;
+    background: radial-gradient(circle at 35% 28%,
+      white 0%, var(--blush) 20%, var(--rose) 45%, var(--pink) 75%, var(--mauve));
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.7),
+      0 4px 14px rgba(255,122,168,0.4),
+      inset 0 1px 0 rgba(255,255,255,0.6),
+      inset 0 -2px 4px rgba(184,85,119,0.3);
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+  .brand-icon::after {
+    content: ""; position: absolute;
+    top: 5px; left: 8px; width: 14px; height: 5px;
+    background: rgba(255,255,255,0.75); border-radius: 50%;
+    transform: rotate(-25deg);
+  }
+  .brand-icon svg { width: 18px; height: 18px; color: white;
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
+  }
+  .brand-name { font-weight: 600; font-size: 18px; letter-spacing: -0.012em; }
+  nav .center { display: flex; gap: 8px; align-items: center; }
+  nav .center a {
+    padding: 9px 18px; border-radius: 100px;
+    color: var(--ink-2); text-decoration: none;
+    font-size: 14px; font-weight: 500;
+    transition: all 0.2s;
+  }
+  body[lang="th"] nav .center a { font-family: var(--font-thai); }
+  nav .center a:hover { background: rgba(255,255,255,0.6); color: var(--ink); }
+  nav .center a.active { background: rgba(255,122,168,0.12); color: var(--ink); }
+  nav .right { display: flex; align-items: center; gap: 12px; }
+  .lang-toggle {
+    display: inline-flex; padding: 3px;
+    background: rgba(255,255,255,0.6);
+    border: 1px solid rgba(255,255,255,0.6);
+    border-radius: 100px; gap: 2px;
+  }
+  .lang-toggle button {
+    border: 0; background: transparent;
+    padding: 5px 12px; border-radius: 100px;
+    font-family: var(--font-mono); font-size: 10px;
+    color: var(--ink-2); cursor: none;
+    transition: all 0.25s;
+  }
+  .lang-toggle button.active {
+    background: var(--ink); color: white;
+  }
+  .nav-cta {
+    padding: 10px 20px; border-radius: 100px;
+    background: linear-gradient(135deg, var(--coral) 0%, var(--pink) 50%, var(--plum) 100%);
+    color: white; text-decoration: none;
+    font-size: 14px; font-weight: 600;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.4) inset,
+      0 -1px 0 rgba(184,85,119,0.3) inset,
+      0 4px 14px rgba(255,122,168,0.5);
+    transition: all 0.25s;
+  }
+  body[lang="th"] .nav-cta { font-family: var(--font-thai); }
+  .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 1px 0 rgba(255,255,255,0.4) inset, 0 -1px 0 rgba(184,85,119,0.3) inset, 0 8px 24px rgba(255,122,168,0.6); }
+
+  /* HERO */
+  .hero {
+    min-height: 88vh;
+    padding: 140px 32px 60px;
+    position: relative;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center;
+    z-index: 2;
+  }
+  .app-icon {
+    width: 120px; height: 120px;
+    border-radius: 32px;
+    background: radial-gradient(circle at 30% 25%,
+      white 0%,
+      var(--blush) 15%,
+      var(--rose) 35%,
+      var(--pink) 60%,
+      var(--plum) 100%);
+    box-shadow:
+      inset 0 3px 0 rgba(255,255,255,0.6),
+      inset 0 -3px 0 rgba(184,85,119,0.4),
+      0 0 0 1px rgba(255,255,255,0.4),
+      0 28px 60px rgba(255,122,168,0.5),
+      0 0 100px rgba(255,196,214,0.5);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 36px; position: relative;
+    animation: float 4s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  .app-icon svg {
+    width: 54px; height: 54px; color: white;
+    filter: drop-shadow(0 2px 4px rgba(184,85,119,0.4));
+  }
+  .app-icon::after {
+    content: ""; position: absolute;
+    top: 18px; left: 26px; width: 38px; height: 14px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.7), transparent);
+    border-radius: 50%; transform: rotate(-25deg);
+  }
+  /* Decorative hearts/flowers */
+  .heart {
+    position: absolute;
+    color: var(--pink); opacity: 0.8;
+    filter: drop-shadow(0 0 12px currentColor);
+    animation: floatHeart 6s ease-in-out infinite;
+  }
+  @keyframes floatHeart {
+    0%,100% { transform: translateY(0) rotate(0deg); opacity: 0.8; }
+    50% { transform: translateY(-12px) rotate(8deg); opacity: 0.5; }
+  }
+  .heart svg { width: 100%; height: 100%; }
+  .h-1 { top: 18%; right: 18%; width: 20px; color: var(--coral); animation-delay: 0s; }
+  .h-2 { top: 60%; right: 14%; width: 16px; color: var(--pink); animation-delay: 1s; }
+  .h-3 { top: 25%; left: 16%; width: 22px; color: var(--sun); animation-delay: 2s; }
+  .h-4 { top: 68%; left: 22%; width: 14px; color: var(--rose); animation-delay: 3s; }
+  .h-5 { top: 12%; left: 50%; width: 14px; color: var(--coral); animation-delay: 0.5s; }
+
+  .hero h1 {
+    font-family: var(--font-display);
+    font-size: clamp(48px, 7vw, 100px);
+    line-height: 1; font-weight: 700;
+    letter-spacing: -0.035em;
+    margin-bottom: 20px;
+    color: var(--ink); max-width: 1100px;
+  }
+  body[lang="th"] .hero h1 {
+    font-family: var(--font-thai); font-weight: 700;
+    font-size: clamp(40px, 6vw, 88px); line-height: 1.05;
+  }
+  .hero h1 .iri {
+    background: linear-gradient(135deg, var(--coral) 0%, var(--pink) 50%, var(--plum) 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero h1 .serif {
+    font-family: var(--font-serif); font-style: italic; font-weight: 400;
+    background: linear-gradient(180deg, var(--ink), var(--plum));
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 1.08em;
+  }
+  body[lang="th"] .hero h1 .serif { font-family: var(--font-thai); font-style: normal; }
+
+  .hero-sub {
+    font-size: 18px; line-height: 1.55;
+    color: var(--ink-2); max-width: 580px;
+    margin: 0 auto 36px;
+  }
+  body[lang="th"] .hero-sub { font-family: var(--font-thai); }
+  .hero-sub strong { color: var(--ink); font-weight: 600; }
+
+  .hero-form {
+    display: inline-flex; align-items: center;
+    padding: 5px 5px 5px 22px;
+    background: rgba(255,255,255,0.6);
+    backdrop-filter: blur(28px) saturate(1.6);
+    border: 1px solid rgba(255,255,255,0.85);
+    border-radius: 14px;
+    min-width: 460px; max-width: 100%;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.95) inset, 0 16px 40px rgba(184,85,119,0.15);
+  }
+  .hero-form input {
+    flex: 1; background: transparent; border: 0;
+    padding: 13px 0;
+    color: var(--ink); font-family: var(--font-display); font-size: 14px;
+    outline: none; min-width: 0;
+  }
+  body[lang="th"] .hero-form input { font-family: var(--font-thai); }
+  .hero-form input::placeholder { color: var(--slate); }
+  .hero-form button {
+    padding: 11px 22px; border-radius: 9px;
+    background: linear-gradient(135deg, var(--coral) 0%, var(--pink) 100%);
+    color: white; border: 0;
+    font-family: var(--font-display); font-size: 14px; font-weight: 600;
+    cursor: none;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.4) inset, 0 4px 14px rgba(255,122,168,0.5);
+    transition: all 0.25s;
+    white-space: nowrap;
+  }
+  body[lang="th"] .hero-form button { font-family: var(--font-thai); }
+  .hero-form button:hover { transform: translateY(-1px); box-shadow: 0 1px 0 rgba(255,255,255,0.4) inset, 0 8px 24px rgba(255,122,168,0.7); }
+  .hero-trust {
+    margin-top: 24px;
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--ink-2); letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .hero-trust .avs { display: flex; }
+  .hero-trust .av {
+    width: 20px; height: 20px; border-radius: 50%;
+    border: 2px solid var(--bg); margin-left: -6px;
+  }
+  .hero-trust .av:first-child { margin: 0; }
+  .hero-trust .av:nth-child(1) { background: linear-gradient(135deg, var(--coral), var(--pink)); }
+  .hero-trust .av:nth-child(2) { background: linear-gradient(135deg, var(--peach), var(--rose)); }
+  .hero-trust .av:nth-child(3) { background: linear-gradient(135deg, var(--sun), var(--coral)); }
+  .hero-trust strong { color: var(--ink); font-weight: 700; }
+
+  /* DASHBOARD PREVIEW */
+  .dashboard-section { padding: 40px 32px 100px; position: relative; z-index: 2; perspective: 2200px; }
+  .dash-eye {
+    text-align: center; margin-bottom: 28px;
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.22em; color: var(--ink-2);
+    text-transform: uppercase;
+    display: flex; justify-content: center; align-items: center; gap: 14px;
+    max-width: 1500px; margin-left: auto; margin-right: auto;
+  }
+  .dash-eye::before, .dash-eye::after {
+    content: "♥";
+    background: linear-gradient(135deg, var(--coral), var(--pink));
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 14px;
+  }
+  .dashboard-wrap {
+    max-width: 1500px; margin: 0 auto;
+    transform: rotateX(6deg); transform-origin: center top;
+  }
+  .dashboard-frame {
+    background: rgba(255,255,255,0.7);
+    backdrop-filter: blur(30px) saturate(1.6);
+    border: 1px solid rgba(255,255,255,0.9);
+    border-radius: 22px; overflow: hidden;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.95) inset,
+      0 50px 100px rgba(184,85,119,0.25),
+      0 0 80px rgba(255,196,214,0.2);
+  }
+  .dash-bar {
+    padding: 14px 22px;
+    border-bottom: 1px solid var(--line);
+    display: flex; align-items: center; gap: 16px;
+    background: rgba(255,255,255,0.4);
+  }
+  .dash-brand-mini { display: flex; align-items: center; gap: 10px; }
+  .dash-brand-mini .icon {
+    width: 30px; height: 30px; border-radius: 9px;
+    background: radial-gradient(circle at 35% 28%, white, var(--pink) 60%, var(--mauve));
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.6), 0 2px 8px rgba(255,122,168,0.4);
+  }
+  .dash-brand-mini .icon svg { width: 14px; height: 14px; color: white; }
+  .dash-brand-mini .label { line-height: 1.1; }
+  .dash-brand-mini .label strong { font-size: 14px; font-weight: 700; color: var(--ink); }
+  .dash-brand-mini .label .beta {
+    display: inline-block; padding: 1px 6px;
+    background: linear-gradient(135deg, var(--coral), var(--pink));
+    color: white; border-radius: 4px; font-size: 9px;
+    font-family: var(--font-mono); letter-spacing: 0.08em;
+    margin-left: 4px; vertical-align: middle; font-weight: 600;
+  }
+  .dash-brand-mini .label .sub {
+    font-size: 10px; color: var(--slate);
+    font-family: var(--font-mono); display: block;
+  }
+  .dash-bar .title {
+    font-size: 15px; font-weight: 600; color: var(--ink);
+    padding-left: 16px; border-left: 1px solid var(--line);
+    margin-left: 4px;
+  }
+  body[lang="th"] .dash-bar .title { font-family: var(--font-thai); }
+  .dash-search {
+    flex: 1; max-width: 360px; margin: 0 auto;
+    display: flex; align-items: center; gap: 8px;
+    padding: 9px 14px;
+    background: rgba(255,255,255,0.6);
+    border: 1px solid rgba(255,255,255,0.8);
+    border-radius: 10px;
+    font-family: var(--font-mono); font-size: 12px;
+    color: var(--ink-2);
+  }
+  .dash-search svg { width: 14px; height: 14px; }
+  .dash-search .kbd {
+    margin-left: auto; padding: 2px 6px;
+    background: rgba(184,85,119,0.1);
+    border-radius: 4px; font-size: 10px;
+  }
+  .dash-bar .actions { display: flex; align-items: center; gap: 14px; }
+  .dash-bar .ico-btn {
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ink-2); border-radius: 8px;
+    background: rgba(255,255,255,0.4);
+  }
+  .dash-bar .ico-btn svg { width: 14px; height: 14px; }
+  .dash-bar .avatar-mini {
+    display: flex; align-items: center; gap: 10px;
+    padding-left: 14px; border-left: 1px solid var(--line);
+  }
+  .dash-bar .avatar-mini .av {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--coral), var(--pink));
+    box-shadow: 0 2px 8px rgba(255,122,168,0.4);
+  }
+  .dash-bar .avatar-mini .info { line-height: 1.1; }
+  .dash-bar .avatar-mini .info strong { font-size: 13px; font-weight: 600; color: var(--ink); }
+  .dash-bar .avatar-mini .info .sub { font-size: 10px; color: var(--slate); font-family: var(--font-mono); }
+
+  .dash-body { display: grid; grid-template-columns: 220px 1fr; }
+  .dash-side {
+    padding: 18px 12px;
+    border-right: 1px solid var(--line);
+    background: rgba(255,255,255,0.3);
+  }
+  .dash-item {
+    padding: 10px 14px; border-radius: 10px;
+    font-size: 13px; color: var(--ink-2);
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 3px; cursor: none; transition: all 0.2s;
+  }
+  body[lang="th"] .dash-item { font-family: var(--font-thai); }
+  .dash-item:hover { background: rgba(255,255,255,0.55); color: var(--ink); }
+  .dash-item.active {
+    background: linear-gradient(135deg, rgba(255,163,143,0.18), rgba(255,122,168,0.18));
+    color: var(--ink); font-weight: 600;
+    border: 1px solid rgba(255,122,168,0.25);
+  }
+  .dash-item .ico { width: 14px; height: 14px; opacity: 0.7; }
+  .dash-item .arrow { margin-left: auto; opacity: 0.4; }
+  .dash-sep { height: 1px; background: var(--line); margin: 14px 8px; }
+  .dash-side h6 {
+    font-family: var(--font-mono); font-size: 9px;
+    letter-spacing: 0.2em; color: var(--slate);
+    text-transform: uppercase; margin: 0 8px 12px; font-weight: 600;
+  }
+  .dash-item .badge {
+    margin-left: auto; padding: 2px 8px;
+    border-radius: 100px;
+    background: linear-gradient(135deg, var(--coral), var(--pink));
+    color: white; font-size: 9px;
+    letter-spacing: 0.08em; font-weight: 600;
+  }
+
+  .dash-main { padding: 28px 32px; }
+  .dash-section-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+  .dash-section-title h4 { font-size: 18px; font-weight: 700; color: var(--ink); }
+  body[lang="th"] .dash-section-title h4 { font-family: var(--font-thai); }
+  .dash-section-title .demo-badge {
+    padding: 5px 12px; border-radius: 100px;
+    background: linear-gradient(135deg, var(--coral), var(--pink));
+    color: white;
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.12em; font-weight: 600;
+    display: inline-flex; align-items: center; gap: 6px;
+    box-shadow: 0 4px 14px rgba(255,122,168,0.4);
+  }
+  .dash-section-title .demo-badge::before {
+    content: ""; width: 6px; height: 6px;
+    background: white; border-radius: 50%; animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1;}50%{opacity:.4;} }
+  .dash-tabs {
+    display: flex; gap: 4px; margin-bottom: 24px;
+    padding: 4px;
+    background: rgba(255,255,255,0.55);
+    border: 1px solid rgba(255,255,255,0.7);
+    border-radius: 12px;
+    align-self: flex-start; width: fit-content;
+  }
+  .dash-tab {
+    padding: 8px 16px; border-radius: 8px;
+    font-size: 12px; font-weight: 500; color: var(--ink-2);
+    cursor: none; transition: all 0.2s;
+  }
+  .dash-tab.active {
+    background: white; color: var(--ink); font-weight: 600;
+    box-shadow: 0 2px 6px rgba(184,85,119,0.12);
+  }
+  .dash-content h5 { font-size: 15px; font-weight: 700; color: var(--ink); margin-bottom: 6px; }
+  body[lang="th"] .dash-content h5 { font-family: var(--font-thai); }
+  .dash-content > p { font-size: 13px; color: var(--ink-2); margin-bottom: 18px; }
+  body[lang="th"] .dash-content > p { font-family: var(--font-thai); }
+  .dash-card {
+    background: rgba(255,255,255,0.6);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.8);
+    border-radius: 16px; padding: 20px;
+    display: flex; align-items: center; gap: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 14px rgba(184,85,119,0.08);
+    transition: all 0.25s;
+  }
+  .dash-card:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(184,85,119,0.15); }
+  .dash-card .ico-orb {
+    width: 46px; height: 46px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 28%, white, var(--peach) 30%, var(--coral) 70%, var(--pink));
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.6), 0 6px 18px rgba(255,163,143,0.4);
+    flex-shrink: 0; position: relative;
+  }
+  .dash-card .ico-orb::after {
+    content: ""; position: absolute;
+    top: 6px; left: 11px; width: 14px; height: 5px;
+    background: rgba(255,255,255,0.7); border-radius: 50%;
+    transform: rotate(-25deg);
+  }
+  .dash-card .info { flex: 1; }
+  .dash-card .info strong { display: block; font-size: 14px; font-weight: 700; color: var(--ink); margin-bottom: 3px; }
+  body[lang="th"] .dash-card .info strong { font-family: var(--font-thai); }
+  .dash-card .info span { font-size: 12px; color: var(--ink-2); }
+  body[lang="th"] .dash-card .info span { font-family: var(--font-thai); }
+  .dash-create-btn {
+    padding: 10px 20px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--coral) 0%, var(--pink) 100%);
+    color: white; border: 0;
+    font-family: var(--font-display); font-weight: 600;
+    font-size: 13px; cursor: none;
+    display: inline-flex; align-items: center; gap: 6px;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.4) inset, 0 4px 14px rgba(255,122,168,0.4);
+  }
+  body[lang="th"] .dash-create-btn { font-family: var(--font-thai); }
+  .dash-tags {
+    display: flex; gap: 12px; margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+    font-family: var(--font-mono); font-size: 10px;
+    color: var(--ink-2); letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  /* Pastel beams */
+  .dash-beam {
+    position: absolute; z-index: -1;
+    width: 250px; height: 250px;
+    border-radius: 50%;
+    filter: blur(60px); opacity: 0.5;
+  }
+  .dash-beam-l { bottom: 100px; left: 5%; background: radial-gradient(circle, var(--coral), transparent 70%); }
+  .dash-beam-r { bottom: 100px; right: 5%; background: radial-gradient(circle, var(--pink), transparent 70%); }
+  .dash-beam-t { top: 100px; left: 50%; transform: translateX(-50%); background: radial-gradient(circle, var(--sun), transparent 70%); }
+
+  /* STUDIOS */
+  .studios-section { padding: 100px 32px; position: relative; z-index: 2; }
+  .studios-head { max-width: 800px; margin: 0 auto 60px; text-align: center; }
+  .eyebrow {
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--ink-2); margin-bottom: 24px;
+    display: inline-flex; align-items: center; gap: 14px;
+  }
+  .eyebrow::before, .eyebrow::after {
+    content: "♥";
+    background: linear-gradient(135deg, var(--coral), var(--pink));
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 14px;
+  }
+  .studios-head h2 {
+    font-family: var(--font-display);
+    font-size: clamp(40px, 5.4vw, 76px);
+    font-weight: 700; letter-spacing: -0.03em;
+    line-height: 1.05; color: var(--ink); margin-bottom: 18px;
+  }
+  body[lang="th"] .studios-head h2 { font-family: var(--font-thai); font-weight: 700; }
+  .studios-head h2 .iri {
+    background: linear-gradient(135deg, var(--coral), var(--pink), var(--plum));
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .studios-head p { color: var(--ink-2); font-size: 17px; line-height: 1.55; }
+  body[lang="th"] .studios-head p { font-family: var(--font-thai); }
+
+  .studios-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    max-width: 1400px; margin: 0 auto;
+  }
+  .studio {
+    padding: 36px 30px;
+    background: rgba(255,255,255,0.6);
+    backdrop-filter: blur(28px) saturate(1.4);
+    border: 1px solid rgba(255,255,255,0.85);
+    border-radius: 22px;
+    transition: all 0.3s;
+    position: relative; overflow: hidden;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.95) inset, 0 10px 30px rgba(184,85,119,0.1);
+  }
+  .studio::before {
+    content: ""; position: absolute;
+    top: -50%; right: -50%; width: 100%; height: 100%;
+    border-radius: 50%;
+    filter: blur(40px); opacity: 0;
+    transition: opacity 0.4s;
+  }
+  .studio:nth-child(1)::before { background: radial-gradient(circle, var(--peach), transparent 70%); }
+  .studio:nth-child(2)::before { background: radial-gradient(circle, var(--rose), transparent 70%); }
+  .studio:nth-child(3)::before { background: radial-gradient(circle, var(--sun), transparent 70%); }
+  .studio:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 1px 0 rgba(255,255,255,0.95) inset, 0 28px 56px rgba(184,85,119,0.18);
+  }
+  .studio:hover::before { opacity: 0.7; }
+  .studio > * { position: relative; z-index: 1; }
+  .studio-orb {
+    width: 76px; height: 76px;
+    border-radius: 50%;
+    margin-bottom: 26px; position: relative;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.6), 0 14px 32px rgba(184,85,119,0.25);
+  }
+  .studio:nth-child(1) .studio-orb {
+    background: radial-gradient(circle at 35% 28%, white, var(--peach) 25%, var(--coral) 60%, var(--pink));
+  }
+  .studio:nth-child(2) .studio-orb {
+    background: radial-gradient(circle at 35% 28%, white, var(--rose) 25%, var(--pink) 60%, var(--plum));
+  }
+  .studio:nth-child(3) .studio-orb {
+    background: radial-gradient(circle at 35% 28%, white, var(--sun) 25%, var(--peach) 60%, var(--coral));
+  }
+  .studio-orb::after {
+    content: ""; position: absolute;
+    top: 9px; left: 18px; width: 24px; height: 10px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.7), transparent);
+    border-radius: 50%; transform: rotate(-25deg);
+  }
+  .studio h3 {
+    font-family: var(--font-display); font-size: 26px;
+    font-weight: 700; letter-spacing: -0.02em;
+    margin-bottom: 6px; color: var(--ink);
+  }
+  body[lang="th"] .studio h3 { font-family: var(--font-thai); }
+  .studio h3 em {
+    font-family: var(--font-serif);
+    font-style: italic; font-weight: 400;
+    color: var(--pink);
+  }
+  body[lang="th"] .studio h3 em { font-family: var(--font-thai); font-style: normal; font-weight: 800; }
+  .studio .sub {
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--ink-2); margin-bottom: 20px; font-weight: 600;
+  }
+  .studio p { font-size: 14px; line-height: 1.65; color: var(--ink-2); }
+  body[lang="th"] .studio p { font-family: var(--font-thai); font-size: 15px; }
+
+  /* BOTTOM CTA */
+  .bottom-cta {
+    padding: 100px 32px; text-align: center;
+    position: relative; z-index: 2;
+    border-top: 1px solid var(--line);
+  }
+  .bottom-cta::before {
+    content: ""; position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 30% 50%, rgba(255,163,143,0.15), transparent 60%),
+      radial-gradient(ellipse 60% 50% at 70% 50%, rgba(255,122,168,0.15), transparent 60%);
+    z-index: -1;
+  }
+  .bottom-cta-inner { max-width: 720px; margin: 0 auto; }
+  .bottom-cta h2 {
+    font-size: clamp(42px, 5.5vw, 72px);
+    font-weight: 700; letter-spacing: -0.03em;
+    line-height: 1.05; color: var(--ink); margin-bottom: 20px;
+  }
+  body[lang="th"] .bottom-cta h2 { font-family: var(--font-thai); }
+  .bottom-cta h2 .iri {
+    background: linear-gradient(135deg, var(--coral), var(--pink), var(--plum));
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .bottom-cta h2 .serif {
+    font-family: var(--font-serif); font-style: italic; font-weight: 400;
+  }
+  body[lang="th"] .bottom-cta h2 .serif { font-family: var(--font-thai); font-style: normal; }
+  .bottom-cta p { color: var(--ink-2); font-size: 17px; margin-bottom: 32px; line-height: 1.55; }
+  body[lang="th"] .bottom-cta p { font-family: var(--font-thai); }
+
+  /* FOOTER */
+  footer {
+    padding: 60px 32px 32px;
+    position: relative; z-index: 2;
+    background: rgba(255,255,255,0.5);
+    backdrop-filter: blur(30px);
+    border-top: 1px solid rgba(255,255,255,0.5);
+  }
+  .footer-grid {
+    max-width: 1400px; margin: 0 auto;
+    display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 48px;
+    padding-bottom: 48px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 24px;
+  }
+  .footer-brand-row {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 16px; color: var(--ink); text-decoration: none;
+  }
+  .footer-brand-row .icon {
+    width: 32px; height: 32px; border-radius: 9px;
+    background: radial-gradient(circle at 35% 28%, white, var(--pink) 60%, var(--mauve));
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 14px rgba(255,122,168,0.4);
+  }
+  .footer-brand-row .icon svg { width: 16px; height: 16px; color: white; }
+  .footer-brand-row .name { font-weight: 700; font-size: 20px; }
+  .footer-tag {
+    font-size: 14px; color: var(--ink-2);
+    max-width: 320px; line-height: 1.55;
+  }
+  body[lang="th"] .footer-tag { font-family: var(--font-thai); }
+  .footer-col h5 {
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    margin-bottom: 20px; font-weight: 600;
+    background: linear-gradient(135deg, var(--coral), var(--pink));
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .footer-col a {
+    display: block; color: var(--ink);
+    text-decoration: none; font-size: 14px;
+    padding: 6px 0; transition: color 0.2s;
+  }
+  body[lang="th"] .footer-col a { font-family: var(--font-thai); }
+  .footer-col a:hover {
+    background: linear-gradient(135deg, var(--coral), var(--pink));
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .footer-bot {
+    max-width: 1400px; margin: 0 auto;
+    display: flex; justify-content: space-between; align-items: center;
+    padding-top: 24px;
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.14em; color: var(--ink-2);
+    text-transform: uppercase;
+  }
+  .footer-bot .status {
+    background: linear-gradient(135deg, var(--coral), var(--pink));
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 600;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .footer-bot .status::before {
+    content: ""; width: 6px; height: 6px;
+    background: radial-gradient(circle, var(--coral), var(--pink));
+    border-radius: 50%;
+    box-shadow: 0 0 10px rgba(255,122,168,0.6);
+    animation: pulse 2s infinite;
+  }
+
+  @media (max-width: 1024px) {
+    nav { flex-wrap: wrap; gap: 12px; padding: 10px 14px; }
+    nav .center { order: 3; width: 100%; justify-content: center; flex-wrap: wrap; gap: 6px; }
+    nav .center a { padding: 7px 12px; font-size: 12px; }
+    .hero { padding: 180px 20px 60px; }
+    .app-icon { width: 96px; height: 96px; }
+    .hero-form { min-width: 0; width: 100%; max-width: 460px; }
+    .dashboard-wrap { transform: none; }
+    .dash-body { grid-template-columns: 1fr; }
+    .dash-side { display: none; }
+    .dash-bar .title, .dash-search, .dash-bar .actions .avatar-mini { display: none; }
+    .studios-grid, .footer-grid { grid-template-columns: 1fr; }
+    .studios-section, .bottom-cta { padding: 60px 20px; }
+    body { cursor: auto; }
+  }
+</style>
+</head>
+<body lang="th">
+
+<div class="cursor" id="cursor"><span class="label" id="clabel"></span></div>
+
+<div class="hero-wave">
+  <svg viewBox="0 0 1440 800" fill="none" preserveAspectRatio="none">
+    <path d="M0,250 Q360,150 720,250 T1440,250" stroke="rgba(255,122,168,0.45)" stroke-width="1" fill="none"/>
+    <path d="M0,300 Q360,200 720,300 T1440,300" stroke="rgba(255,163,143,0.35)" stroke-width="1" fill="none"/>
+    <path d="M0,350 Q360,250 720,350 T1440,350" stroke="rgba(255,229,168,0.3)" stroke-width="1" fill="none"/>
+    <path d="M0,400 Q360,300 720,400 T1440,400" stroke="rgba(255,122,168,0.2)" stroke-width="1" fill="none"/>
+  </svg>
+</div>
+
+<nav>
+  <a href="#" class="brand">
+    <div class="brand-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M6 4l12 8-12 8V4z" fill="currentColor"/></svg></div>
+    <span class="brand-name">Capduction</span>
+  </a>
+  <div class="center">
+    <a href="#" class="active hover-target" data-cursor="go">Home</a>
+    <a href="#" class="hover-target" data-cursor="go">Studios</a>
+    <a href="#" class="hover-target" data-cursor="go">Pricing</a>
+    <a href="#" class="hover-target" data-cursor="go">Showcase</a>
+    <a href="#" class="hover-target" data-cursor="go">FAQ</a>
+  </div>
+  <div class="right">
+    <div class="lang-toggle">
+      <button class="active hover-target" data-lang="th">TH</button>
+      <button class="hover-target" data-lang="en">EN</button>
+    </div>
+    <a href="#" class="nav-cta hover-target" data-cursor="start"><span data-i18n="nav.cta">เริ่มเลย</span></a>
+  </div>
+</nav>
+
+<section class="hero">
+  <span class="heart h-1"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21l-1.5-1.4C5 14.7 2 12 2 8.5 2 6 4 4 6.5 4c1.5 0 2.9.7 3.8 1.8L12 7.5l1.7-1.7C14.6 4.7 16 4 17.5 4 20 4 22 6 22 8.5c0 3.5-3 6.2-8.5 11.1L12 21z"/></svg></span>
+  <span class="heart h-2"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21l-1.5-1.4C5 14.7 2 12 2 8.5 2 6 4 4 6.5 4c1.5 0 2.9.7 3.8 1.8L12 7.5l1.7-1.7C14.6 4.7 16 4 17.5 4 20 4 22 6 22 8.5c0 3.5-3 6.2-8.5 11.1L12 21z"/></svg></span>
+  <span class="heart h-3"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0l2.4 9.6L24 12l-9.6 2.4L12 24l-2.4-9.6L0 12l9.6-2.4z"/></svg></span>
+  <span class="heart h-4"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21l-1.5-1.4C5 14.7 2 12 2 8.5 2 6 4 4 6.5 4c1.5 0 2.9.7 3.8 1.8L12 7.5l1.7-1.7C14.6 4.7 16 4 17.5 4 20 4 22 6 22 8.5c0 3.5-3 6.2-8.5 11.1L12 21z"/></svg></span>
+  <span class="heart h-5"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0l2.4 9.6L24 12l-9.6 2.4L12 24l-2.4-9.6L0 12l9.6-2.4z"/></svg></span>
+
+  <div class="app-icon">
+    <svg viewBox="0 0 24 24" fill="none"><path d="M6 4l12 8-12 8V4z" fill="currentColor"/></svg>
+  </div>
+  <h1>
+    <span data-i18n="hero.h"><span class="serif">Where Scripts</span><br/><span class="iri">Bloom Like Roses</span></span>
+  </h1>
+  <p class="hero-sub" data-i18n="hero.sub">
+    สตูดิโอ AI สำหรับครีเอเตอร์วิดีโอสั้นไทย — ปั้น<strong>สคริปต์การพูด</strong>และ<strong>แคปชั่นหน้าจอ</strong>ที่เข้าใจ style ไทย น่ารัก เข้าถึงง่าย ใช้แล้วยอดขึ้นจริง
+  </p>
+  <form class="hero-form" onsubmit="event.preventDefault()">
+    <input type="email" placeholder="your@email.com" />
+    <button class="hover-target" data-cursor="join"><span data-i18n="hero.cta">ลองฟรี →</span></button>
+  </form>
+  <div class="hero-trust">
+    <div class="avs"><div class="av"></div><div class="av"></div><div class="av"></div></div>
+    <span><strong>2,847</strong> <span data-i18n="hero.trust">creators · กำลังใช้ตอนนี้</span></span>
+  </div>
+</section>
+
+<section class="dashboard-section">
+  <div class="dash-beam dash-beam-l"></div>
+  <div class="dash-beam dash-beam-r"></div>
+  <div class="dash-beam dash-beam-t"></div>
+  <div class="dash-eye" data-i18n="dash.eye">— LIVE STUDIO PREVIEW</div>
+  <div class="dashboard-wrap">
+    <div class="dashboard-frame">
+      <div class="dash-bar">
+        <div class="dash-brand-mini">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none"><path d="M6 4l12 8-12 8V4z" fill="currentColor"/></svg></div>
+          <div class="label">
+            <strong>Capduction <span class="beta">Beta</span></strong>
+            <span class="sub">AI Script Studio</span>
+          </div>
+        </div>
+        <div class="title" data-i18n="dash.title">Workspace</div>
+        <div class="dash-search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <span>Search anywhere</span>
+          <span class="kbd">⌘K</span>
+        </div>
+        <div class="actions">
+          <span class="ico-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/></svg></span>
+          <span class="ico-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/></svg></span>
+          <div class="avatar-mini">
+            <div class="av"></div>
+            <div class="info"><strong>Alex Smith</strong><span class="sub">New User</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="dash-body">
+        <aside class="dash-side">
+          <h6>STUDIOS</h6>
+          <div class="dash-item active">
+            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v20M2 12h20"/><circle cx="12" cy="12" r="9"/></svg>
+            <span data-i18n="dash.combo">Combo Mode</span>
+            <span class="badge">NEW</span>
+          </div>
+          <div class="dash-item hover-target" data-cursor="open">
+            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="6" width="18" height="14" rx="1"/></svg>
+            <span data-i18n="dash.script">Script Studio</span>
+          </div>
+          <div class="dash-item hover-target" data-cursor="open">
+            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/></svg>
+            <span data-i18n="dash.caption">Caption Studio</span>
+          </div>
+          <div class="dash-sep"></div>
+          <h6>PROJECTS</h6>
+          <div class="dash-item hover-target" data-cursor="open">
+            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 7l9-4 9 4-9 4-9-4z"/></svg>
+            <span data-i18n="dash.p1">ลิปสติกแดงแมตต์</span>
+          </div>
+          <div class="dash-item hover-target" data-cursor="open">
+            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 7l9-4 9 4-9 4-9-4z"/></svg>
+            <span data-i18n="dash.p2">แคมเปญฤดูร้อน</span>
+          </div>
+          <div class="dash-sep"></div>
+          <h6>RESOURCES</h6>
+          <div class="dash-item hover-target" data-cursor="open">
+            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/></svg>
+            <span data-i18n="dash.bv">Brand Voice</span>
+          </div>
+          <div class="dash-item hover-target" data-cursor="open">
+            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3h18v18H3z"/></svg>
+            <span data-i18n="dash.hist">History</span>
+          </div>
+        </aside>
+        <main class="dash-main">
+          <div class="dash-section-title">
+            <h4 data-i18n="dash.section">เลือก studio สำหรับช่วงเวลาของคุณ</h4>
+            <span class="demo-badge">Live</span>
+          </div>
+          <div class="dash-tabs">
+            <div class="dash-tab active">Script</div>
+            <div class="dash-tab hover-target" data-cursor="switch">Caption</div>
+            <div class="dash-tab hover-target" data-cursor="switch">Combo</div>
+            <div class="dash-tab hover-target" data-cursor="switch">Other</div>
+          </div>
+          <div class="dash-content">
+            <h5 data-i18n="dash.h5">เริ่มจากศูนย์</h5>
+            <p data-i18n="dash.p">สร้างจาก scratch เพื่อปรับ creator experience ในแบบที่คุณต้องการ 100% เข้าใจสไตล์การเขียนแม่ค้าไทย</p>
+            <div class="dash-card">
+              <div class="ico-orb"></div>
+              <div class="info">
+                <strong data-i18n="dash.card.t">Real-Time Script Generator</strong>
+                <span data-i18n="dash.card.s">เพื่อนคู่คิดที่ทำงาน 24 × 7 ให้คอนเทนต์คุณ</span>
+              </div>
+              <button class="dash-create-btn hover-target" data-cursor="create">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14m-7-7h14"/></svg>
+                <span data-i18n="dash.create">สร้าง</span>
+              </button>
+            </div>
+            <div class="dash-tags">
+              <span>15S—90S SCRIPTS</span>
+              <span>·</span>
+              <span>7 PLATFORMS</span>
+              <span>·</span>
+              <span>BRAND VOICE MEMORY</span>
+              <span>·</span>
+              <span>EXPORT .PDF</span>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="studios-section" id="studios">
+  <div class="studios-head">
+    <div class="eyebrow" data-i18n="st.eye">THREE STUDIOS · ONE WORKFLOW</div>
+    <h2 data-i18n="st.h">เครื่องมือที่ทำให้คุณ <span class="iri">รัก</span><br/>การทำคอนเทนต์อีกครั้ง</h2>
+    <p data-i18n="st.p">เลือกใช้ทีละโหมด หรือเรียก Combo เพื่อปั้น script + caption ใน hook เดียวกัน — เสร็จในนาทีเดียว</p>
+  </div>
+  <div class="studios-grid">
+    <div class="studio">
+      <div class="studio-orb"></div>
+      <h3 data-i18n="st.1.n"><em>Script</em> Studio</h3>
+      <div class="sub">SPOKEN · TIMED · CUED</div>
+      <p data-i18n="st.1.d">สคริปต์การพูดสำหรับวิดีโอสั้น พร้อม timing markers ทุกวินาที B-roll cues และข้อความหน้าจอ — director's plan ที่น่ารัก</p>
+    </div>
+    <div class="studio">
+      <div class="studio-orb"></div>
+      <h3 data-i18n="st.2.n"><em>Caption</em> Studio</h3>
+      <div class="sub">POSTS · HOOKS · TAGS</div>
+      <p data-i18n="st.2.d">แคปชั่น 5 variants, hooks ดึงสายตา, hashtags ตรงเทรนด์, CTA ปิดการขายแบบหวานๆ — ปรับโทนตามแพลตฟอร์ม</p>
+    </div>
+    <div class="studio">
+      <div class="studio-orb"></div>
+      <h3 data-i18n="st.3.n"><em>Combo</em> Mode</h3>
+      <div class="sub">ALIGNED · PACKAGED · READY</div>
+      <p data-i18n="st.3.d">ปั้น script และ caption ใช้ hook เดียวกัน package พร้อมโพสต์ครบในไฟล์เดียว เหมาะกับแคมเปญใหญ่</p>
+    </div>
+  </div>
+</section>
+
+<section class="bottom-cta">
+  <div class="bottom-cta-inner">
+    <h2 data-i18n="bcta.h"><span class="serif">Make every post</span><br/><span class="iri">Bloom in seconds.</span></h2>
+    <p data-i18n="bcta.p">เริ่มใช้ Capduction ฟรี 10 ครั้ง · ไม่ต้องใช้บัตรเครดิต · ยกเลิกได้ทุกเมื่อ — น่ารักง่ายๆ ในนาทีเดียว</p>
+    <form class="hero-form" onsubmit="event.preventDefault()" style="display: inline-flex;">
+      <input type="email" placeholder="your@email.com" />
+      <button class="hover-target" data-cursor="join"><span data-i18n="bcta.btn">เริ่มเลย →</span></button>
+    </form>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-grid">
+    <div>
+      <a href="#" class="footer-brand-row">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none"><path d="M6 4l12 8-12 8V4z" fill="currentColor"/></svg></div>
+        <span class="name">Capduction</span>
+      </a>
+      <p class="footer-tag" data-i18n="ft.tag">สตูดิโอ AI ระหว่างไอเดียกับการกดอัปโหลด — สร้างในบางกอก เพื่อ creator ไทยทั่วประเทศ</p>
+    </div>
+    <div class="footer-col"><h5>STUDIOS</h5><a href="#" class="hover-target" data-cursor="go">Script</a><a href="#" class="hover-target" data-cursor="go">Caption</a><a href="#" class="hover-target" data-cursor="go">Combo</a><a href="#" class="hover-target" data-cursor="go">Brand Voice</a></div>
+    <div class="footer-col"><h5>RESOURCES</h5><a href="#" class="hover-target" data-cursor="go">Documentation</a><a href="#" class="hover-target" data-cursor="go">Changelog</a><a href="#" class="hover-target" data-cursor="go">API</a><a href="#" class="hover-target" data-cursor="go">Status</a></div>
+    <div class="footer-col"><h5>COMPANY</h5><a href="#" class="hover-target" data-cursor="go">About</a><a href="#" class="hover-target" data-cursor="go">Careers</a><a href="#" class="hover-target" data-cursor="go">Contact</a><a href="#" class="hover-target" data-cursor="go">Privacy</a></div>
+  </div>
+  <div class="footer-bot">
+    <span>© 2026 CAPDUCTION · MADE IN BANGKOK</span>
+    <span class="status">♥ All systems operational</span>
+    <span>ROSÉ DAYDREAM · MIX 02</span>
+  </div>
+</footer>
+
+<script>
+const cursor = document.getElementById('cursor');
+const cLabel = document.getElementById('clabel');
+const target = { x: 0, y: 0 };
+const actual = { x: 0, y: 0 };
+window.addEventListener('mousemove', e => { target.x = e.clientX; target.y = e.clientY; });
+function loopC(){
+  actual.x += (target.x - actual.x) * 0.22;
+  actual.y += (target.y - actual.y) * 0.22;
+  cursor.style.left = actual.x + 'px';
+  cursor.style.top = actual.y + 'px';
+  requestAnimationFrame(loopC);
+}
+loopC();
+const labels = { go: '→', start: '♥', join: '♥', open: 'OPEN', switch: '⇄', create: '+' };
+document.querySelectorAll('.hover-target').forEach(el => {
+  el.addEventListener('mouseenter', () => {
+    cursor.classList.add('target');
+    cLabel.textContent = labels[el.dataset.cursor] || '→';
+  });
+  el.addEventListener('mouseleave', () => cursor.classList.remove('target'));
+});
+
+const dict = {
+  th: {
+    "nav.cta":"เริ่มเลย",
+    "hero.h":"<span class='serif'>Where Scripts</span><br/><span class='iri'>Bloom Like Roses</span>",
+    "hero.sub":"สตูดิโอ AI สำหรับครีเอเตอร์วิดีโอสั้นไทย — ปั้น<strong>สคริปต์การพูด</strong>และ<strong>แคปชั่นหน้าจอ</strong>ที่เข้าใจ style ไทย น่ารัก เข้าถึงง่าย ใช้แล้วยอดขึ้นจริง",
+    "hero.cta":"ลองฟรี →","hero.trust":"creators · กำลังใช้ตอนนี้",
+    "dash.eye":"— LIVE STUDIO PREVIEW",
+    "dash.title":"เวิร์กสเปซ","dash.combo":"Combo Mode","dash.script":"Script Studio","dash.caption":"Caption Studio",
+    "dash.p1":"ลิปสติกแดงแมตต์","dash.p2":"แคมเปญฤดูร้อน",
+    "dash.bv":"Brand Voice","dash.hist":"ประวัติ",
+    "dash.section":"เลือก studio สำหรับช่วงเวลาของคุณ",
+    "dash.h5":"เริ่มจากศูนย์",
+    "dash.p":"สร้างจาก scratch เพื่อปรับ creator experience ในแบบที่คุณต้องการ 100% เข้าใจสไตล์การเขียนแม่ค้าไทย",
+    "dash.card.t":"Real-Time Script Generator",
+    "dash.card.s":"เพื่อนคู่คิดที่ทำงาน 24 × 7 ให้คอนเทนต์คุณ",
+    "dash.create":"สร้าง",
+    "st.eye":"THREE STUDIOS · ONE WORKFLOW",
+    "st.h":"เครื่องมือที่ทำให้คุณ <span class='iri'>รัก</span><br/>การทำคอนเทนต์อีกครั้ง",
+    "st.p":"เลือกใช้ทีละโหมด หรือเรียก Combo เพื่อปั้น script + caption ใน hook เดียวกัน — เสร็จในนาทีเดียว",
+    "st.1.n":"<em>Script</em> Studio",
+    "st.1.d":"สคริปต์การพูดสำหรับวิดีโอสั้น พร้อม timing markers ทุกวินาที B-roll cues และข้อความหน้าจอ — director's plan ที่น่ารัก",
+    "st.2.n":"<em>Caption</em> Studio",
+    "st.2.d":"แคปชั่น 5 variants, hooks ดึงสายตา, hashtags ตรงเทรนด์, CTA ปิดการขายแบบหวานๆ — ปรับโทนตามแพลตฟอร์ม",
+    "st.3.n":"<em>Combo</em> Mode",
+    "st.3.d":"ปั้น script และ caption ใช้ hook เดียวกัน package พร้อมโพสต์ครบในไฟล์เดียว เหมาะกับแคมเปญใหญ่",
+    "bcta.h":"<span class='serif'>Make every post</span><br/><span class='iri'>Bloom in seconds.</span>",
+    "bcta.p":"เริ่มใช้ Capduction ฟรี 10 ครั้ง · ไม่ต้องใช้บัตรเครดิต · ยกเลิกได้ทุกเมื่อ — น่ารักง่ายๆ ในนาทีเดียว",
+    "bcta.btn":"เริ่มเลย →",
+    "ft.tag":"สตูดิโอ AI ระหว่างไอเดียกับการกดอัปโหลด — สร้างในบางกอก เพื่อ creator ไทยทั่วประเทศ"
+  },
+  en: {
+    "nav.cta":"Get started",
+    "hero.h":"<span class='serif'>Where Scripts</span><br/><span class='iri'>Bloom Like Roses</span>",
+    "hero.sub":"An AI studio for Thai short-form creators — craft <strong>spoken scripts</strong> and <strong>on-screen captions</strong> in real Thai style. Cute, accessible, conversion-tested.",
+    "hero.cta":"Try free →","hero.trust":"creators · using now",
+    "dash.eye":"— LIVE STUDIO PREVIEW",
+    "dash.title":"Workspace","dash.combo":"Combo Mode","dash.script":"Script Studio","dash.caption":"Caption Studio",
+    "dash.p1":"Matte Red Lipstick","dash.p2":"Summer Campaign",
+    "dash.bv":"Brand Voice","dash.hist":"History",
+    "dash.section":"Pick the studio for your moment",
+    "dash.h5":"From Scratch",
+    "dash.p":"Begin from the ground up for a fully personalized creator experience. Understands Thai seller voice deeply.",
+    "dash.card.t":"Real-Time Script Generator",
+    "dash.card.s":"A companion that works 24 × 7 for your content",
+    "dash.create":"Create",
+    "st.eye":"THREE STUDIOS · ONE WORKFLOW",
+    "st.h":"Tools that make you <span class='iri'>love</span><br/>creating content again",
+    "st.p":"Use modes individually, or call Combo to craft script + caption on one hook — done in a minute.",
+    "st.1.n":"<em>Script</em> Studio",
+    "st.1.d":"Spoken video scripts with per-second timing markers, B-roll cues, and on-screen text — a cute director's plan.",
+    "st.2.n":"<em>Caption</em> Studio",
+    "st.2.d":"5 caption variants, scroll-stopping hooks, trend-matched hashtags, sweet closing CTAs — tone tunes per platform.",
+    "st.3.n":"<em>Combo</em> Mode",
+    "st.3.d":"Script and caption on the same hook — ready-to-post package in one file. Built for major campaigns.",
+    "bcta.h":"<span class='serif'>Make every post</span><br/><span class='iri'>Bloom in seconds.</span>",
+    "bcta.p":"Try Capduction free for 10 generations · no credit card · cancel anytime — cute and easy, in one minute.",
+    "bcta.btn":"Get started →",
+    "ft.tag":"The AI studio between idea and upload — built in Bangkok, for Thai creators everywhere."
+  }
+};
+document.querySelectorAll('.lang-toggle button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.lang-toggle button').forEach(x => x.classList.remove('active'));
+    btn.classList.add('active');
+    const lang = btn.dataset.lang;
+    document.body.lang = lang;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.dataset.i18n;
+      if (dict[lang][key]) el.innerHTML = dict[lang][key];
+    });
+  });
+});
+</script>
+</body>
+</html>

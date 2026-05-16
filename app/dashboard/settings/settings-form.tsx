@@ -1,0 +1,186 @@
+'use client';
+
+import { useState } from 'react';
+import Link from 'next/link';
+import { Save, CreditCard, LogOut, Check } from 'lucide-react';
+import { TONES, PLATFORMS, DURATIONS } from '@/types';
+import { updateProfileAction, updateSettingsAction } from '@/app/actions/settings';
+
+interface Defaults {
+  full_name:        string;
+  company_name:     string;
+  default_platform: string;
+  default_tone:     string;
+  default_duration: string;
+  brand_voice:      string;
+}
+
+export function SettingsForm({
+  defaults, email, plan, isDemoMode,
+}: {
+  defaults: Defaults;
+  email: string;
+  plan: string;
+  isDemoMode: boolean;
+}) {
+  const [d, setD] = useState<Defaults>(defaults);
+  const [saving, setSaving] = useState(false);
+  const [saved,  setSaved]  = useState(false);
+  const [error,  setError]  = useState<string | null>(null);
+
+  async function handleSave(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null); setSaving(true); setSaved(false);
+
+    if (isDemoMode) {
+      // Demo mode — just show saved animation
+      setTimeout(() => { setSaving(false); setSaved(true); }, 600);
+      setTimeout(() => setSaved(false), 2000);
+      return;
+    }
+
+    const profileFd = new FormData();
+    profileFd.set('full_name', d.full_name);
+    const profRes = await updateProfileAction(profileFd);
+    if (profRes.error) { setError(profRes.error); setSaving(false); return; }
+
+    const settingsFd = new FormData();
+    settingsFd.set('company_name',     d.company_name);
+    settingsFd.set('default_platform', d.default_platform);
+    settingsFd.set('default_tone',     d.default_tone);
+    settingsFd.set('default_duration', d.default_duration);
+    settingsFd.set('brand_voice',      d.brand_voice);
+    const setRes = await updateSettingsAction(settingsFd);
+    if (setRes.error) { setError(setRes.error); setSaving(false); return; }
+
+    setSaving(false); setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  }
+
+  return (
+    <form onSubmit={handleSave} className="flex flex-col gap-6">
+      {/* ── Account block ─────────────────────────── */}
+      <Card title="บัญชี">
+        <Field label="อีเมล (อ่านอย่างเดียว)">
+          <input value={email} disabled className={inputCls + ' opacity-60'} />
+        </Field>
+        <Field label="ชื่อแสดง">
+          <input
+            value={d.full_name}
+            onChange={(e) => setD({ ...d, full_name: e.target.value })}
+            placeholder="เช่น Khun Nam"
+            className={inputCls}
+          />
+        </Field>
+        <Field label="ชื่อบริษัท / ร้าน (ทางเลือก)">
+          <input
+            value={d.company_name}
+            onChange={(e) => setD({ ...d, company_name: e.target.value })}
+            placeholder="เช่น Nam Beauty Co."
+            className={inputCls}
+          />
+        </Field>
+      </Card>
+
+      {/* ── Defaults block ────────────────────────── */}
+      <Card title="ค่า Default สำหรับทุก generation">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <Field label="Platform">
+            <select value={d.default_platform} onChange={(e) => setD({ ...d, default_platform: e.target.value })} className={inputCls}>
+              {PLATFORMS.map((p) => <option key={p} value={p}>{p}</option>)}
+            </select>
+          </Field>
+          <Field label="Tone">
+            <select value={d.default_tone} onChange={(e) => setD({ ...d, default_tone: e.target.value })} className={inputCls}>
+              {TONES.map((t) => <option key={t} value={t}>{t}</option>)}
+            </select>
+          </Field>
+          <Field label="Duration">
+            <select value={d.default_duration} onChange={(e) => setD({ ...d, default_duration: e.target.value })} className={inputCls}>
+              {DURATIONS.map((dr) => <option key={dr} value={dr}>{dr}</option>)}
+            </select>
+          </Field>
+        </div>
+      </Card>
+
+      {/* ── Brand voice ───────────────────────────── */}
+      <Card title="Brand Voice (อธิบายสไตล์การพูดของแบรนด์)">
+        <textarea
+          rows={5}
+          value={d.brand_voice}
+          onChange={(e) => setD({ ...d, brand_voice: e.target.value })}
+          placeholder="เช่น 'พูดเหมือนพี่สาวที่ปรึกษาเรื่องผิว ใช้ภาษาน่ารัก ใส่ emoji ✨ บางครั้ง อย่าใส่ศัพท์เทคนิคหนักๆ'"
+          className={`${inputCls} resize-none font-thai`}
+        />
+        <p className="text-[11px] text-ink-3 lang-th:font-thai">
+          AI จะใช้ข้อความนี้เป็น context ทุกครั้งที่สร้าง — ลง detail ได้ละเอียดเท่าที่ต้องการ
+        </p>
+      </Card>
+
+      {/* ── Save row ──────────────────────────────── */}
+      {error && (
+        <p className="text-[13px] text-rose-600 bg-rose-50/70 border border-rose-200 rounded-lg px-3 py-2 lang-th:font-thai">
+          {error}
+        </p>
+      )}
+      <div className="flex items-center gap-3 flex-wrap">
+        <button
+          type="submit"
+          data-cursor="start"
+          disabled={saving}
+          className="hover-target btn-grad px-6 py-3 rounded-[12px] text-white font-semibold text-[14px] border-0 flex items-center gap-2 disabled:opacity-60 lang-th:font-thai"
+        >
+          {saved ? <><Check size={14} /> บันทึกแล้ว</> : <><Save size={14} /> บันทึก</>}
+        </button>
+        <Link
+          href={plan === 'free' ? '/pricing' : '/api/billing/portal'}
+          data-cursor="go"
+          className="hover-target inline-flex items-center gap-2 px-5 py-3 rounded-[12px] bg-white/65 border border-white/80 text-ink-2 hover:bg-white/85 font-semibold text-[14px] no-underline transition-all lang-th:font-thai"
+        >
+          <CreditCard size={14} />
+          {plan === 'free'
+            ? 'อัปเกรดเป็น Studio · ฿349/mo'
+            : `จัดการการชำระเงิน · ${plan === 'studio' ? 'Studio' : 'Agency'}`}
+        </Link>
+        {!isDemoMode && (
+          <form action="/auth/signout" method="post" className="m-0 ml-auto">
+            <button
+              type="submit"
+              data-cursor="start"
+              className="hover-target inline-flex items-center gap-2 px-5 py-3 rounded-[12px] bg-rose-50/70 border border-rose-200 text-rose-700 hover:bg-rose-100/70 font-semibold text-[14px] transition-all lang-th:font-thai"
+            >
+              <LogOut size={14} />
+              ออกจากระบบ
+            </button>
+          </form>
+        )}
+      </div>
+    </form>
+  );
+}
+
+function Card({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="glass-strong rounded-[18px] p-6 flex flex-col gap-4">
+      <h2 className="font-mono text-[10px] tracking-[0.22em] uppercase text-ink-3 font-semibold lang-th:font-thai lang-th:normal-case lang-th:tracking-normal">
+        — {title}
+      </h2>
+      {children}
+    </div>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="block">
+      <span className="block font-mono text-[10px] tracking-[0.18em] text-ink-3 uppercase mb-1.5 font-semibold lang-th:font-thai lang-th:normal-case lang-th:tracking-normal">
+        {label}
+      </span>
+      {children}
+    </label>
+  );
+}
+
+const inputCls =
+  'w-full px-4 py-2.5 rounded-[10px] bg-white/55 border border-white/70 text-ink text-[14px] ' +
+  'placeholder:text-slate outline-none focus:ring-2 focus:ring-violet/40 focus:bg-white/75 transition-all lang-th:font-thai';

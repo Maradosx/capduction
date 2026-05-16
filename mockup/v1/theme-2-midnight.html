@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Capduction · Theme 02 — Midnight Cinema</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@300;400;500&family=Anuphan:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script type="importmap">
+{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }
+</script>
+<style>
+  :root {
+    --bg:      #0A0A0F;
+    --bg-2:    #11111A;
+    --bg-3:    #1A1A26;
+    --text:    #F8F6F0;
+    --text-2:  #C9C5BC;
+    --text-3:  #6B6B7A;
+    --cyan:    #00E5FF;
+    --amber:   #FFB547;
+    --line:    rgba(248,246,240,0.08);
+    --font-display: 'Instrument Serif', serif;
+    --font-thai:    'Anuphan', sans-serif;
+    --font-mono:    'JetBrains Mono', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: var(--font-mono); font-weight: 300;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden; min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse at top, rgba(0,229,255,0.06), transparent 50%),
+      radial-gradient(ellipse at bottom right, rgba(255,181,71,0.04), transparent 60%);
+  }
+  body[lang="th"] { font-family: var(--font-thai); font-weight: 300; }
+
+  /* Spotlight cursor effect */
+  .spotlight {
+    position: fixed; pointer-events: none; z-index: 1;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(0,229,255,0.06) 0%, transparent 60%);
+    transform: translate(-50%, -50%);
+    transition: opacity 0.3s;
+  }
+  /* Scanline overlay (subtle CRT) */
+  body::after {
+    content: ""; position: fixed; inset: 0;
+    background: repeating-linear-gradient(0deg,
+      transparent 0px, transparent 2px,
+      rgba(255,255,255,0.015) 2px, rgba(255,255,255,0.015) 3px);
+    pointer-events: none; z-index: 9999;
+  }
+
+  /* Nav */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+    padding: 18px 32px;
+    display: flex; justify-content: space-between; align-items: center;
+    background: rgba(10,10,15,0.6); backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--line);
+  }
+  .brand {
+    font-family: var(--font-display); font-style: italic;
+    font-size: 26px; letter-spacing: -0.01em;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .brand-dot {
+    width: 10px; height: 10px; background: var(--cyan);
+    border-radius: 50%; box-shadow: 0 0 16px var(--cyan);
+    animation: rec 1.6s infinite;
+  }
+  @keyframes rec { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+  nav .links {
+    display: flex; gap: 28px; font-size: 11px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    align-items: center;
+  }
+  nav .links a {
+    color: var(--text-2); text-decoration: none;
+    transition: color 0.2s;
+  }
+  nav .links a:hover { color: var(--cyan); }
+  .nav-cta {
+    border: 1px solid var(--cyan); color: var(--cyan);
+    padding: 10px 18px; font-size: 11px;
+    letter-spacing: 0.18em; text-decoration: none;
+    transition: all 0.2s;
+  }
+  .nav-cta:hover { background: var(--cyan); color: var(--bg); }
+
+  /* Hero */
+  .hero {
+    min-height: 100vh; padding: 140px 60px 80px;
+    display: grid; grid-template-columns: 1.2fr 1fr; gap: 40px;
+    align-items: center; position: relative; z-index: 2;
+  }
+  .hero-marker {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.2em; color: var(--text-3);
+    text-transform: uppercase; margin-bottom: 40px;
+    padding: 6px 12px; border: 1px solid var(--line);
+    border-radius: 100px;
+  }
+  .hero-marker .live {
+    width: 6px; height: 6px; background: var(--cyan);
+    border-radius: 50%; box-shadow: 0 0 10px var(--cyan);
+  }
+  .hero h1 {
+    font-family: var(--font-display);
+    font-size: clamp(60px, 9vw, 130px);
+    line-height: 0.92; font-weight: 400;
+    letter-spacing: -0.04em; margin-bottom: 36px;
+  }
+  body[lang="th"] .hero h1 { font-family: var(--font-thai); font-weight: 300; font-size: clamp(48px, 7.5vw, 110px); }
+  .hero h1 em {
+    font-style: italic; color: var(--cyan);
+    text-shadow: 0 0 40px rgba(0,229,255,0.4);
+  }
+  .hero h1 .line { display: block; }
+  .hero-sub {
+    font-family: var(--font-mono); font-size: 14px;
+    line-height: 1.7; color: var(--text-2);
+    max-width: 480px; margin-bottom: 48px;
+    letter-spacing: 0.02em;
+  }
+  body[lang="th"] .hero-sub { font-family: var(--font-thai); font-size: 15px; }
+  .hero-actions { display: flex; gap: 20px; align-items: center; margin-bottom: 64px; }
+  .btn-primary {
+    background: var(--cyan); color: var(--bg);
+    padding: 16px 28px; font-family: var(--font-mono);
+    font-size: 11px; letter-spacing: 0.18em;
+    text-transform: uppercase; text-decoration: none;
+    font-weight: 500;
+    box-shadow: 0 0 30px rgba(0,229,255,0.3);
+    transition: all 0.2s;
+  }
+  .btn-primary:hover {
+    box-shadow: 0 0 50px rgba(0,229,255,0.6);
+    transform: translateY(-2px);
+  }
+  .btn-secondary {
+    color: var(--text); border-bottom: 1px solid var(--text-3);
+    padding-bottom: 4px; text-decoration: none;
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+  }
+  .timecode-strip {
+    border-top: 1px solid var(--line); padding-top: 32px;
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+    max-width: 560px;
+  }
+  .tc-item .tc-num {
+    font-family: var(--font-display); font-style: italic;
+    font-size: 42px; color: var(--cyan); line-height: 1;
+  }
+  .tc-item .tc-label {
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.18em; color: var(--text-3);
+    text-transform: uppercase; margin-top: 8px;
+  }
+
+  /* 3D area */
+  #stage {
+    position: relative; width: 100%; height: 540px;
+  }
+  #stage canvas { width: 100% !important; height: 100% !important; }
+  .stage-meta {
+    position: absolute; font-family: var(--font-mono);
+    font-size: 9px; letter-spacing: 0.18em;
+    color: var(--text-3); text-transform: uppercase;
+  }
+  .stage-meta .num { color: var(--amber); }
+  .meta-1 { top: 4%; right: 0; }
+  .meta-2 { bottom: 20%; left: 0; }
+  .meta-3 { bottom: 4%; right: 0; }
+  .rec-badge {
+    position: absolute; top: 8%; left: 0;
+    display: flex; align-items: center; gap: 8px;
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.2em; color: var(--cyan);
+    text-transform: uppercase;
+  }
+  .rec-badge .ring {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #ff3838; box-shadow: 0 0 12px #ff3838;
+    animation: rec 1.2s infinite;
+  }
+
+  /* Section: studios */
+  .studios {
+    padding: 80px 60px;
+    border-top: 1px solid var(--line);
+    position: relative; z-index: 2;
+  }
+  .section-label {
+    display: flex; justify-content: space-between; align-items: end;
+    margin-bottom: 56px;
+  }
+  .section-label .ch {
+    font-family: var(--font-display); font-style: italic;
+    font-size: 140px; line-height: 0.9; color: var(--text);
+  }
+  .section-label .ch span { color: var(--cyan); }
+  .section-label .meta {
+    text-align: right; font-family: var(--font-mono);
+    font-size: 10px; letter-spacing: 0.18em;
+    color: var(--text-3); text-transform: uppercase;
+  }
+  .section-label .meta .t {
+    color: var(--text); font-size: 12px; display: block; margin-bottom: 4px;
+  }
+  .studio-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 0;
+    border-top: 1px solid var(--line);
+  }
+  .studio {
+    padding: 40px 32px; border-right: 1px solid var(--line);
+    position: relative; transition: background 0.3s;
+  }
+  .studio:last-child { border-right: 0; }
+  .studio:hover { background: var(--bg-2); }
+  .studio-tc {
+    font-family: var(--font-mono); font-size: 10px;
+    color: var(--cyan); letter-spacing: 0.18em; margin-bottom: 20px;
+  }
+  .studio-glyph {
+    width: 64px; height: 64px;
+    border: 1px solid var(--line);
+    margin-bottom: 32px;
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, var(--bg-2), var(--bg-3));
+    position: relative;
+  }
+  .studio-glyph::before {
+    content: ""; position: absolute; inset: -1px;
+    background: linear-gradient(135deg, var(--cyan), transparent);
+    z-index: -1; opacity: 0.6;
+  }
+  .studio-glyph svg { width: 32px; height: 32px; color: var(--cyan); }
+  .studio h3 {
+    font-family: var(--font-display); font-size: 36px;
+    font-weight: 400; margin-bottom: 6px; letter-spacing: -0.02em;
+  }
+  .studio h3 em { font-style: italic; color: var(--cyan); }
+  body[lang="th"] .studio h3 { font-family: var(--font-thai); font-weight: 400; }
+  .studio .sub {
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.18em; color: var(--text-3);
+    text-transform: uppercase; margin-bottom: 24px;
+  }
+  .studio p {
+    font-family: var(--font-mono); font-size: 13px;
+    line-height: 1.7; color: var(--text-2); margin-bottom: 28px;
+  }
+  body[lang="th"] .studio p { font-family: var(--font-thai); font-size: 14px; }
+  .studio ul { list-style: none; font-family: var(--font-mono); font-size: 11px; color: var(--text-3); }
+  .studio li {
+    padding: 6px 0; border-top: 1px solid var(--line);
+    display: flex; gap: 10px;
+    letter-spacing: 0.05em;
+  }
+  .studio li::before { content: "›"; color: var(--cyan); }
+
+  @media (max-width: 1024px) {
+    .hero, .studio-grid { grid-template-columns: 1fr; }
+    .studio { border-right: 0; border-bottom: 1px solid var(--line); }
+    .hero { padding: 110px 24px 60px; }
+    .studios { padding: 60px 24px; }
+    nav { padding: 14px 20px; }
+    nav .links { display: none; }
+    nav .links .nav-cta { display: inline-block; }
+    .section-label .ch { font-size: 80px; }
+    #stage { height: 380px; }
+  }
+</style>
+</head>
+<body lang="th">
+<div class="spotlight" id="spotlight"></div>
+
+<nav>
+  <div class="brand"><span class="brand-dot"></span>Capduction</div>
+  <div class="links">
+    <a href="#">Studios</a>
+    <a href="#">Demo</a>
+    <a href="#">Pricing</a>
+    <a href="#" class="nav-cta">Enter Studio →</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div>
+    <div class="hero-marker"><span class="live"></span> REC · STUDIO V1.0 · LIVE</div>
+    <h1>
+      <span class="line">เขียน<em>สคริปต์.</em></span>
+      <span class="line">ปั้น<em>แคปชั่น.</em></span>
+      <span class="line">ก่อนกด record.</span>
+    </h1>
+    <p class="hero-sub">
+      สตูดิโอ AI สำหรับ creator วิดีโอสั้นยุค scroll-first ตั้งแต่สคริปต์การพูด ไปจนถึงแคปชั่นหน้าคลิป ในไฟล์เดียว
+    </p>
+    <div class="hero-actions">
+      <a href="#" class="btn-primary">› Enter the Studio</a>
+      <a href="#" class="btn-secondary">watch reel →</a>
+    </div>
+    <div class="timecode-strip">
+      <div class="tc-item"><div class="tc-num">07</div><div class="tc-label">platforms</div></div>
+      <div class="tc-item"><div class="tc-num">03</div><div class="tc-label">studios</div></div>
+      <div class="tc-item"><div class="tc-num">∞</div><div class="tc-label">variations</div></div>
+    </div>
+  </div>
+  <div id="stage">
+    <div class="rec-badge"><span class="ring"></span> REC · 00:00:14:08</div>
+    <div class="stage-meta meta-1"><span class="num">01</span> · CHROME REEL · 35MM</div>
+    <div class="stage-meta meta-2"><span class="num">02</span> · CYAN LIGHT · KEY</div>
+    <div class="stage-meta meta-3"><span class="num">03</span> · POST-PROD READY</div>
+  </div>
+</section>
+
+<section class="studios">
+  <div class="section-label">
+    <div class="ch"><span>01</span> Studios</div>
+    <div class="meta">
+      <span class="t">THREE MODES</span>
+      <span>ONE PIPELINE</span>
+    </div>
+  </div>
+  <div class="studio-grid">
+    <div class="studio">
+      <div class="studio-tc">› TC 01:00:00</div>
+      <div class="studio-glyph">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="3" y="6" width="18" height="14" rx="1"/>
+          <path d="M3 10h18M7 6l-2 4M11 6l-2 4M15 6l-2 4M19 6l-2 4"/>
+        </svg>
+      </div>
+      <h3><em>Script</em> Studio</h3>
+      <div class="sub">SPOKEN · TIMED · CUED</div>
+      <p>สคริปต์การพูดสำหรับวิดีโอสั้น พร้อม timing markers, B-roll cues และข้อความหน้าจอ</p>
+      <ul>
+        <li>15s · 30s · 60s · 90s · long</li>
+        <li>timed beats per second</li>
+        <li>b-roll cue notation</li>
+      </ul>
+    </div>
+    <div class="studio">
+      <div class="studio-tc">› TC 02:00:00</div>
+      <div class="studio-glyph">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/>
+          <path d="M12 3v3M12 18v3M21 12h-3M6 12H3"/>
+        </svg>
+      </div>
+      <h3><em>Caption</em> Studio</h3>
+      <div class="sub">POST · HOOKS · TAGS</div>
+      <p>แคปชั่น 5 variants, hooks ดึงสายตา, hashtags ตรงเทรนด์ — ปรับตามแพลตฟอร์มและโทน</p>
+      <ul>
+        <li>5 captions · 5 hooks</li>
+        <li>10 hashtags · 5 CTAs</li>
+        <li>4 angles · 4 ideas</li>
+      </ul>
+    </div>
+    <div class="studio">
+      <div class="studio-tc">› TC 03:00:00</div>
+      <div class="studio-glyph">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M12 2v20M2 12h20"/><circle cx="12" cy="12" r="9"/>
+        </svg>
+      </div>
+      <h3><em>Combo</em> Mode</h3>
+      <div class="sub">SCRIPT + CAPTION ALIGNED</div>
+      <p>ปั้น script และ caption ที่ใช้ hook เดียวกัน — package พร้อมโพสต์ครบในครั้งเดียว</p>
+      <ul>
+        <li>shared hook system</li>
+        <li>aligned messaging</li>
+        <li>posting checklist</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<script type="module">
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+const stage = document.getElementById('stage');
+const scene = new THREE.Scene();
+const cam = new THREE.PerspectiveCamera(38, stage.clientWidth/stage.clientHeight, 0.1, 100);
+cam.position.set(0, 0, 5);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(stage.clientWidth, stage.clientHeight);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 0.9;
+stage.appendChild(renderer.domElement);
+
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+
+const chrome = new THREE.MeshStandardMaterial({ color: 0xeeeeee, metalness: 1.0, roughness: 0.1, envMapIntensity: 1.4 });
+const dark = new THREE.MeshStandardMaterial({ color: 0x1a1a26, metalness: 0.85, roughness: 0.3 });
+const cyanGlow = new THREE.MeshStandardMaterial({
+  color: 0x00E5FF, metalness: 0.5, roughness: 0.2,
+  emissive: 0x00E5FF, emissiveIntensity: 0.4,
+});
+
+// Film reel
+const reel = new THREE.Group();
+const reelBody = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 1.6, 0.18, 64), chrome);
+reelBody.rotation.x = Math.PI/2;
+reel.add(reelBody);
+
+// 6 spokes
+for (let i=0; i<6; i++) {
+  const spoke = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.06, 0.1), chrome);
+  spoke.rotation.z = (i * Math.PI) / 6;
+  reel.add(spoke);
+}
+// Center hub
+const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.26, 32), dark);
+hub.rotation.x = Math.PI/2;
+reel.add(hub);
+const hubRing = new THREE.Mesh(new THREE.TorusGeometry(0.42, 0.04, 16, 32), chrome);
+reel.add(hubRing);
+const hubDot = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), cyanGlow);
+hubDot.position.z = 0.15;
+reel.add(hubDot);
+
+// Outer rim ring
+const rim = new THREE.Mesh(new THREE.TorusGeometry(1.6, 0.08, 16, 64), chrome);
+reel.add(rim);
+
+scene.add(reel);
+
+// Spot light beams
+const spot1 = new THREE.SpotLight(0x00E5FF, 80, 12, Math.PI/8, 0.4, 1);
+spot1.position.set(3, 4, 3);
+spot1.target = reel;
+scene.add(spot1);
+const spot2 = new THREE.SpotLight(0xFFB547, 30, 12, Math.PI/6, 0.5, 1);
+spot2.position.set(-3, -2, 3);
+spot2.target = reel;
+scene.add(spot2);
+scene.add(new THREE.AmbientLight(0xffffff, 0.15));
+
+let mx = 0, my = 0;
+window.addEventListener('mousemove', (e) => {
+  mx = (e.clientX/innerWidth - 0.5) * 0.4;
+  my = (e.clientY/innerHeight - 0.5) * 0.4;
+  const sp = document.getElementById('spotlight');
+  sp.style.left = e.clientX + 'px';
+  sp.style.top = e.clientY + 'px';
+});
+
+let t=0;
+function loop(){
+  t += 0.01;
+  reel.rotation.z = t * 0.4;
+  reel.rotation.y = mx + Math.sin(t*0.3)*0.1;
+  reel.rotation.x = my * 0.3 + Math.sin(t*0.4)*0.05;
+  renderer.render(scene, cam);
+  requestAnimationFrame(loop);
+}
+loop();
+window.addEventListener('resize', () => {
+  cam.aspect = stage.clientWidth/stage.clientHeight;
+  cam.updateProjectionMatrix();
+  renderer.setSize(stage.clientWidth, stage.clientHeight);
+});
+</script>
+</body>
+</html>

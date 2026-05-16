@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Capduction — Theme Gallery v2 (5 directions)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,400;1,9..144,500&family=Instrument+Serif:ital@0;1&family=DM+Serif+Display:ital@0;1&family=Anuphan:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Archivo+Black&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #F5F1E8;
+    --ink: #0B0B0B;
+    --smoke: #6B6760;
+    --fog: #E8E3D6;
+    --signal: #D4FF3F;
+    --ember: #C45A1A;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--paper); color: var(--ink);
+    font-family: 'Anuphan', sans-serif; font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh; padding: 60px 32px 80px;
+    cursor: none; position: relative;
+  }
+  body::after {
+    content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 9998;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: 0.04; mix-blend-mode: multiply;
+  }
+  body::before {
+    content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background:
+      radial-gradient(ellipse at top left, rgba(196,90,26,0.05), transparent 60%),
+      radial-gradient(ellipse at bottom right, rgba(11,11,11,0.06), transparent 55%);
+  }
+
+  /* Cursor */
+  .cursor {
+    position: fixed; pointer-events: none; z-index: 10000;
+    width: 14px; height: 14px;
+    background: var(--ink); border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.25s, height 0.25s, background 0.25s;
+    mix-blend-mode: difference;
+  }
+  .cursor.target {
+    width: 64px; height: 64px;
+    background: var(--signal); mix-blend-mode: normal;
+  }
+  .cursor::after {
+    content: attr(data-label);
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 9px;
+    color: var(--ink); letter-spacing: 0.12em; text-transform: uppercase;
+  }
+  @media (max-width: 768px) { body { cursor: auto; } .cursor { display: none; } }
+  a, button, .hover-target { cursor: none; }
+
+  .wrap { max-width: 1500px; margin: 0 auto; position: relative; z-index: 1; }
+
+  /* Header */
+  header { text-align: center; margin-bottom: 80px; }
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.22em;
+    color: var(--smoke); text-transform: uppercase;
+    margin-bottom: 28px;
+    display: inline-flex; align-items: center; gap: 14px;
+  }
+  .eyebrow::before, .eyebrow::after {
+    content: ""; width: 40px; height: 1px; background: var(--ember);
+  }
+  .eyebrow .dot {
+    width: 7px; height: 7px; background: var(--signal);
+    border-radius: 50%; box-shadow: 0 0 12px var(--signal);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1;}50%{opacity:.5;} }
+  header h1 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(48px, 7vw, 96px);
+    font-weight: 400;
+    font-variation-settings: 'opsz' 144;
+    letter-spacing: -0.035em;
+    line-height: 0.95;
+    margin-bottom: 24px;
+  }
+  header h1 em {
+    font-style: italic; color: var(--ember);
+  }
+  header p {
+    font-size: 17px; color: var(--smoke);
+    max-width: 640px; margin: 0 auto;
+    line-height: 1.55;
+  }
+  header .meta {
+    margin-top: 28px;
+    display: inline-flex; gap: 24px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: 0.18em;
+    color: var(--smoke); text-transform: uppercase;
+  }
+  header .meta span strong { color: var(--ink); font-weight: 500; }
+
+  /* Grid */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+    gap: 28px;
+  }
+  .card {
+    background: white;
+    border-radius: 24px;
+    overflow: hidden;
+    border: 1px solid var(--fog);
+    transition: all 0.4s cubic-bezier(0.22,1,0.36,1);
+    display: flex; flex-direction: column;
+    text-decoration: none; color: var(--ink);
+    position: relative;
+  }
+  .card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 30px 60px rgba(11,11,11,0.15);
+    border-color: transparent;
+  }
+
+  /* Preview area */
+  .card-preview {
+    aspect-ratio: 16/10;
+    position: relative;
+    overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    padding: 32px;
+  }
+
+  /* ─── Theme 1: Editorial Studio ────────────────────────── */
+  .preview-1 { background: #F5F1E8; color: #0B0B0B; }
+  .preview-1 .demo-h {
+    font-family: 'Fraunces', serif;
+    font-size: 52px; line-height: 0.95;
+    font-variation-settings: 'opsz' 144;
+    letter-spacing: -0.035em; text-align: center; font-weight: 400;
+  }
+  .preview-1 .demo-h em { font-style: italic; color: #C45A1A; font-weight: 300; }
+  .preview-1 .demo-h .stroke {
+    display: inline-block; position: relative;
+  }
+  .preview-1 .demo-h .stroke::after {
+    content: ""; position: absolute;
+    left: 0; right: 0; bottom: 0.13em; height: 0.08em;
+    background: #D4FF3F; z-index: -1;
+  }
+  .preview-1 .demo-chip {
+    position: absolute; top: 18px; left: 18px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px; letter-spacing: 0.18em;
+    color: #6B6760; text-transform: uppercase;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .preview-1 .demo-chip::before {
+    content: ""; width: 6px; height: 6px; background: #D4FF3F;
+    border-radius: 50%; box-shadow: 0 0 10px #D4FF3F;
+  }
+  .preview-1 .chrome-mark {
+    position: absolute; top: 18px; right: 18px;
+    width: 24px; height: 24px; border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #fff 0%, #c5c5c5 30%, #555 70%, #1a1a1a 100%);
+    box-shadow: inset 0 0 0 1.5px #0B0B0B;
+  }
+
+  /* ─── Theme 2: Midnight Cinema ─────────────────────────── */
+  .preview-2 {
+    background: #06060B; color: #F8F6F0;
+    background-image: radial-gradient(ellipse at top, rgba(0,229,255,0.15), transparent 60%);
+  }
+  .preview-2::after {
+    content: ""; position: absolute; inset: 0;
+    background: repeating-linear-gradient(0deg, transparent 0 2px, rgba(255,255,255,0.02) 2px 3px);
+    pointer-events: none;
+  }
+  .preview-2 .demo-h {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic; font-size: 60px;
+    line-height: 0.92; letter-spacing: -0.035em;
+    text-align: center; font-weight: 400;
+  }
+  .preview-2 .demo-h em {
+    color: #00E5FF; font-style: italic;
+    text-shadow: 0 0 30px rgba(0,229,255,0.5);
+  }
+  .preview-2 .demo-h .underline {
+    border-bottom: 4px solid #00E5FF;
+    box-shadow: 0 5px 20px rgba(0,229,255,0.4);
+    display: inline-block;
+  }
+  .preview-2 .demo-chip {
+    position: absolute; top: 18px; left: 18px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px; letter-spacing: 0.18em;
+    color: #00E5FF; text-transform: uppercase;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .preview-2 .demo-chip::before {
+    content: "●"; color: #FF3838;
+  }
+  .preview-2 .hud {
+    position: absolute; top: 12px; right: 12px;
+    width: 16px; height: 16px;
+    border-top: 1px solid #00E5FF;
+    border-right: 1px solid #00E5FF;
+    opacity: 0.6;
+  }
+  .preview-2 .hud-bl {
+    position: absolute; bottom: 12px; left: 12px;
+    width: 16px; height: 16px;
+    border-bottom: 1px solid #00E5FF;
+    border-left: 1px solid #00E5FF;
+    opacity: 0.6;
+  }
+
+  /* ─── Theme 3: Neo-Thai Brutalist ──────────────────────── */
+  .preview-3 {
+    background: #ECE8DD;
+    background-image:
+      linear-gradient(rgba(11,9,8,0.06) 0.5px, transparent 0.5px),
+      linear-gradient(90deg, rgba(11,9,8,0.06) 0.5px, transparent 0.5px);
+    background-size: 30px 30px;
+    color: #0A0908;
+  }
+  .preview-3 .demo-h {
+    font-family: 'Anuphan', sans-serif;
+    font-weight: 700; font-size: 48px;
+    line-height: 0.88; letter-spacing: -0.045em;
+    text-transform: uppercase; text-align: left;
+  }
+  .preview-3 .demo-h .r {
+    background: #D72638; color: #ECE8DD;
+    padding: 0 12px 4px;
+    display: inline-block; transform: rotate(-1.5deg);
+    margin: 0 2px;
+    box-shadow: 4px 4px 0 #0A0908;
+  }
+  .preview-3 .demo-h .y {
+    background: #F4C430; color: #0A0908;
+    padding: 0 12px 4px;
+    display: inline-block; transform: rotate(1deg);
+    margin: 0 2px;
+    box-shadow: 4px 4px 0 #0A0908;
+  }
+  .preview-3 .demo-chip {
+    position: absolute; top: 16px; left: 16px;
+    background: #0A0908; color: #ECE8DD;
+    padding: 6px 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px; letter-spacing: 0.18em;
+    text-transform: uppercase; font-weight: 600;
+  }
+  .preview-3 .square {
+    position: absolute; top: 16px; right: 16px;
+    width: 26px; height: 26px;
+    background: #D72638;
+    box-shadow: 4px 4px 0 #F4C430;
+  }
+
+  /* ─── Theme 4: Liquid Chrome ──────────────────────────── */
+  .preview-4 {
+    background: #FAFAFF;
+    background-image:
+      radial-gradient(circle at 10% 18%, #E8DEFF 0%, transparent 50%),
+      radial-gradient(circle at 85% 12%, #FFE0D0 0%, transparent 45%),
+      radial-gradient(circle at 75% 78%, #D6F5E5 0%, transparent 50%),
+      radial-gradient(circle at 15% 82%, #D5E8FF 0%, transparent 50%);
+    color: #1A1530;
+  }
+  .preview-4 .demo-h {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic; font-size: 60px;
+    line-height: 0.95; letter-spacing: -0.03em;
+    text-align: center; font-weight: 400;
+  }
+  .preview-4 .demo-h em {
+    background: linear-gradient(135deg, #FF8FB5 0%, #B58FFF 50%, #5DD5DA 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-style: italic;
+  }
+  .preview-4 .demo-h .chrome {
+    background: linear-gradient(180deg, #FFFFFF 0%, #B58FFF 50%, #5E4F8A 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 4px 10px rgba(168,155,213,0.3));
+    font-style: italic;
+  }
+  .preview-4 .demo-chip {
+    position: absolute; top: 18px; left: 18px;
+    padding: 6px 12px; border-radius: 100px;
+    background: rgba(255,255,255,0.6); backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.8);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px; letter-spacing: 0.12em;
+    color: #4A4170; text-transform: uppercase;
+    box-shadow: 0 4px 14px rgba(168,155,213,0.2);
+  }
+  .preview-4 .orb {
+    position: absolute; top: 18px; right: 18px;
+    width: 28px; height: 28px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #fff 0%, #E8DEFF 30%, #B58FFF 70%, #5E4F8A 100%);
+    box-shadow: 0 4px 14px rgba(181,143,255,0.4);
+  }
+
+  /* ─── Theme 5: Bangkok Sunset ──────────────────────────── */
+  .preview-5 {
+    background:
+      radial-gradient(ellipse 80% 60% at 75% -10%, #FFD89F 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 0% 80%, #E37468 0%, transparent 55%),
+      #FFF5E4;
+    color: #093A3E;
+  }
+  .preview-5 .demo-h {
+    font-family: 'DM Serif Display', serif;
+    font-size: 56px; line-height: 0.95;
+    letter-spacing: -0.025em; text-align: center;
+    color: #093A3E; font-weight: 400;
+  }
+  .preview-5 .demo-h em { font-style: italic; color: #C2532E; }
+  .preview-5 .demo-h .u {
+    position: relative; display: inline-block;
+  }
+  .preview-5 .demo-h .u::after {
+    content: ""; position: absolute;
+    left: -2px; right: -2px; bottom: 0.08em; height: 0.14em;
+    background: #F4A82A; z-index: -1; border-radius: 4px;
+  }
+  .preview-5 .demo-chip {
+    position: absolute; top: 18px; left: 18px;
+    background: #F4A82A; color: #2B1810;
+    padding: 6px 12px; border-radius: 100px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px; letter-spacing: 0.12em;
+    text-transform: uppercase; font-weight: 600;
+  }
+  .preview-5 .sun {
+    position: absolute; top: 18px; right: 18px;
+    width: 28px; height: 28px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #FFE5B4, #F4A82A 50%, #C2532E 100%);
+    box-shadow: 0 0 24px rgba(244,168,42,0.5);
+  }
+
+  /* Card meta */
+  .card-meta {
+    padding: 28px 30px 30px;
+    border-top: 1px solid var(--fog);
+    flex: 1;
+    display: flex; flex-direction: column;
+  }
+  .card-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.2em;
+    color: var(--smoke); text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .card-name {
+    font-family: 'Fraunces', serif; font-size: 30px;
+    font-weight: 500; font-variation-settings: 'opsz' 48;
+    letter-spacing: -0.022em; margin-bottom: 10px; line-height: 1.05;
+  }
+  .card-name em { font-style: italic; color: var(--ember); font-weight: 400; }
+  .card-desc {
+    font-family: 'Anuphan', sans-serif;
+    font-size: 14px; line-height: 1.6;
+    color: var(--smoke); margin-bottom: 22px;
+    flex: 1;
+  }
+  .card-tags {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    margin-bottom: 24px;
+  }
+  .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; padding: 4px 10px;
+    border: 1px solid var(--fog); border-radius: 100px;
+    color: var(--smoke); text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .card-tags .hl {
+    background: var(--ink); color: var(--paper); border-color: var(--ink);
+  }
+  .card-actions {
+    display: flex; gap: 12px;
+    padding-top: 16px;
+    border-top: 1px dashed var(--fog);
+  }
+  .btn-open {
+    flex: 1; text-align: center;
+    padding: 13px;
+    background: var(--ink); color: var(--paper);
+    border-radius: 100px; text-decoration: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.14em;
+    text-transform: uppercase; font-weight: 500;
+    transition: all 0.25s;
+    position: relative; overflow: hidden;
+  }
+  .btn-open::before {
+    content: ""; position: absolute; inset: 0;
+    background: var(--signal); transform: translateY(101%);
+    transition: transform 0.3s;
+  }
+  .btn-open:hover { color: var(--ink); }
+  .btn-open:hover::before { transform: translateY(0); }
+  .btn-open span { position: relative; z-index: 1; }
+
+  /* Footer info */
+  footer {
+    margin-top: 100px;
+    padding-top: 48px;
+    border-top: 1px solid var(--fog);
+    text-align: center;
+  }
+  footer .ft-eye {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.2em;
+    color: var(--smoke); text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  footer h3 {
+    font-family: 'Fraunces', serif; font-size: 36px;
+    font-variation-settings: 'opsz' 144; font-style: italic;
+    color: var(--ink); margin-bottom: 12px;
+    letter-spacing: -0.025em; font-weight: 400;
+  }
+  footer h3 em { color: var(--ember); }
+  footer p {
+    font-size: 15px; color: var(--smoke);
+    max-width: 580px; margin: 0 auto;
+    line-height: 1.55;
+  }
+  .quick-ref {
+    margin-top: 40px;
+    display: inline-flex; gap: 28px; flex-wrap: wrap; justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.15em;
+    color: var(--smoke); text-transform: uppercase;
+  }
+  .quick-ref a {
+    color: var(--ink); text-decoration: none;
+    border-bottom: 1px solid var(--fog);
+    padding-bottom: 3px;
+    transition: all 0.2s;
+  }
+  .quick-ref a:hover { border-color: var(--ember); color: var(--ember); }
+
+  .build-stamp {
+    margin-top: 60px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: 0.18em;
+    color: var(--smoke); text-transform: uppercase;
+  }
+
+  @media (max-width: 768px) {
+    body { padding: 40px 20px 60px; }
+    .grid { grid-template-columns: 1fr; }
+    header h1 { font-size: 40px; }
+    .quick-ref { flex-direction: column; gap: 14px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">
+      <span>CAPDUCTION</span>
+      <span class="dot"></span>
+      <span>THEME GALLERY V2 · 2026.05.16</span>
+    </div>
+    <h1>เลือก<em>ทิศทาง</em>ที่ใช่<br/>สำหรับ Capduction</h1>
+    <p>5 design directions — แต่ละอันคือ production-grade landing page เต็มหน้า มี cursor custom, scroll animations, 3D scene, workspace mockup, pricing, footer — เปิดดูเทียบกันแล้วบอกผมเบอร์ที่เลือก</p>
+    <div class="meta">
+      <span><strong>5</strong> THEMES</span>
+      <span><strong>~10,000</strong> LOC</span>
+      <span><strong>TH/EN</strong> BILINGUAL</span>
+      <span><strong>WORLD-CLASS</strong> READY</span>
+    </div>
+  </header>
+
+  <div class="grid">
+
+    <!-- THEME 1 -->
+    <a href="theme-1-editorial.html" class="card hover-target" data-cursor="open" target="_blank">
+      <div class="card-preview preview-1">
+        <div class="demo-chip">● LIVE · ISSUE 01</div>
+        <div class="chrome-mark"></div>
+        <div class="demo-h">
+          เขียน<em>สคริปต์</em><br/>
+          ปั้น<span class="stroke">แคปชั่น</span>
+        </div>
+      </div>
+      <div class="card-meta">
+        <div class="card-num">— THEME 01 · v2</div>
+        <div class="card-name"><em>Editorial</em> Studio</div>
+        <p class="card-desc">Warm cream paper + deep ink + electric lime accent. Fraunces variable serif italic + Anuphan. 3D chrome clapperboard + mic + lens scene. Magazine-grade editorial layout พร้อม Issue bar, chapter dividers, marquee italic, workspace mockup ครบทุกหน้า — ฟีล A24 × Apple Studio × Pentagram</p>
+        <div class="card-tags">
+          <span class="tag hl">FRAUNCES</span>
+          <span class="tag">CREAM/INK/LIME</span>
+          <span class="tag">3D CHROME</span>
+          <span class="tag">EDITORIAL</span>
+          <span class="tag">CUSTOM CURSOR</span>
+        </div>
+        <div class="card-actions">
+          <a href="theme-1-editorial.html" class="btn-open hover-target" data-cursor="open" target="_blank"><span>เปิด theme 01 →</span></a>
+        </div>
+      </div>
+    </a>
+
+    <!-- THEME 2 -->
+    <a href="theme-2-midnight.html" class="card hover-target" data-cursor="open" target="_blank">
+      <div class="card-preview preview-2">
+        <div class="demo-chip">● REC · LIVE</div>
+        <div class="hud"></div>
+        <div class="hud-bl"></div>
+        <div class="demo-h">
+          เขียน<em>สคริปต์.</em><br/>
+          ปั้น<span class="underline">แคปชั่น.</span>
+        </div>
+      </div>
+      <div class="card-meta">
+        <div class="card-num">— THEME 02 · v2</div>
+        <div class="card-name"><em>Midnight</em> Cinema</div>
+        <p class="card-desc">Noir dark mode บรรยากาศห้องตัดต่อยามดึก. Instrument Serif italic + JetBrains Mono + cyan glow. มี HUD frame brackets ทั้งจอ + timecode counter วิ่งจริง + crosshair cursor + CRT scanlines + 3D film reel + bokeh particles + spotlights. ฟีล A24 film promo × Cyberpunk UI × Linear</p>
+        <div class="card-tags">
+          <span class="tag hl">DARK MODE</span>
+          <span class="tag">INSTRUMENT SERIF</span>
+          <span class="tag">CYAN GLOW</span>
+          <span class="tag">HUD FRAME</span>
+          <span class="tag">CRT EFFECT</span>
+        </div>
+        <div class="card-actions">
+          <a href="theme-2-midnight.html" class="btn-open hover-target" data-cursor="open" target="_blank"><span>เปิด theme 02 →</span></a>
+        </div>
+      </div>
+    </a>
+
+    <!-- THEME 3 -->
+    <a href="theme-3-brutalist.html" class="card hover-target" data-cursor="open" target="_blank">
+      <div class="card-preview preview-3">
+        <div class="demo-chip">EDITORIAL 01 · MAY</div>
+        <div class="square"></div>
+        <div class="demo-h">
+          เขียน <span class="r">สคริปต์</span><br/>
+          ปั้น <span class="y">แคปชั่น</span>
+        </div>
+      </div>
+      <div class="card-meta">
+        <div class="card-num">— THEME 03 · v2</div>
+        <div class="card-name"><em>Neo-Thai</em> Brutalist</div>
+        <p class="card-desc">นิตยสารไทย editorial โทน bone + signal red + mustard yellow. Anuphan extra bold ใหญ่ + Archivo Black ตัวเลข. Hero มี color blocks rotate + hard 6px shadows. Block cursor red, marquee strip, grid breaks, manifesto-style sections + stat strip ดำ. ฟีล POPEYE × IDEA Magazine × Pentagram</p>
+        <div class="card-tags">
+          <span class="tag hl">BRUTALIST</span>
+          <span class="tag">ANUPHAN BOLD</span>
+          <span class="tag">RED/YELLOW</span>
+          <span class="tag">MASTHEAD</span>
+          <span class="tag">HARD SHADOWS</span>
+        </div>
+        <div class="card-actions">
+          <a href="theme-3-brutalist.html" class="btn-open hover-target" data-cursor="open" target="_blank"><span>เปิด theme 03 →</span></a>
+        </div>
+      </div>
+    </a>
+
+    <!-- THEME 4 -->
+    <a href="theme-4-liquid.html" class="card hover-target" data-cursor="open" target="_blank">
+      <div class="card-preview preview-4">
+        <div class="demo-chip">◉ STUDIO V1</div>
+        <div class="orb"></div>
+        <div class="demo-h">
+          เขียน<em>สคริปต์</em><br/>
+          ปั้น<span class="chrome">แคปชั่น</span>
+        </div>
+      </div>
+      <div class="card-meta">
+        <div class="card-num">— THEME 04 · v2</div>
+        <div class="card-name"><em>Liquid</em> Chrome</div>
+        <p class="card-desc">Iridescent gradient mesh พาสเทล (lavender/peach/mint/sky/rose) drift ช้าๆ. Instrument Serif + chrome gradient text. 3D torus knot iridescent material หมุน + 5 floating chrome orbs + pastel rim lights. Orb cursor chrome glow. Glass cards ทุกที่ — frosted glassmorphism. ฟีล Apple Pro Display × Y2K Aqua × Studio Output</p>
+        <div class="card-tags">
+          <span class="tag hl">Y2K CHROME</span>
+          <span class="tag">GRADIENT MESH</span>
+          <span class="tag">GLASSMORPHISM</span>
+          <span class="tag">IRIDESCENT 3D</span>
+          <span class="tag">ORB CURSOR</span>
+        </div>
+        <div class="card-actions">
+          <a href="theme-4-liquid.html" class="btn-open hover-target" data-cursor="open" target="_blank"><span>เปิด theme 04 →</span></a>
+        </div>
+      </div>
+    </a>
+
+    <!-- THEME 5 -->
+    <a href="theme-5-sunset.html" class="card hover-target" data-cursor="open" target="_blank">
+      <div class="card-preview preview-5">
+        <div class="demo-chip">✦ EST. 2026 · BKK</div>
+        <div class="sun"></div>
+        <div class="demo-h">
+          เขียน<em>สคริปต์</em><br/>
+          ปั้น<span class="u">แคปชั่น</span>
+        </div>
+      </div>
+      <div class="card-meta">
+        <div class="card-num">— THEME 05 · v2</div>
+        <div class="card-name"><em>Bangkok</em> Sunset</div>
+        <p class="card-desc">โทนพระอาทิตย์ตกกรุงเทพ — terracotta + mango + deep teal. DM Serif Display + Noto Serif Thai. Sunset gradient drift backdrop. 3D ดวงอาทิตย์ glow + halos + rings + teal cloud blob + warm particles. Sun cursor mango glow. Memphis-style hard shadows (12px mango offset). ฟีลอบอุ่นพรีเมียมแบบไทย — Aesop × Anthropic × COMME</p>
+        <div class="card-tags">
+          <span class="tag hl">WARM ORGANIC</span>
+          <span class="tag">DM SERIF</span>
+          <span class="tag">TERRACOTTA</span>
+          <span class="tag">SUN 3D</span>
+          <span class="tag">MEMPHIS SHADOW</span>
+        </div>
+        <div class="card-actions">
+          <a href="theme-5-sunset.html" class="btn-open hover-target" data-cursor="open" target="_blank"><span>เปิด theme 05 →</span></a>
+        </div>
+      </div>
+    </a>
+  </div>
+
+  <footer>
+    <div class="ft-eye">— GALLERY · STUDIO V1 · BUILD 2026.05.16</div>
+    <h3>กดเปิดเทียบกัน <em>เลือกอันที่ใช่</em></h3>
+    <p>เปิดทุก theme ในแท็บใหม่ ลองเลื่อนเมาส์ดู custom cursor แต่ละแบบ ลอง toggle TH/EN ดู scroll-driven sections — แล้วบอกผมเบอร์ที่ชอบ (หรือผสมจากหลาย theme ก็ได้) ผมจะใช้ direction นั้นปั้น production Next.js app ต่อ</p>
+    <div class="quick-ref">
+      <a href="theme-1-editorial.html" target="_blank" class="hover-target" data-cursor="01">01 · Editorial Studio</a>
+      <a href="theme-2-midnight.html" target="_blank" class="hover-target" data-cursor="02">02 · Midnight Cinema</a>
+      <a href="theme-3-brutalist.html" target="_blank" class="hover-target" data-cursor="03">03 · Neo-Thai Brutalist</a>
+      <a href="theme-4-liquid.html" target="_blank" class="hover-target" data-cursor="04">04 · Liquid Chrome</a>
+      <a href="theme-5-sunset.html" target="_blank" class="hover-target" data-cursor="05">05 · Bangkok Sunset</a>
+    </div>
+    <div class="build-stamp">
+      CAPDUCTION © 2026 · MADE IN BANGKOK · GALLERY V2 · ALL SYSTEMS OPERATIONAL
+    </div>
+  </footer>
+</div>
+
+<script>
+const cursor = document.getElementById('cursor');
+const target = { x: 0, y: 0 };
+const actual = { x: 0, y: 0 };
+window.addEventListener('mousemove', e => { target.x = e.clientX; target.y = e.clientY; });
+function loopC(){
+  actual.x += (target.x - actual.x) * 0.22;
+  actual.y += (target.y - actual.y) * 0.22;
+  cursor.style.left = actual.x + 'px';
+  cursor.style.top = actual.y + 'px';
+  requestAnimationFrame(loopC);
+}
+loopC();
+document.querySelectorAll('.hover-target').forEach(el => {
+  el.addEventListener('mouseenter', () => {
+    cursor.classList.add('target');
+    cursor.dataset.label = el.dataset.cursor === 'open' ? 'OPEN →' : (el.dataset.cursor || 'OPEN →');
+  });
+  el.addEventListener('mouseleave', () => cursor.classList.remove('target'));
+});
+</script>
+
+</body>
+</html>
