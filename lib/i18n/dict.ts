@@ -109,6 +109,17 @@ export const DICT = {
   'auth.no_account':     { th: 'ยังไม่มีบัญชี?',       en: 'Don\'t have an account?' },
   'auth.or':             { th: 'หรือ',                en: 'or' },
   'auth.google':         { th: 'เข้าสู่ระบบด้วย Google', en: 'Continue with Google' },
+  'auth.method.magic':   { th: 'Magic Link',          en: 'Magic Link' },
+  'auth.method.password':{ th: 'รหัสผ่าน',            en: 'Password' },
+  'auth.magic.send':     { th: 'ส่ง Magic Link',       en: 'Send Magic Link' },
+  'auth.magic.hint':     { th: 'ไม่ต้องจำรหัสผ่าน — เราจะส่งลิงก์เข้าสู่ระบบไปที่อีเมลของคุณ',
+                          en: "No password needed — we'll email you a one-tap sign-in link" },
+  'auth.magic.sent.title':{ th: '✦ ตรวจอีเมลของคุณ',  en: '✦ Check your email' },
+  'auth.magic.sent.sub': { th: 'ส่งลิงก์เข้าสู่ระบบไปที่ {email} แล้ว — กดลิงก์ในอีเมลเพื่อเข้าสู่ระบบ',
+                          en: 'A sign-in link was sent to {email} — tap it to continue' },
+  'auth.magic.resend':   { th: '← ส่งลิงก์อีกครั้ง',    en: '← Send another link' },
+  'auth.check_spam':     { th: 'ไม่เห็นในกล่องจดหมาย? ลองดูใน Spam / Junk',
+                          en: "Don't see it? Check Spam / Junk" },
 } as const;
 
 export type DictKey = keyof typeof DICT;

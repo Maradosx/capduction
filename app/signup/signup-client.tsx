@@ -2,25 +2,44 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { useT } from '@/lib/i18n';
 import {
   AuthCard, AuthLabel, AuthInput, AuthButton, AuthDivider, AuthOAuthButton,
 } from '@/components/auth/auth-card';
 
+type Method = 'magic' | 'password';
+
 export default function SignupClient() {
   const t = useT();
-  const router = useRouter();
   const search = useSearchParams();
 
-  const [email, setEmail] = useState(search.get('email') ?? '');
-  const [password, setPassword] = useState('');
+  const [method, setMethod]   = useState<Method>('magic');
+  const [email, setEmail]     = useState(search.get('email') ?? '');
+  const [password, setPwd]    = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
+  const [error, setError]     = useState<string | null>(null);
+  const [sent, setSent]       = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleMagic(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+    const supabase = createClient();
+    const { error: authErr } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        shouldCreateUser: true,
+      },
+    });
+    setLoading(false);
+    if (authErr) { setError(authErr.message); return; }
+    setSent(true);
+  }
+
+  async function handlePassword(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     if (password.length < 8) {
@@ -28,21 +47,15 @@ export default function SignupClient() {
       return;
     }
     setLoading(true);
-
     const supabase = createClient();
     const { error: authErr } = await supabase.auth.signUp({
       email,
       password,
       options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
     });
-
-    if (authErr) {
-      setError(authErr.message);
-      setLoading(false);
-      return;
-    }
-    setSuccess(true);
     setLoading(false);
+    if (authErr) { setError(authErr.message); return; }
+    setSent(true);
   }
 
   async function handleGoogle() {
@@ -54,26 +67,27 @@ export default function SignupClient() {
     });
   }
 
-  if (success) {
+  if (sent) {
     return (
       <AuthCard
-        title="✦ ตรวจอีเมลของคุณ"
-        subtitle={`ส่งลิงก์ยืนยันไปที่ ${email} แล้ว — กดในอีเมลเพื่อยืนยันบัญชี`}
+        title={t('auth.magic.sent.title')}
+        subtitle={t('auth.magic.sent.sub').replace('{email}', email)}
         footer={
           <Link href="/login" data-cursor="go" className="hover-target text-iridescent font-semibold no-underline hover:underline">
-            ← กลับไปเข้าสู่ระบบ
+            ← {t('auth.submit.login')}
           </Link>
         }
       >
-        <div className="text-center py-8">
-          <div
-            className="orb-chrome w-20 h-20 rounded-full mx-auto mb-5"
-            style={{
-              background: 'radial-gradient(circle at 35% 28%, white, var(--mint) 30%, var(--teal) 70%, #2A7B82)',
-            }}
-          />
-          <p className="text-ink-3 text-[14px] leading-relaxed lang-th:font-thai">
-            ถ้าไม่เห็นในกล่องจดหมาย ลองเช็คใน <strong className="text-ink">Spam / Junk</strong>
+        <div className="text-center py-6">
+          <div className="mx-auto mb-5 w-20 h-20 rounded-[20px] flex items-center justify-center"
+               style={{
+                 background: 'linear-gradient(135deg, #C4B5FD 0%, #F0ABFC 50%, #FBA98C 100%)',
+                 boxShadow: '0 20px 40px -10px rgba(124,58,237,0.35)',
+               }}>
+            <span className="text-white text-[36px]">✉︎</span>
+          </div>
+          <p className="text-ink-3 text-[13px] leading-relaxed lang-th:font-thai">
+            {t('auth.check_spam')}
           </p>
         </div>
       </AuthCard>
@@ -93,57 +107,107 @@ export default function SignupClient() {
         </>
       }
     >
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <div>
-          <AuthLabel htmlFor="email">{t('auth.email')}</AuthLabel>
-          <AuthInput
-            id="email"
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="your@email.com"
-            autoComplete="email"
-          />
-        </div>
+      <div className="grid grid-cols-2 gap-1 p-1 bg-white/40 rounded-[12px] mb-5 border border-white/60">
+        <MethodTab active={method === 'magic'} onClick={() => setMethod('magic')}>
+          ✦ {t('auth.method.magic')}
+        </MethodTab>
+        <MethodTab active={method === 'password'} onClick={() => setMethod('password')}>
+          {t('auth.method.password')}
+        </MethodTab>
+      </div>
 
-        <div>
-          <AuthLabel htmlFor="password">{t('auth.password')}</AuthLabel>
-          <AuthInput
-            id="password"
-            type="password"
-            required
-            minLength={8}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="อย่างน้อย 8 ตัวอักษร"
-            autoComplete="new-password"
-          />
-        </div>
+      {method === 'magic' ? (
+        <form onSubmit={handleMagic} className="flex flex-col gap-4">
+          <div>
+            <AuthLabel htmlFor="email">{t('auth.email')}</AuthLabel>
+            <AuthInput
+              id="email"
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="your@email.com"
+              autoComplete="email"
+            />
+            <p className="text-[11px] text-ink-3 mt-2 lang-th:font-thai leading-relaxed">
+              {t('auth.magic.hint')}
+            </p>
+          </div>
+          {error && <ErrorBox>{error}</ErrorBox>}
+          <AuthButton type="submit" loading={loading}>
+            ✦ {t('auth.magic.send')}
+          </AuthButton>
+        </form>
+      ) : (
+        <form onSubmit={handlePassword} className="flex flex-col gap-4">
+          <div>
+            <AuthLabel htmlFor="email">{t('auth.email')}</AuthLabel>
+            <AuthInput
+              id="email"
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="your@email.com"
+              autoComplete="email"
+            />
+          </div>
+          <div>
+            <AuthLabel htmlFor="password">{t('auth.password')}</AuthLabel>
+            <AuthInput
+              id="password"
+              type="password"
+              required
+              minLength={8}
+              value={password}
+              onChange={(e) => setPwd(e.target.value)}
+              placeholder="อย่างน้อย 8 ตัวอักษร"
+              autoComplete="new-password"
+            />
+          </div>
+          {error && <ErrorBox>{error}</ErrorBox>}
+          <AuthButton type="submit" loading={loading}>
+            {t('auth.submit.signup')}
+          </AuthButton>
+        </form>
+      )}
 
-        {error && (
-          <p className="text-[12px] text-rose-600 bg-rose-50/70 border border-rose-200 rounded-lg px-3 py-2">
-            {error}
-          </p>
-        )}
+      <AuthDivider label={t('auth.or')} />
 
-        <AuthButton type="submit" loading={loading}>
-          {t('auth.submit.signup')}
-        </AuthButton>
+      <AuthOAuthButton provider="google" onClick={handleGoogle} type="button">
+        {t('auth.google')}
+      </AuthOAuthButton>
 
-        <AuthDivider label={t('auth.or')} />
-
-        <AuthOAuthButton provider="google" onClick={handleGoogle} type="button">
-          {t('auth.google')}
-        </AuthOAuthButton>
-
-        <p className="text-[11px] text-ink-3 text-center mt-2 lang-th:font-thai">
-          กด {t('auth.submit.signup')} = ยอมรับ{' '}
-          <Link href="/terms" data-cursor="read" className="hover-target underline">Terms</Link>{' '}
-          และ{' '}
-          <Link href="/privacy" data-cursor="read" className="hover-target underline">Privacy Policy</Link>
-        </p>
-      </form>
+      <p className="text-[11px] text-ink-3 text-center mt-4 lang-th:font-thai">
+        กด {t('auth.submit.signup')} = ยอมรับ{' '}
+        <Link href="/terms" data-cursor="read" className="hover-target underline">Terms</Link>{' '}
+        และ{' '}
+        <Link href="/privacy" data-cursor="read" className="hover-target underline">Privacy Policy</Link>
+      </p>
     </AuthCard>
+  );
+}
+
+function MethodTab({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      data-cursor="go"
+      className={`hover-target py-2.5 rounded-[9px] text-[13px] font-semibold transition-all lang-th:font-thai
+        ${active
+          ? 'btn-grad text-white shadow-[0_4px_12px_-2px_rgba(124,58,237,0.4)]'
+          : 'text-ink-3 hover:text-ink hover:bg-white/55 bg-transparent'}`}
+    >
+      {children}
+    </button>
+  );
+}
+
+function ErrorBox({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="text-[12px] text-rose-600 bg-rose-50/70 border border-rose-200 rounded-lg px-3 py-2">
+      {children}
+    </p>
   );
 }
