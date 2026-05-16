@@ -8,6 +8,7 @@ import {
   updateBrandVoiceAction,
   deleteBrandVoiceAction,
 } from '@/app/actions/brand-voices';
+import { useT } from '@/lib/i18n';
 
 interface BrandVoiceFormProps {
   mode: 'create' | 'edit';
@@ -20,6 +21,7 @@ interface BrandVoiceFormProps {
 }
 
 export function BrandVoiceForm({ mode, initial }: BrandVoiceFormProps) {
+  const t = useT();
   const router = useRouter();
   const [name,        setName]        = useState(initial?.name ?? '');
   const [description, setDescription] = useState(initial?.description ?? '');
@@ -74,38 +76,36 @@ export function BrandVoiceForm({ mode, initial }: BrandVoiceFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="glass-strong rounded-[20px] p-6 md:p-7 flex flex-col gap-5">
-      <Field label="ชื่อ Voice" required>
+      <Field label={t('bv.f.name')} required>
         <input
           type="text"
           required
           maxLength={60}
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="เช่น พี่สาวที่ปรึกษาผิว"
+          placeholder={t('bv.f.name.ph')}
           className={inputCls}
         />
       </Field>
 
-      <Field label="อธิบายโทน + สไตล์" required>
+      <Field label={t('bv.f.desc')} required>
         <textarea
           rows={5}
           required
           maxLength={600}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder="เช่น 'พูดเหมือนพี่สาวที่ปรึกษาเรื่องผิว ใช้ภาษาน่ารัก ใส่ ✨ บางครั้ง อย่าใส่ศัพท์เทคนิคหนักๆ จบประโยคด้วย ค่า'"
+          placeholder={t('set.bv.ph')}
           className={`${inputCls} resize-none font-thai`}
         />
-        <p className="text-[11px] text-ink-3 mt-1.5 lang-th:font-thai">
-          AI จะอ่านส่วนนี้ก่อนทุกครั้งที่ generate ลง detail ได้ละเอียดเท่าที่ต้องการ
-        </p>
+        <p className="text-[11px] text-ink-3 mt-1.5 lang-th:font-thai">{t('bv.f.desc.hint')}</p>
       </Field>
 
       <div>
         <div className="flex items-center gap-2 mb-3">
           <Mic2 size={14} className="text-iridescent" />
-          <span className="font-mono text-[10px] tracking-[0.18em] text-ink-3 uppercase font-semibold">
-            ตัวอย่างโพสต์ (สูงสุด 3 อัน)
+          <span className="font-mono text-[10px] tracking-[0.18em] text-ink-3 uppercase font-semibold lang-th:font-thai lang-th:normal-case lang-th:tracking-normal">
+            {t('bv.f.samples')}
           </span>
         </div>
         <div className="flex flex-col gap-3">
@@ -119,7 +119,7 @@ export function BrandVoiceForm({ mode, initial }: BrandVoiceFormProps) {
                 maxLength={400}
                 value={s}
                 onChange={(e) => updateSample(i, e.target.value)}
-                placeholder={`ตัวอย่างโพสต์ที่ ${i + 1} (ทางเลือก) — copy-paste จากโพสต์จริงของคุณ`}
+                placeholder={t('bv.f.sample.ph', { i: i + 1 })}
                 className={`${inputCls} resize-none font-thai flex-1`}
               />
             </div>
@@ -141,7 +141,7 @@ export function BrandVoiceForm({ mode, initial }: BrandVoiceFormProps) {
           className="hover-target btn-grad px-6 py-3 rounded-[12px] text-white font-semibold text-[14px] border-0 flex items-center gap-2 disabled:opacity-60 lang-th:font-thai"
         >
           <Save size={14} />
-          {mode === 'create' ? 'สร้าง Voice' : 'บันทึก'}
+          {mode === 'create' ? t('bv.f.create') : t('bv.f.save')}
         </button>
 
         {mode === 'edit' && (
@@ -152,7 +152,7 @@ export function BrandVoiceForm({ mode, initial }: BrandVoiceFormProps) {
             className="hover-target ml-auto inline-flex items-center gap-2 px-4 py-3 rounded-[12px] bg-rose-50/70 border border-rose-200 text-rose-700 hover:bg-rose-100/70 font-semibold text-[13px] transition-all lang-th:font-thai"
           >
             <Trash2 size={14} />
-            ลบ
+            {t('bv.f.delete')}
           </button>
         )}
       </div>

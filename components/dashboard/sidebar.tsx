@@ -95,7 +95,7 @@ export function Sidebar({ projects = [], plan = 'free', credits = 10 }: SidebarP
           className="hover-target text-[12px] text-ink-3 px-3.5 py-2 rounded-[10px] hover:bg-white/55 hover:text-ink transition-all flex items-center gap-2.5 lang-th:font-thai no-underline"
         >
           <FolderOpen size={14} className="opacity-70" />
-          + เริ่มโปรเจกต์แรก
+          {t('side.first_project')}
         </Link>
       ) : (
         projects.slice(0, 5).map((p) => (
@@ -127,12 +127,14 @@ export function Sidebar({ projects = [], plan = 'free', credits = 10 }: SidebarP
           <div className="flex items-center gap-2 mb-2">
             <Sparkles size={14} className="text-iridescent" />
             <span className="font-mono text-[10px] tracking-[0.18em] uppercase text-ink-3 font-semibold">
-              Credits
+              {t('side.credits')}
             </span>
           </div>
           <div className="font-display font-bold text-[28px] leading-none text-ink mb-1">{credits}</div>
           <div className="text-[11px] text-ink-3 mb-3 lang-th:font-thai">
-            {plan === 'free' ? 'แผน Free · ฟรี 10 ครั้ง/เดือน' : `แผน ${plan === 'studio' ? 'Studio' : 'Agency'}`}
+            {plan === 'free'
+              ? t('side.plan_free')
+              : t('side.plan_paid', { plan: plan === 'studio' ? 'Studio' : 'Agency' })}
           </div>
           {plan === 'free' && (
             <Link
@@ -140,7 +142,7 @@ export function Sidebar({ projects = [], plan = 'free', credits = 10 }: SidebarP
               data-cursor="start"
               className="hover-target btn-grad w-full block text-center px-3 py-2 rounded-[10px] text-white font-semibold text-[12px] no-underline lang-th:font-thai"
             >
-              ↑ Upgrade to Studio
+              {t('side.upgrade')}
             </Link>
           )}
         </div>

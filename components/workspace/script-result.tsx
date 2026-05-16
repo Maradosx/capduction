@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Copy, Check, RefreshCw, Download, Film, Mic, Eye, Image as ImageIcon } from 'lucide-react';
 import type { ScriptContent } from '@/types';
+import { useT } from '@/lib/i18n';
 
 interface ScriptResultProps {
   data: ScriptContent | null;
@@ -11,7 +12,8 @@ interface ScriptResultProps {
 }
 
 export function ScriptResult({ data, loading, onRegenerate }: ScriptResultProps) {
-  if (loading) return <ResultSkeleton label="กำลังปั้นสคริปต์..." />;
+  const t = useT();
+  if (loading) return <ResultSkeleton label={t('rs.script.loading')} />;
   if (!data)   return <EmptyResult />;
 
   return (
@@ -114,6 +116,7 @@ export function ResultHeader({
   onRegenerate?: () => void;
   onExport?: () => void;
 }) {
+  const t = useT();
   return (
     <div className="flex items-center justify-between flex-wrap gap-3">
       <div className="flex items-center gap-2">
@@ -121,9 +124,9 @@ export function ResultHeader({
         <h2 className="font-display font-bold text-[18px] text-ink lang-th:font-thai">{title}</h2>
       </div>
       <div className="flex items-center gap-2">
-        {onCopyAll && <SmallBtn icon={<Copy size={13} />} label="คัดลอกทั้งหมด" onClick={onCopyAll} />}
+        {onCopyAll && <SmallBtn icon={<Copy size={13} />} label={t('rs.copy_all')} onClick={onCopyAll} />}
         {onExport   && <SmallBtn icon={<Download size={13} />} label="Export .txt" onClick={onExport} />}
-        {onRegenerate && <SmallBtn icon={<RefreshCw size={13} />} label="สร้างใหม่" onClick={onRegenerate} />}
+        {onRegenerate && <SmallBtn icon={<RefreshCw size={13} />} label={t('rs.regen')} onClick={onRegenerate} />}
       </div>
     </div>
   );
@@ -175,6 +178,7 @@ export function Section({ label, children }: { label: string; children: React.Re
 }
 
 export function EmptyResult() {
+  const t = useT();
   return (
     <div className="glass rounded-[20px] p-12 text-center flex flex-col items-center justify-center min-h-[400px]">
       <div
@@ -183,10 +187,10 @@ export function EmptyResult() {
         <Mic size={20} className="text-white drop-shadow-sm" />
       </div>
       <h3 className="font-display font-bold text-[18px] text-ink mb-2 lang-th:font-thai">
-        พร้อมสร้างคอนเทนต์
+        {t('rs.empty.title')}
       </h3>
       <p className="text-[14px] text-ink-3 max-w-[280px] mx-auto lang-th:font-thai">
-        กรอกข้อมูลด้านซ้าย กด &ldquo;สร้างเลย&rdquo; — ผลลัพธ์จะปรากฏที่นี่
+        {t('rs.empty.msg')}
       </p>
     </div>
   );

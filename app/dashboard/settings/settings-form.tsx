@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Save, CreditCard, LogOut, Check, Upload, Trash2, Loader2 } from 'lucide-react';
 import { TONES, PLATFORMS, DURATIONS } from '@/types';
+import { useT } from '@/lib/i18n';
 import { updateProfileAction, updateSettingsAction } from '@/app/actions/settings';
 import { uploadAvatarAction, removeAvatarAction } from '@/app/actions/avatar';
 
@@ -26,6 +27,7 @@ export function SettingsForm({
   avatarUrl: string | null;
   isDemoMode: boolean;
 }) {
+  const t = useT();
   const router = useRouter();
   const [d, setD] = useState<Defaults>(defaults);
   const [saving, setSaving] = useState(false);
@@ -111,7 +113,7 @@ export function SettingsForm({
   return (
     <form onSubmit={handleSave} className="flex flex-col gap-6">
       {/* ── Avatar block ──────────────────────────── */}
-      <Card title="รูปโปรไฟล์">
+      <Card title={t('set.avatar.title')}>
         <div className="flex items-center gap-5 flex-wrap">
           <div className="relative">
             <div
@@ -147,7 +149,7 @@ export function SettingsForm({
                            disabled:opacity-60 lang-th:font-thai"
               >
                 <Upload size={14} />
-                {avatar ? 'เปลี่ยนรูป' : 'อัปโหลดรูป'}
+                {avatar ? t('set.avatar.change') : t('set.avatar.upload')}
               </button>
               {avatar && (
                 <button
@@ -161,13 +163,11 @@ export function SettingsForm({
                              disabled:opacity-60 transition-all lang-th:font-thai"
                 >
                   <Trash2 size={14} />
-                  ลบรูป
+                  {t('set.avatar.remove')}
                 </button>
               )}
             </div>
-            <p className="text-[11px] text-ink-3 lang-th:font-thai">
-              JPG · PNG · WebP · GIF · ไฟล์ไม่เกิน 2 MB
-            </p>
+            <p className="text-[11px] text-ink-3 lang-th:font-thai">{t('set.avatar.hint')}</p>
             {avatarErr && (
               <p className="text-[12px] text-rose-600 lang-th:font-thai">{avatarErr}</p>
             )}
@@ -184,42 +184,42 @@ export function SettingsForm({
       </Card>
 
       {/* ── Account block ─────────────────────────── */}
-      <Card title="บัญชี">
-        <Field label="อีเมล (อ่านอย่างเดียว)">
+      <Card title={t('set.account')}>
+        <Field label={t('set.email_ro')}>
           <input value={email} disabled className={inputCls + ' opacity-60'} />
         </Field>
-        <Field label="ชื่อแสดง">
+        <Field label={t('set.display_name')}>
           <input
             value={d.full_name}
             onChange={(e) => setD({ ...d, full_name: e.target.value })}
-            placeholder="เช่น Khun Nam"
+            placeholder={t('set.display_name.ph')}
             className={inputCls}
           />
         </Field>
-        <Field label="ชื่อบริษัท / ร้าน (ทางเลือก)">
+        <Field label={t('set.company')}>
           <input
             value={d.company_name}
             onChange={(e) => setD({ ...d, company_name: e.target.value })}
-            placeholder="เช่น Nam Beauty Co."
+            placeholder={t('set.company.ph')}
             className={inputCls}
           />
         </Field>
       </Card>
 
       {/* ── Defaults block ────────────────────────── */}
-      <Card title="ค่า Default สำหรับทุก generation">
+      <Card title={t('set.defaults')}>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <Field label="Platform">
+          <Field label={t('set.platform')}>
             <select value={d.default_platform} onChange={(e) => setD({ ...d, default_platform: e.target.value })} className={inputCls}>
               {PLATFORMS.map((p) => <option key={p} value={p}>{p}</option>)}
             </select>
           </Field>
-          <Field label="Tone">
+          <Field label={t('set.tone')}>
             <select value={d.default_tone} onChange={(e) => setD({ ...d, default_tone: e.target.value })} className={inputCls}>
-              {TONES.map((t) => <option key={t} value={t}>{t}</option>)}
+              {TONES.map((tone) => <option key={tone} value={tone}>{tone}</option>)}
             </select>
           </Field>
-          <Field label="Duration">
+          <Field label={t('set.duration')}>
             <select value={d.default_duration} onChange={(e) => setD({ ...d, default_duration: e.target.value })} className={inputCls}>
               {DURATIONS.map((dr) => <option key={dr} value={dr}>{dr}</option>)}
             </select>
@@ -228,17 +228,15 @@ export function SettingsForm({
       </Card>
 
       {/* ── Brand voice ───────────────────────────── */}
-      <Card title="Brand Voice (อธิบายสไตล์การพูดของแบรนด์)">
+      <Card title={t('set.bv')}>
         <textarea
           rows={5}
           value={d.brand_voice}
           onChange={(e) => setD({ ...d, brand_voice: e.target.value })}
-          placeholder="เช่น 'พูดเหมือนพี่สาวที่ปรึกษาเรื่องผิว ใช้ภาษาน่ารัก ใส่ emoji ✨ บางครั้ง อย่าใส่ศัพท์เทคนิคหนักๆ'"
+          placeholder={t('set.bv.ph')}
           className={`${inputCls} resize-none font-thai`}
         />
-        <p className="text-[11px] text-ink-3 lang-th:font-thai">
-          AI จะใช้ข้อความนี้เป็น context ทุกครั้งที่สร้าง — ลง detail ได้ละเอียดเท่าที่ต้องการ
-        </p>
+        <p className="text-[11px] text-ink-3 lang-th:font-thai">{t('set.bv.hint')}</p>
       </Card>
 
       {/* ── Save row ──────────────────────────────── */}
@@ -254,7 +252,7 @@ export function SettingsForm({
           disabled={saving}
           className="hover-target btn-grad px-6 py-3 rounded-[12px] text-white font-semibold text-[14px] border-0 flex items-center gap-2 disabled:opacity-60 lang-th:font-thai"
         >
-          {saved ? <><Check size={14} /> บันทึกแล้ว</> : <><Save size={14} /> บันทึก</>}
+          {saved ? <><Check size={14} /> {t('set.saved')}</> : <><Save size={14} /> {t('set.save')}</>}
         </button>
         <Link
           href={plan === 'free' ? '/pricing' : '/api/billing/portal'}
@@ -263,8 +261,8 @@ export function SettingsForm({
         >
           <CreditCard size={14} />
           {plan === 'free'
-            ? 'อัปเกรดเป็น Studio · ฿349/mo'
-            : `จัดการการชำระเงิน · ${plan === 'studio' ? 'Studio' : 'Agency'}`}
+            ? t('set.upgrade_btn')
+            : t('set.manage_billing', { plan: plan === 'studio' ? 'Studio' : 'Agency' })}
         </Link>
         {!isDemoMode && (
           <form action="/auth/signout" method="post" className="m-0 ml-auto">
@@ -274,7 +272,7 @@ export function SettingsForm({
               className="hover-target inline-flex items-center gap-2 px-5 py-3 rounded-[12px] bg-rose-50/70 border border-rose-200 text-rose-700 hover:bg-rose-100/70 font-semibold text-[14px] transition-all lang-th:font-thai"
             >
               <LogOut size={14} />
-              ออกจากระบบ
+              {t('set.logout')}
             </button>
           </form>
         )}

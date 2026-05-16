@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getProfile } from '@/lib/db/profiles';
 import { getUserSettings } from '@/lib/db/settings';
 import { SettingsForm } from './settings-form';
+import { SettingsHeader } from './settings-header';
 import type { Profile, UserSettings } from '@/types';
 
 export default async function SettingsPage() {
@@ -20,16 +21,7 @@ export default async function SettingsPage() {
 
   return (
     <div className="max-w-[800px] mx-auto flex flex-col gap-6">
-      <div>
-        <h1 className="font-display font-bold text-[clamp(28px,3.5vw,42px)] tracking-[-0.025em] text-ink lang-th:font-thai">
-          ตั้งค่าบัญชี
-        </h1>
-        <p className="text-ink-3 text-[15px] mt-1 lang-th:font-thai">
-          {isDemoMode
-            ? 'Demo mode · การบันทึกจะไม่มีผล (ไม่ได้ตั้ง Supabase)'
-            : 'ตั้งค่า default + brand voice เพื่อให้ทุก generation เป็นในแบบของคุณ'}
-        </p>
-      </div>
+      <SettingsHeader isDemoMode={isDemoMode} />
 
       <SettingsForm
         defaults={{

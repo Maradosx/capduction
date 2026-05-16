@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { FileText, Type, Wand2, Search, Trash2, ExternalLink } from 'lucide-react';
 import type { Generation, StudioMode } from '@/types';
+import { useT } from '@/lib/i18n';
 
 const STUDIO_META: Record<StudioMode, { label: string; icon: typeof Wand2; grad: string }> = {
   script:  { label: 'Script',  icon: FileText, grad: 'from-pink to-rose' },
@@ -11,24 +12,24 @@ const STUDIO_META: Record<StudioMode, { label: string; icon: typeof Wand2; grad:
   combo:   { label: 'Combo',   icon: Wand2,    grad: 'from-teal to-violet' },
 };
 
-const FILTERS: Array<{ value: StudioMode | 'all'; label: string }> = [
-  { value: 'all',     label: 'ทั้งหมด' },
-  { value: 'script',  label: 'Script' },
-  { value: 'caption', label: 'Caption' },
-  { value: 'combo',   label: 'Combo' },
-];
-
 function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins  = Math.floor(diff / 60_000);
   const hours = Math.floor(diff / 3_600_000);
   const days  = Math.floor(diff / 86_400_000);
-  if (mins < 60)  return `${mins} นาทีที่แล้ว`;
-  if (hours < 24) return `${hours} ชั่วโมงที่แล้ว`;
-  return `${days} วันที่แล้ว`;
+  if (mins < 60)  return `${mins}m`;
+  if (hours < 24) return `${hours}h`;
+  return `${days}d`;
 }
 
 export function HistoryClient({ items: initialItems }: { items: Generation[] }) {
+  const t = useT();
+  const FILTERS: Array<{ value: StudioMode | 'all'; label: string }> = [
+    { value: 'all',     label: t('hs.filter.all') },
+    { value: 'script',  label: 'Script' },
+    { value: 'caption', label: 'Caption' },
+    { value: 'combo',   label: 'Combo' },
+  ];
   const [items,   setItems]   = useState<Generation[]>(initialItems);
   const [filter,  setFilter]  = useState<StudioMode | 'all'>('all');
   const [query,   setQuery]   = useState('');
@@ -44,7 +45,7 @@ export function HistoryClient({ items: initialItems }: { items: Generation[] }) 
   }, [items, filter, query]);
 
   async function handleDelete(id: string) {
-    if (!confirm('ลบรายการนี้?')) return;
+    if (!confirm(t('hs.delete.confirm'))) return;
     // Optimistic UI
     setItems((prev) => prev.filter((g) => g.id !== id));
     try {
@@ -75,7 +76,7 @@ export function HistoryClient({ items: initialItems }: { items: Generation[] }) 
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="ค้นหาตามชื่อสินค้า / แพลตฟอร์ม..."
+            placeholder={t('hs.search.ph')}
             className="flex-1 bg-transparent border-0 outline-none text-[13px] text-ink placeholder:text-slate lang-th:font-thai"
           />
         </div>
@@ -84,7 +85,7 @@ export function HistoryClient({ items: initialItems }: { items: Generation[] }) 
       {/* List */}
       {filtered.length === 0 ? (
         <div className="glass rounded-[14px] p-10 text-center text-ink-3 text-[14px] lang-th:font-thai">
-          ไม่มีรายการที่ตรงกับเงื่อนไข
+          {t('hs.no_match')}
         </div>
       ) : (
         <div className="glass rounded-[18px] overflow-hidden">

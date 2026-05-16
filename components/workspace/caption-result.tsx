@@ -5,6 +5,7 @@ import {
   ResultHeader, CopyBtn, Section, EmptyResult, ResultSkeleton,
   copyText, downloadText,
 } from './script-result';
+import { useT } from '@/lib/i18n';
 
 interface CaptionResultProps {
   data: CaptionContent | null;
@@ -13,7 +14,8 @@ interface CaptionResultProps {
 }
 
 export function CaptionResult({ data, loading, onRegenerate }: CaptionResultProps) {
-  if (loading) return <ResultSkeleton label="กำลังปั้นแคปชั่น..." />;
+  const t = useT();
+  if (loading) return <ResultSkeleton label={t('rs.caption.loading')} />;
   if (!data)   return <EmptyResult />;
 
   return (
@@ -25,7 +27,7 @@ export function CaptionResult({ data, loading, onRegenerate }: CaptionResultProp
         onExport={() => downloadText(formatCaptionForCopy(data), 'capduction-caption.txt')}
       />
 
-      <Section label={`CAPTIONS · ${data.captions.length} VARIANTS`}>
+      <Section label={t('rs.section.captions', { n: data.captions.length })}>
         <div className="flex flex-col gap-3">
           {data.captions.map((c, i) => (
             <div key={i} className="glass rounded-[14px] p-4">
@@ -41,7 +43,7 @@ export function CaptionResult({ data, loading, onRegenerate }: CaptionResultProp
         </div>
       </Section>
 
-      <Section label={`HOOKS · ${data.hooks.length}`}>
+      <Section label={t('rs.section.hooks', { n: data.hooks.length })}>
         <div className="flex flex-col gap-2">
           {data.hooks.map((h, i) => (
             <div key={i} className="glass rounded-[12px] px-4 py-2.5 flex items-start gap-3">
@@ -55,7 +57,7 @@ export function CaptionResult({ data, loading, onRegenerate }: CaptionResultProp
         </div>
       </Section>
 
-      <Section label={`HASHTAGS · ${data.hashtags.length}`}>
+      <Section label={t('rs.section.hashtags', { n: data.hashtags.length })}>
         <div className="glass rounded-[12px] p-4">
           <div className="flex flex-wrap gap-2">
             {data.hashtags.map((t, i) => (
@@ -65,13 +67,13 @@ export function CaptionResult({ data, loading, onRegenerate }: CaptionResultProp
             ))}
           </div>
           <div className="mt-3 pt-3 border-t border-[var(--line)] flex justify-between items-center">
-            <span className="font-mono text-[10px] text-ink-3">All in one line:</span>
+            <span className="font-mono text-[10px] text-ink-3">{t('rs.hash.oneline')}</span>
             <CopyBtn text={data.hashtags.join(' ')} />
           </div>
         </div>
       </Section>
 
-      <Section label={`CTA · ${data.cta.length} ตัวเลือก`}>
+      <Section label={t('rs.section.cta', { n: data.cta.length })}>
         <div className="flex flex-col gap-2">
           {data.cta.map((c, i) => (
             <div key={i} className="glass rounded-[12px] px-4 py-2.5 flex items-start gap-3">
@@ -85,7 +87,7 @@ export function CaptionResult({ data, loading, onRegenerate }: CaptionResultProp
         </div>
       </Section>
 
-      <Section label={`SELLING ANGLES · ${data.angles.length}`}>
+      <Section label={t('rs.section.angles', { n: data.angles.length })}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {data.angles.map((a, i) => (
             <div key={i} className="glass rounded-[12px] p-4">
@@ -98,7 +100,7 @@ export function CaptionResult({ data, loading, onRegenerate }: CaptionResultProp
         </div>
       </Section>
 
-      <Section label={`VIDEO CONTENT IDEAS · ${data.contentIdeas.length}`}>
+      <Section label={t('rs.section.ideas', { n: data.contentIdeas.length })}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {data.contentIdeas.map((idea, i) => (
             <div key={i} className="glass rounded-[12px] p-4">

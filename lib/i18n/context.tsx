@@ -6,7 +6,7 @@ import { DICT, type DictKey, type Lang } from './dict';
 interface I18nValue {
   lang: Lang;
   setLang: (l: Lang) => void;
-  t: (key: DictKey) => string;
+  t: (key: DictKey, vars?: Record<string, string | number>) => string;
 }
 
 const I18nContext = createContext<I18nValue | null>(null);
@@ -39,9 +39,15 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const t = useCallback(
-    (key: DictKey): string => {
+    (key: DictKey, vars?: Record<string, string | number>): string => {
       const entry = DICT[key];
-      return entry?.[lang] ?? entry?.en ?? String(key);
+      let str: string = entry?.[lang] ?? entry?.en ?? String(key);
+      if (vars) {
+        for (const [k, v] of Object.entries(vars)) {
+          str = str.split(`{${k}}`).join(String(v));
+        }
+      }
+      return str;
     },
     [lang]
   );

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { Search, Bell, ChevronDown, LogOut, Settings, Menu } from 'lucide-react';
 import { LangToggle } from '@/components/lang-toggle';
+import { useT } from '@/lib/i18n';
 import { useMobileMenu } from './menu-context';
 
 interface TopbarProps {
@@ -12,6 +13,7 @@ interface TopbarProps {
 }
 
 export function Topbar({ user, isDemoMode }: TopbarProps) {
+  const t = useT();
   const [menuOpen, setMenuOpen] = useState(false);
   const { setOpen: setDrawerOpen } = useMobileMenu();
 
@@ -46,7 +48,7 @@ export function Topbar({ user, isDemoMode }: TopbarProps) {
       <div className="hidden sm:flex flex-1 max-w-[420px] items-center gap-2 px-3.5 py-2.5
                       bg-white/60 border border-white/80 rounded-[10px] font-mono text-xs text-ink-3">
         <Search size={14} />
-        <span className="lang-th:font-thai truncate">ค้นหา script, caption, project...</span>
+        <span className="lang-th:font-thai truncate">{t('top.search')}</span>
         <span className="ml-auto px-1.5 py-0.5 bg-violet/10 rounded text-[10px] hidden md:inline">⌘K</span>
       </div>
       <button
@@ -114,7 +116,7 @@ export function Topbar({ user, isDemoMode }: TopbarProps) {
               className="hover-target flex items-center gap-2.5 px-3 py-2.5 rounded-[8px] text-sm text-ink-3 hover:bg-white/55 hover:text-ink transition-all no-underline lang-th:font-thai"
             >
               <Settings size={14} />
-              ตั้งค่าบัญชี
+              {t('top.menu.settings')}
             </Link>
             <div className="h-px bg-[var(--line)] my-1" />
             {isDemoMode ? (
@@ -124,7 +126,7 @@ export function Topbar({ user, isDemoMode }: TopbarProps) {
                 className="hover-target flex items-center gap-2.5 px-3 py-2.5 rounded-[8px] text-sm text-ink-3 hover:bg-white/55 hover:text-ink transition-all no-underline lang-th:font-thai"
               >
                 <LogOut size={14} />
-                เข้าสู่ระบบ
+                {t('top.menu.login')}
               </Link>
             ) : (
               <form action="/auth/signout" method="post" className="m-0">
@@ -134,7 +136,7 @@ export function Topbar({ user, isDemoMode }: TopbarProps) {
                   className="hover-target w-full flex items-center gap-2.5 px-3 py-2.5 rounded-[8px] text-sm text-ink-3 hover:bg-white/55 hover:text-ink transition-all lang-th:font-thai border-0 bg-transparent text-left"
                 >
                   <LogOut size={14} />
-                  ออกจากระบบ
+                  {t('top.menu.logout')}
                 </button>
               </form>
             )}

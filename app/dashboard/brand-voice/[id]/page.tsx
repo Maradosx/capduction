@@ -1,9 +1,8 @@
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ArrowLeft } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { getBrandVoice } from '@/lib/db/brand-voices';
 import { BrandVoiceForm } from '../brand-voice-form';
+import { EditHeader } from './edit-header';
 import type { BrandVoice } from '@/types';
 
 const DEMO_BV: BrandVoice = {
@@ -41,22 +40,7 @@ export default async function BrandVoiceDetailPage({ params }: { params: { id: s
 
   return (
     <div className="max-w-[680px] mx-auto flex flex-col gap-6">
-      <Link
-        href="/dashboard/brand-voice"
-        data-cursor="go"
-        className="hover-target inline-flex items-center gap-2 text-ink-3 hover:text-ink text-[13px] font-mono no-underline"
-      >
-        <ArrowLeft size={14} /> All voices
-      </Link>
-
-      <div>
-        <h1 className="font-display font-bold text-[clamp(28px,3.5vw,42px)] tracking-[-0.025em] text-ink lang-th:font-thai">
-          <span className="text-iridescent">{bv.name}</span>
-        </h1>
-        <p className="text-ink-3 text-[15px] mt-1 lang-th:font-thai">
-          แก้ไข description / sample posts — บันทึกแล้ว AI จะใช้ทันทีในทุก generation ครั้งถัดไป
-        </p>
-      </div>
+      <EditHeader name={bv.name} />
 
       <BrandVoiceForm
         mode="edit"

@@ -6,6 +6,7 @@ import type { ComboContent } from '@/types';
 import { ScriptResult } from './script-result';
 import { CaptionResult } from './caption-result';
 import { ResultSkeleton, EmptyResult, CopyBtn } from './script-result';
+import { useT } from '@/lib/i18n';
 
 interface ComboResultProps {
   data: ComboContent | null;
@@ -14,9 +15,10 @@ interface ComboResultProps {
 }
 
 export function ComboResult({ data, loading, onRegenerate }: ComboResultProps) {
+  const t = useT();
   const [tab, setTab] = useState<'script' | 'caption'>('script');
 
-  if (loading) return <ResultSkeleton label="กำลังปั้น script + caption..." />;
+  if (loading) return <ResultSkeleton label={t('rs.combo.loading')} />;
   if (!data)   return <EmptyResult />;
 
   return (

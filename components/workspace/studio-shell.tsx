@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { StudioForm, type StudioFormData } from './studio-form';
 import type { StudioMode, ScriptContent, CaptionContent, ComboContent, BrandVoice } from '@/types';
+import { useT } from '@/lib/i18n';
 
 interface StudioShellProps {
   mode: StudioMode;
@@ -26,6 +27,7 @@ const ENDPOINT: Record<StudioMode, string> = {
 };
 
 export function StudioShell({ mode, title, description, brandVoices = [], renderResult }: StudioShellProps) {
+  const t = useT();
   const search = useSearchParams();
   const projectId = search.get('projectId') ?? undefined;
 
@@ -61,13 +63,13 @@ export function StudioShell({ mode, title, description, brandVoices = [], render
       const json = await res.json();
       if (!res.ok || !json.success) {
         if (json.code === 'CREDITS_EXHAUSTED') {
-          setError('เครดิตหมดแล้ว — กรุณาอัปเกรดแผน');
+          setError(t('wsh.err.credit'));
         } else if (res.status === 401) {
-          setError('กรุณาเข้าสู่ระบบก่อนสร้างคอนเทนต์');
+          setError(t('wsh.err.auth'));
         } else if (res.status === 429) {
-          setError('คุณส่งคำขอเร็วเกินไป — กรุณารอสักครู่');
+          setError(t('wsh.err.rate'));
         } else {
-          setError(json.error || 'เกิดข้อผิดพลาด กรุณาลองใหม่');
+          setError(json.error || t('wsh.err.generic'));
         }
         setData(null);
       } else {
@@ -97,7 +99,7 @@ export function StudioShell({ mode, title, description, brandVoices = [], render
           {projectId && (
             <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-violet/10 border border-violet/25 font-mono text-[11px] tracking-wider text-ink-2 font-semibold">
               <span className="w-1.5 h-1.5 rounded-full bg-violet animate-pulse" />
-              จะบันทึกในโปรเจกต์ที่เลือก
+              {t('wsh.tag.project')}
             </span>
           )}
           {brandVoices.length > 0 && (
@@ -108,7 +110,7 @@ export function StudioShell({ mode, title, description, brandVoices = [], render
                 onChange={(e) => setBrandVoiceId(e.target.value)}
                 className="bg-transparent border-0 outline-none text-ink font-semibold cursor-pointer font-mono"
               >
-                <option value="">— ไม่ใช้ —</option>
+                <option value="">{t('wsh.bv.none')}</option>
                 {brandVoices.map((bv) => (
                   <option key={bv.id} value={bv.id}>{bv.name}</option>
                 ))}

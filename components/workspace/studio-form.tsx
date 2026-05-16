@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Sparkles, Loader2 } from 'lucide-react';
 import { TONES, PLATFORMS, DURATIONS, type Tone, type Platform, type Duration, type StudioMode } from '@/types';
+import { useT, useI18n } from '@/lib/i18n';
 
 export interface StudioFormData {
   productName: string;
@@ -22,24 +23,19 @@ interface StudioFormProps {
   onSubmit: (data: StudioFormData) => void;
 }
 
-const TONE_LABELS_TH: Record<Tone, string> = {
-  Friendly: 'เป็นมิตร',
-  Professional: 'มืออาชีพ',
-  Luxury: 'หรูหรา',
-  Viral: 'ไวรัล',
-  Persuasive: 'โน้มน้าว',
-  Minimal: 'มินิมอล',
+const TONE_LABELS: Record<'th' | 'en', Record<Tone, string>> = {
+  th: { Friendly: 'เป็นมิตร', Professional: 'มืออาชีพ', Luxury: 'หรูหรา', Viral: 'ไวรัล', Persuasive: 'โน้มน้าว', Minimal: 'มินิมอล' },
+  en: { Friendly: 'Friendly',  Professional: 'Professional', Luxury: 'Luxury', Viral: 'Viral', Persuasive: 'Persuasive', Minimal: 'Minimal' },
 };
 
-const DURATION_LABELS: Record<Duration, string> = {
-  '15s':  '15 วินาที',
-  '30s':  '30 วินาที',
-  '60s':  '1 นาที',
-  '90s':  '1.5 นาที',
-  long:   'Long-form (>90s)',
+const DURATION_LABELS: Record<'th' | 'en', Record<Duration, string>> = {
+  th: { '15s': '15 วินาที', '30s': '30 วินาที', '60s': '1 นาที', '90s': '1.5 นาที', long: 'Long-form (>90s)' },
+  en: { '15s': '15 sec',    '30s': '30 sec',    '60s': '1 min',  '90s': '1.5 min',  long: 'Long-form (>90s)' },
 };
 
 export function StudioForm({ mode, defaults, loading, error, onSubmit }: StudioFormProps) {
+  const t = useT();
+  const { lang } = useI18n();
   const [data, setData] = useState<StudioFormData>({
     productName:    defaults?.productName    ?? '',
     category:       defaults?.category       ?? '',
@@ -70,20 +66,20 @@ export function StudioForm({ mode, defaults, loading, error, onSubmit }: StudioF
         </h2>
       </div>
 
-      <Field label="ชื่อสินค้า" required>
+      <Field label={t('wf.product')} required>
         <input
           type="text"
           required
           maxLength={100}
           value={data.productName}
           onChange={(e) => setData({ ...data, productName: e.target.value })}
-          placeholder="เช่น ลิปสติกแดงแมตต์ ติด 12 ชั่วโมง"
+          placeholder={t('wf.product.ph')}
           className={inputCls}
         />
       </Field>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Field label="หมวดหมู่ (ทางเลือก)">
+        <Field label={t('wf.category')}>
           <input
             type="text"
             maxLength={50}
@@ -93,20 +89,20 @@ export function StudioForm({ mode, defaults, loading, error, onSubmit }: StudioF
             className={inputCls}
           />
         </Field>
-        <Field label="กลุ่มเป้าหมาย (ทางเลือก)">
+        <Field label={t('wf.target')}>
           <input
             type="text"
             maxLength={100}
             value={data.targetCustomer}
             onChange={(e) => setData({ ...data, targetCustomer: e.target.value })}
-            placeholder="ผู้หญิงวัย 18-35 ที่ชอบแต่งหน้า"
+            placeholder={t('wf.target.ph')}
             className={inputCls}
           />
         </Field>
       </div>
 
       <div className={`grid grid-cols-1 ${showDuration ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-4`}>
-        <Field label="แพลตฟอร์ม">
+        <Field label={t('wf.platform')}>
           <select
             value={data.platform}
             onChange={(e) => setData({ ...data, platform: e.target.value as Platform })}
@@ -115,39 +111,39 @@ export function StudioForm({ mode, defaults, loading, error, onSubmit }: StudioF
             {PLATFORMS.map((p) => <option key={p} value={p}>{p}</option>)}
           </select>
         </Field>
-        <Field label="โทน">
+        <Field label={t('wf.tone')}>
           <select
             value={data.tone}
             onChange={(e) => setData({ ...data, tone: e.target.value as Tone })}
             className={inputCls}
           >
-            {TONES.map((t) => (
-              <option key={t} value={t}>{t} · {TONE_LABELS_TH[t]}</option>
+            {TONES.map((tone) => (
+              <option key={tone} value={tone}>{tone} · {TONE_LABELS[lang][tone]}</option>
             ))}
           </select>
         </Field>
         {showDuration && (
-          <Field label="ความยาว">
+          <Field label={t('wf.duration')}>
             <select
               value={data.duration}
               onChange={(e) => setData({ ...data, duration: e.target.value as Duration })}
               className={inputCls}
             >
               {DURATIONS.map((d) => (
-                <option key={d} value={d}>{DURATION_LABELS[d]}</option>
+                <option key={d} value={d}>{DURATION_LABELS[lang][d]}</option>
               ))}
             </select>
           </Field>
         )}
       </div>
 
-      <Field label="รายละเอียดเพิ่มเติม / โปรโมชั่น (ทางเลือก)">
+      <Field label={t('wf.details')}>
         <textarea
           rows={3}
           maxLength={500}
           value={data.details}
           onChange={(e) => setData({ ...data, details: e.target.value })}
-          placeholder="ราคา ฿299 · ส่งฟรี · ลด 20% เฉพาะ 50 คนแรก"
+          placeholder={t('wf.details.ph')}
           className={`${inputCls} resize-none`}
         />
       </Field>
@@ -168,12 +164,12 @@ export function StudioForm({ mode, defaults, loading, error, onSubmit }: StudioF
         {loading ? (
           <>
             <Loader2 size={16} className="animate-spin" />
-            กำลังสร้าง...
+            {t('wf.generating')}
           </>
         ) : (
           <>
             <Sparkles size={16} />
-            สร้างเลย
+            {t('wf.generate')}
           </>
         )}
       </button>
