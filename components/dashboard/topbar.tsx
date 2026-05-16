@@ -2,8 +2,9 @@
 
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { Search, Bell, ChevronDown, LogOut, Settings } from 'lucide-react';
+import { Search, Bell, ChevronDown, LogOut, Settings, Menu } from 'lucide-react';
 import { LangToggle } from '@/components/lang-toggle';
+import { useMobileMenu } from './menu-context';
 
 interface TopbarProps {
   user?: { email: string; full_name?: string | null; avatar_url?: string | null } | null;
@@ -12,6 +13,7 @@ interface TopbarProps {
 
 export function Topbar({ user, isDemoMode }: TopbarProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { setOpen: setDrawerOpen } = useMobileMenu();
 
   // Close menu on outside click
   useEffect(() => {
@@ -26,15 +28,35 @@ export function Topbar({ user, isDemoMode }: TopbarProps) {
   const initial = displayName.charAt(0).toUpperCase();
 
   return (
-    <header className="fixed top-5 left-[268px] right-5 z-40 flex items-center gap-3
-                       glass rounded-[16px] px-4 py-3">
-      {/* Search */}
-      <div className="flex-1 max-w-[420px] flex items-center gap-2 px-3.5 py-2.5
+    <header className="fixed top-5 left-5 lg:left-[268px] right-5 z-40 flex items-center gap-2 sm:gap-3
+                       glass rounded-[16px] px-3 sm:px-4 py-3">
+      {/* Mobile hamburger */}
+      <button
+        type="button"
+        onClick={() => setDrawerOpen(true)}
+        aria-label="Open menu"
+        data-cursor="open"
+        className="hover-target lg:hidden w-9 h-9 flex items-center justify-center text-ink-3 hover:text-ink
+                   bg-white/40 hover:bg-white/70 rounded-[10px] transition-all flex-shrink-0"
+      >
+        <Menu size={18} />
+      </button>
+
+      {/* Search — collapses to icon-only on small */}
+      <div className="hidden sm:flex flex-1 max-w-[420px] items-center gap-2 px-3.5 py-2.5
                       bg-white/60 border border-white/80 rounded-[10px] font-mono text-xs text-ink-3">
         <Search size={14} />
-        <span className="lang-th:font-thai">ค้นหา script, caption, project...</span>
-        <span className="ml-auto px-1.5 py-0.5 bg-violet/10 rounded text-[10px]">⌘K</span>
+        <span className="lang-th:font-thai truncate">ค้นหา script, caption, project...</span>
+        <span className="ml-auto px-1.5 py-0.5 bg-violet/10 rounded text-[10px] hidden md:inline">⌘K</span>
       </div>
+      <button
+        type="button"
+        aria-label="Search"
+        className="sm:hidden hover-target w-9 h-9 flex items-center justify-center text-ink-3
+                   bg-white/40 hover:bg-white/70 rounded-[10px] transition-all flex-shrink-0"
+      >
+        <Search size={16} />
+      </button>
 
       <div className="flex-1" />
 

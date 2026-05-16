@@ -5,7 +5,8 @@ import { usePathname } from 'next/navigation';
 import { useT } from '@/lib/i18n';
 import { BrandMark } from '@/components/brand-mark';
 import type { Project } from '@/types';
-import { Wand2, FileText, Type, FolderOpen, Mic2, Clock, BarChart3, Settings, Sparkles } from 'lucide-react';
+import { Wand2, FileText, Type, FolderOpen, Mic2, Clock, BarChart3, Settings, Sparkles, X } from 'lucide-react';
+import { useMobileMenu } from './menu-context';
 
 interface SidebarProps {
   /** Project list for the PROJECTS section */
@@ -31,10 +32,34 @@ const RESOURCE_ITEMS = [
 export function Sidebar({ projects = [], plan = 'free', credits = 10 }: SidebarProps) {
   const t = useT();
   const pathname = usePathname();
+  const { open, setOpen } = useMobileMenu();
 
   return (
-    <aside className="hidden lg:flex flex-col w-[240px] fixed left-5 top-5 bottom-5 z-50
-                      glass-strong rounded-[20px] p-4 overflow-y-auto">
+    <>
+      {/* Mobile backdrop */}
+      {open && (
+        <div
+          className="lg:hidden fixed inset-0 z-40 bg-ink/40 backdrop-blur-sm"
+          onClick={() => setOpen(false)}
+        />
+      )}
+
+      <aside
+        className={`flex flex-col w-[260px] lg:w-[240px] fixed left-0 lg:left-5 top-0 lg:top-5 bottom-0 lg:bottom-5
+                    z-50 glass-strong lg:rounded-[20px] p-4 overflow-y-auto
+                    transition-transform duration-300 ease-out lg:!translate-x-0
+                    ${open ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
+      >
+        {/* Mobile close button */}
+        <button
+          type="button"
+          onClick={() => setOpen(false)}
+          aria-label="Close menu"
+          className="lg:hidden absolute top-4 right-4 w-8 h-8 rounded-full bg-white/60
+                     flex items-center justify-center text-ink-3 hover:text-ink hover:bg-white/80 transition"
+        >
+          <X size={16} />
+        </button>
       {/* Brand mini */}
       <Link href="/dashboard" data-cursor="go" className="hover-target flex items-center gap-2.5 mb-6 text-ink no-underline px-1">
         <BrandMark className="w-9 h-9" />
@@ -120,7 +145,8 @@ export function Sidebar({ projects = [], plan = 'free', credits = 10 }: SidebarP
           )}
         </div>
       </div>
-    </aside>
+      </aside>
+    </>
   );
 }
 

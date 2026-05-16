@@ -36,7 +36,9 @@ export function BottomCta() {
 
         <form
           onSubmit={handleSubmit}
-          className="inline-flex items-center pl-[22px] pr-[5px] py-[5px] glass-strong rounded-[14px] min-w-[460px] max-w-full"
+          className="flex flex-col sm:inline-flex sm:flex-row items-stretch sm:items-center
+                     gap-2 sm:gap-0 px-3 sm:pl-[22px] sm:pr-[5px] py-3 sm:py-[5px]
+                     glass-strong rounded-[14px] w-full sm:w-auto sm:min-w-[460px] max-w-full mx-auto"
         >
           <input
             type="email"
@@ -44,12 +46,12 @@ export function BottomCta() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder={t('hero.email.placeholder')}
-            className="flex-1 bg-transparent border-0 py-3 text-ink text-sm outline-none min-w-0 placeholder:text-slate lang-th:font-thai"
+            className="flex-1 bg-transparent border-0 px-2 sm:px-0 py-2 sm:py-3 text-ink text-sm outline-none min-w-0 placeholder:text-slate lang-th:font-thai"
           />
           <button
             type="submit"
             data-cursor="join"
-            className="hover-target btn-grad px-[22px] py-[11px] rounded-[9px] text-white font-semibold text-sm border-0 whitespace-nowrap lang-th:font-thai"
+            className="hover-target btn-grad px-[22px] py-[11px] rounded-[10px] sm:rounded-[9px] text-white font-semibold text-sm border-0 whitespace-nowrap lang-th:font-thai"
           >
             {t('bcta.btn')}
           </button>
