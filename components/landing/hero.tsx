@@ -100,7 +100,7 @@ export function LandingHero() {
           <Avatar gradient="linear-gradient(135deg, var(--mint), var(--teal))" />
         </div>
         <span>
-          <strong className="text-ink font-bold">2,847</strong>{' '}
+          <strong className="text-ink font-bold">10</strong>{' '}
           <span className="lang-th:font-thai">{t('hero.trust')}</span>
         </span>
       </div>

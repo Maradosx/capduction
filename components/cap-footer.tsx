@@ -76,11 +76,11 @@ export function CapFooter() {
           </div>
         ))}
       </div>
-      <div className="max-w-[1400px] mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-2 pt-6 font-mono text-[10px] tracking-[0.14em] uppercase text-ink-3">
-        <span>© 2026 CAPDUCTION · MADE IN BANGKOK</span>
+      <div className="max-w-[1400px] mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-2 pt-6 font-mono text-[10px] tracking-[0.14em] uppercase text-ink-3 lang-th:font-thai lang-th:normal-case lang-th:tracking-normal">
+        <span>{t('ft.copyright')}</span>
         <span className="text-iridescent font-semibold flex items-center gap-2">
           <span className="w-1.5 h-1.5 rounded-full bg-pink shadow-[0_0_10px_rgba(255,143,181,0.6)] animate-pulse" />
-          All systems operational · 99.98%
+          {t('ft.status')}
         </span>
         <span>SOFT LIQUID · V1.0</span>
       </div>

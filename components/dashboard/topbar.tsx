@@ -51,21 +51,27 @@ export function Topbar({ user, isDemoMode }: TopbarProps) {
         <Menu size={18} />
       </button>
 
-      {/* Search — collapses to icon-only on small */}
-      <div className="hidden sm:flex flex-1 max-w-[420px] items-center gap-2 px-3.5 py-2.5
-                      bg-white/60 border border-white/80 rounded-[10px] font-mono text-xs text-ink-3">
+      {/* Search — collapses to icon-only on small. Click navigates to history
+          where the user can search through their generations. */}
+      <Link
+        href="/dashboard/history"
+        data-cursor="go"
+        className="hover-target hidden sm:flex flex-1 max-w-[420px] items-center gap-2 px-3.5 py-2.5
+                   bg-white/60 border border-white/80 rounded-[10px] font-mono text-xs text-ink-3
+                   hover:bg-white/85 hover:text-ink transition-all no-underline"
+      >
         <Search size={14} />
         <span className="lang-th:font-thai truncate">{t('top.search')}</span>
-        <span className="ml-auto px-1.5 py-0.5 bg-violet/10 rounded text-[10px] hidden md:inline">⌘K</span>
-      </div>
-      <button
-        type="button"
+      </Link>
+      <Link
+        href="/dashboard/history"
+        data-cursor="go"
         aria-label="Search"
         className="sm:hidden hover-target w-9 h-9 flex items-center justify-center text-ink-3
-                   bg-white/40 hover:bg-white/70 rounded-[10px] transition-all flex-shrink-0"
+                   bg-white/40 hover:bg-white/70 rounded-[10px] transition-all flex-shrink-0 no-underline"
       >
         <Search size={16} />
-      </button>
+      </Link>
 
       <div className="flex-1" />
 

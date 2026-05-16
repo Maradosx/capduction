@@ -23,7 +23,7 @@ export const DICT = {
     en: 'An AI studio for Thai short-form creators — craft <strong>spoken scripts</strong> and <strong>on-screen captions</strong> that understand Thai style. All in one file.',
   },
   'hero.cta':        { th: 'เริ่มฟรี →',              en: 'Start free →' },
-  'hero.trust':      { th: 'creators · สัปดาห์นี้',   en: 'creators · joined this week' },
+  'hero.trust':      { th: 'ครั้งฟรี · ไม่ต้องใช้บัตรเครดิต', en: 'free generations · no credit card required' },
   'hero.email.placeholder': { th: 'อีเมลของคุณ',      en: 'your@email.com' },
 
   // ─── DASHBOARD PREVIEW (on landing) ────────────────────────
@@ -87,9 +87,11 @@ export const DICT = {
 
   // ─── FOOTER ────────────────────────────────────────────────
   'ft.tag': {
-    th: 'สตูดิโอ AI ระหว่างไอเดียกับการกดอัปโหลด — สร้างในบางกอก เพื่อ creator ไทยทั่วประเทศ',
+    th: 'สตูดิโอ AI ระหว่างไอเดียกับการกดอัปโหลด — สร้างในกรุงเทพฯ เพื่อครีเอเตอร์ไทยทุกคน',
     en: 'The AI studio between idea and upload — built in Bangkok, for Thai creators everywhere.',
   },
+  'ft.copyright':  { th: '© 2026 CAPDUCTION · สร้างในกรุงเทพฯ', en: '© 2026 CAPDUCTION · Made in Bangkok' },
+  'ft.status':     { th: 'ระบบทำงานปกติ · 99.98%',              en: 'All systems operational · 99.98%' },
 
   // ─── SIDEBAR / DASHBOARD ───────────────────────────────────
   'sidebar.analytics': { th: 'Analytics',  en: 'Analytics' },

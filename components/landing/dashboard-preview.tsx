@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useT } from '@/lib/i18n';
 import { BrandMark } from '@/components/brand-mark';
 
@@ -136,12 +137,16 @@ export function DashboardPreview() {
                   </strong>
                   <span className="text-xs text-ink-3 lang-th:font-thai">{t('dash.card.sub')}</span>
                 </div>
-                <button className="hover-target btn-grad px-5 py-2.5 rounded-[10px] text-white font-semibold text-[13px] border-0 inline-flex items-center gap-1.5 lang-th:font-thai" data-cursor="create">
+                <Link
+                  href="/signup"
+                  data-cursor="create"
+                  className="hover-target btn-grad px-5 py-2.5 rounded-[10px] text-white font-semibold text-[13px] border-0 inline-flex items-center gap-1.5 lang-th:font-thai no-underline"
+                >
                   <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5">
                     <path d="M12 5v14m-7-7h14" />
                   </svg>
                   {t('dash.create')}
-                </button>
+                </Link>
               </div>
 
               <div className="flex gap-3 mt-5 pt-4 border-t border-[var(--line)] font-mono text-[10px] text-ink-3 tracking-[0.12em] uppercase flex-wrap">
