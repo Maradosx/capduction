@@ -28,9 +28,7 @@ export function CapNav({ showCta = true, active = '/' }: CapNavProps) {
                  px-[14px] py-3 pl-[22px] rounded-[18px] glass"
     >
       <Link href="/" className="brand flex items-center gap-3 text-ink no-underline">
-        <div className="brand-icon orb-chrome w-9 h-9 rounded-[11px] flex items-center justify-center">
-          <BrandMark className="w-[18px] h-[18px] text-white drop-shadow-sm" />
-        </div>
+        <BrandMark className="w-9 h-9" />
         <span className="font-semibold text-[18px] tracking-tight">Capduction</span>
       </Link>
 

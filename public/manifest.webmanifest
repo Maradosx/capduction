@@ -1,0 +1,15 @@
+{
+  "name": "Capduction",
+  "short_name": "Capduction",
+  "description": "AI studio for Thai short-form video creators — scripts, captions, and combo packs.",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#FBF9FF",
+  "theme_color": "#7C3AED",
+  "lang": "th",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

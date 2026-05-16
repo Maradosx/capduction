@@ -30,9 +30,7 @@ export function DashboardPreview() {
           {/* Top bar */}
           <div className="px-[22px] py-3.5 border-b border-[var(--line)] flex items-center gap-4 bg-white/35">
             <div className="flex items-center gap-2.5">
-              <div className="orb-chrome w-[30px] h-[30px] rounded-[9px] flex items-center justify-center">
-                <BrandMark className="w-3.5 h-3.5 text-white" />
-              </div>
+              <BrandMark className="w-[30px] h-[30px]" />
               <div className="leading-[1.1]">
                 <strong className="text-sm font-bold text-ink">
                   Capduction{' '}

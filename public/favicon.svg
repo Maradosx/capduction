@@ -1,18 +1,26 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Capduction">
   <defs>
-    <radialGradient id="orb" cx="35%" cy="28%" r="70%">
-      <stop offset="0%"  stop-color="#FFFFFF"/>
-      <stop offset="15%" stop-color="#E8DEFF"/>
-      <stop offset="35%" stop-color="#FFD0E0"/>
-      <stop offset="60%" stop-color="#B58FFF"/>
-      <stop offset="100%" stop-color="#5C548A"/>
-    </radialGradient>
-    <radialGradient id="highlight" cx="40%" cy="30%" r="30%">
-      <stop offset="0%"  stop-color="rgba(255,255,255,0.6)"/>
-      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
-    </radialGradient>
+    <linearGradient id="fav-bubble" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#C4B5FD"/>
+      <stop offset="40%" stop-color="#F0ABFC"/>
+      <stop offset="100%" stop-color="#FBA98C"/>
+    </linearGradient>
+    <linearGradient id="fav-spark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFE9C9"/>
+      <stop offset="100%" stop-color="#FB7185"/>
+    </linearGradient>
+    <linearGradient id="fav-shadow" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#7C3AED" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#1E1B4B" stop-opacity="0.18"/>
+    </linearGradient>
   </defs>
-  <rect width="64" height="64" rx="16" fill="url(#orb)"/>
-  <ellipse cx="22" cy="16" rx="14" ry="5" fill="url(#highlight)" transform="rotate(-25 22 16)"/>
-  <path d="M22 18 L48 32 L22 46 Z" fill="white" filter="drop-shadow(0 1px 2px rgba(0,0,0,0.3))"/>
+  <path d="M14 12 h28 a10 10 0 0 1 10 10 v14 a10 10 0 0 1 -10 10 h-12 l-7 8 1.5 -8 h-10.5 a10 10 0 0 1 -10 -10 v-14 a10 10 0 0 1 10 -10 z" fill="url(#fav-bubble)"/>
+  <path d="M14 12 h28 a10 10 0 0 1 10 10 v14 a10 10 0 0 1 -10 10 h-12 l-7 8 1.5 -8 h-10.5 a10 10 0 0 1 -10 -10 v-14 a10 10 0 0 1 10 -10 z" fill="url(#fav-shadow)"/>
+  <rect x="18" y="22" width="22" height="2.4" rx="1.2" fill="#FFFFFF" opacity="0.9"/>
+  <rect x="18" y="28" width="28" height="2.4" rx="1.2" fill="#FFFFFF" opacity="0.85"/>
+  <rect x="18" y="34" width="16" height="2.4" rx="1.2" fill="#FFFFFF" opacity="0.8"/>
+  <g transform="translate(50 14)">
+    <path d="M0 -5 L1.3 -1.3 L5 0 L1.3 1.3 L0 5 L-1.3 1.3 L-5 0 L-1.3 -1.3 Z" fill="url(#fav-spark)"/>
+    <circle cx="0" cy="0" r="1" fill="#FFFFFF"/>
+  </g>
 </svg>

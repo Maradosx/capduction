@@ -17,7 +17,10 @@ export const metadata: Metadata = {
   ],
   icons: {
     icon: [{ url: '/favicon.svg', type: 'image/svg+xml' }],
+    apple: [{ url: '/favicon.svg', type: 'image/svg+xml' }],
+    shortcut: ['/favicon.svg'],
   },
+  manifest: '/manifest.webmanifest',
   openGraph: {
     title:       'Capduction — Smart Scripts, Built By Creators',
     description: 'AI studio between idea and upload — for Thai short-form creators.',

@@ -37,9 +37,7 @@ export function Sidebar({ projects = [], plan = 'free', credits = 10 }: SidebarP
                       glass-strong rounded-[20px] p-4 overflow-y-auto">
       {/* Brand mini */}
       <Link href="/dashboard" data-cursor="go" className="hover-target flex items-center gap-2.5 mb-6 text-ink no-underline px-1">
-        <div className="orb-chrome w-9 h-9 rounded-[11px] flex items-center justify-center">
-          <BrandMark className="w-[18px] h-[18px] text-white drop-shadow-sm" />
-        </div>
+        <BrandMark className="w-9 h-9" />
         <div className="leading-[1.15]">
           <div className="font-bold text-[15px]">
             Capduction

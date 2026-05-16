@@ -1,0 +1,32 @@
+<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Capduction — Bloom mark">
+  <defs>
+    <linearGradient id="bl-pet-1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#C4B5FD"/>
+      <stop offset="100%" stop-color="#F0ABFC"/>
+    </linearGradient>
+    <linearGradient id="bl-pet-2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FBA98C"/>
+      <stop offset="100%" stop-color="#FB7185"/>
+    </linearGradient>
+    <linearGradient id="bl-pet-3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6EE7C7"/>
+      <stop offset="100%" stop-color="#93C5FD"/>
+    </linearGradient>
+    <radialGradient id="bl-core" cx="40%" cy="35%" r="70%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#FFE9C9"/>
+    </radialGradient>
+  </defs>
+  <g transform="translate(32 32)" style="mix-blend-mode:multiply">
+    <ellipse cx="0" cy="-13" rx="8" ry="15" fill="url(#bl-pet-1)" opacity="0.78"/>
+    <ellipse cx="0" cy="-13" rx="8" ry="15" fill="url(#bl-pet-2)" opacity="0.78" transform="rotate(60)"/>
+    <ellipse cx="0" cy="-13" rx="8" ry="15" fill="url(#bl-pet-3)" opacity="0.78" transform="rotate(120)"/>
+    <ellipse cx="0" cy="-13" rx="8" ry="15" fill="url(#bl-pet-1)" opacity="0.78" transform="rotate(180)"/>
+    <ellipse cx="0" cy="-13" rx="8" ry="15" fill="url(#bl-pet-2)" opacity="0.78" transform="rotate(240)"/>
+    <ellipse cx="0" cy="-13" rx="8" ry="15" fill="url(#bl-pet-3)" opacity="0.78" transform="rotate(300)"/>
+  </g>
+  <!-- bright center -->
+  <circle cx="32" cy="32" r="6" fill="url(#bl-core)"/>
+  <!-- play hint -->
+  <path d="M30 29 L36 32 L30 35 Z" fill="#7C3AED" opacity="0.55"/>
+</svg>

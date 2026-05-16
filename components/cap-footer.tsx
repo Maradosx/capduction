@@ -49,9 +49,7 @@ export function CapFooter() {
       <div className="max-w-[1400px] mx-auto grid grid-cols-1 md:grid-cols-[2fr_1fr_1fr_1fr] gap-12 pb-12 border-b border-[var(--line)] mb-6">
         <div>
           <Link href="/" className="flex items-center gap-3 mb-4 text-ink no-underline">
-            <div className="orb-chrome w-8 h-8 rounded-[9px] flex items-center justify-center">
-              <BrandMark className="w-4 h-4 text-white" />
-            </div>
+            <BrandMark className="w-8 h-8" />
             <span className="font-bold text-[20px]">Capduction</span>
           </Link>
           <p className="text-sm text-ink-3 max-w-[320px] leading-relaxed font-thai">

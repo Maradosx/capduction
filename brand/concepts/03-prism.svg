@@ -1,0 +1,42 @@
+<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Capduction — Prism mark">
+  <defs>
+    <linearGradient id="pr-face-1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#C4B5FD"/>
+    </linearGradient>
+    <linearGradient id="pr-face-2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F0ABFC"/>
+      <stop offset="100%" stop-color="#FB7185"/>
+    </linearGradient>
+    <linearGradient id="pr-face-3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FBA98C"/>
+      <stop offset="100%" stop-color="#F0ABFC"/>
+    </linearGradient>
+    <linearGradient id="pr-face-4" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#6EE7C7"/>
+      <stop offset="100%" stop-color="#93C5FD"/>
+    </linearGradient>
+    <linearGradient id="pr-face-5" x1="100%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#93C5FD"/>
+      <stop offset="100%" stop-color="#C4B5FD"/>
+    </linearGradient>
+    <linearGradient id="pr-edge" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7C3AED" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#1E1B4B" stop-opacity="0.18"/>
+    </linearGradient>
+  </defs>
+  <!-- gem silhouette: top point at (32,6), pavilion at (32,58), shoulders at (8,24) (56,24), bezels at (16,40)(48,40) -->
+  <!-- crown facets -->
+  <polygon points="32,6 8,24 32,22" fill="url(#pr-face-1)"/>
+  <polygon points="32,6 56,24 32,22" fill="url(#pr-face-2)"/>
+  <polygon points="8,24 16,40 32,22" fill="url(#pr-face-3)"/>
+  <polygon points="56,24 48,40 32,22" fill="url(#pr-face-4)"/>
+  <polygon points="32,22 16,40 32,32 48,40" fill="url(#pr-face-5)"/>
+  <!-- pavilion (lower half) -->
+  <polygon points="16,40 32,58 32,32" fill="url(#pr-face-3)" opacity="0.85"/>
+  <polygon points="48,40 32,58 32,32" fill="url(#pr-face-4)" opacity="0.85"/>
+  <!-- crisp edges -->
+  <polygon points="32,6 8,24 16,40 32,58 48,40 56,24" fill="none" stroke="url(#pr-edge)" stroke-width="0.7" stroke-linejoin="round"/>
+  <!-- top highlight -->
+  <polygon points="32,7 30,11 34,11" fill="#FFFFFF" opacity="0.85"/>
+</svg>

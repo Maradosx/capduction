@@ -23,9 +23,7 @@ export function AuthCard({ title, subtitle, children, footer }: AuthCardProps) {
       <header className="fixed top-5 left-5 right-5 z-[100] flex justify-between items-center
                          px-[14px] py-3 pl-[22px] rounded-[18px] glass">
         <Link href="/" data-cursor="go" className="hover-target brand flex items-center gap-3 text-ink no-underline">
-          <div className="orb-chrome w-9 h-9 rounded-[11px] flex items-center justify-center">
-            <BrandMark className="w-[18px] h-[18px] text-white drop-shadow-sm" />
-          </div>
+          <BrandMark className="w-9 h-9" />
           <span className="font-semibold text-[18px] tracking-tight">Capduction</span>
         </Link>
         <LangToggle />
