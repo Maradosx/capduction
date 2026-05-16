@@ -14,6 +14,6 @@ export async function POST(request: Request) {
   }
 
   return NextResponse.redirect(`${new URL(request.url).origin}/login`, {
-    status: 301,
+    status: 303,
   })
 }

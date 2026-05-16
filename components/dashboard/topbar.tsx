@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Search, Bell, ChevronDown, LogOut, Settings, Menu } from 'lucide-react';
 import { LangToggle } from '@/components/lang-toggle';
 import { useT } from '@/lib/i18n';
@@ -16,13 +16,20 @@ export function Topbar({ user, isDemoMode }: TopbarProps) {
   const t = useT();
   const [menuOpen, setMenuOpen] = useState(false);
   const { setOpen: setDrawerOpen } = useMobileMenu();
+  const menuRef = useRef<HTMLDivElement>(null);
 
-  // Close menu on outside click
+  // Close menu when click lands outside the dropdown wrapper.
+  // Use the click event (after pointerdown + pointerup) so Link/form submits
+  // inside the menu can fire BEFORE the close runs.
   useEffect(() => {
     if (!menuOpen) return;
-    const close = () => setMenuOpen(false);
-    document.addEventListener('pointerdown', close);
-    return () => document.removeEventListener('pointerdown', close);
+    const onDocClick = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener('click', onDocClick);
+    return () => document.removeEventListener('click', onDocClick);
   }, [menuOpen]);
 
   const displayName =
@@ -83,7 +90,7 @@ export function Topbar({ user, isDemoMode }: TopbarProps) {
       </button>
 
       {/* Avatar dropdown */}
-      <div className="relative" onPointerDown={(e) => e.stopPropagation()}>
+      <div ref={menuRef} className="relative">
         <button
           onClick={() => setMenuOpen((v) => !v)}
           data-cursor="open"
