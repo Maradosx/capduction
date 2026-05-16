@@ -31,15 +31,14 @@ export default function ResetClient() {
     }
 
     let cancelled = false;
+    let settled = false;          // true once we've decided ready or invalid
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
     const supabase = createClient();
 
-    // Whatever URL shape the recovery link arrives in (?code= for PKCE, or
-    // #access_token/#refresh_token from the implicit /verify redirect), the
-    // Supabase client auto-processes it on init. We just wait for the
-    // resulting session via onAuthStateChange and getSession.
     function finalise(ready: boolean) {
-      if (cancelled) return;
+      if (cancelled || settled) return;   // ← never override a prior decision
+      settled = true;
+      if (timeoutId) { clearTimeout(timeoutId); timeoutId = null; }
       if (typeof window !== 'undefined' && window.location.hash.includes('access_token')) {
         history.replaceState(null, '', window.location.pathname);
       }
@@ -48,17 +47,12 @@ export default function ResetClient() {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        if (cancelled) return;
-        // PASSWORD_RECOVERY fires after the SDK consumes a recovery URL.
-        // SIGNED_IN fires for any successful session.
         if (event === 'PASSWORD_RECOVERY' || (event === 'SIGNED_IN' && session)) {
           finalise(true);
         }
       },
     );
 
-    // Fast path: session already exists (page revisited while signed in,
-    // or hash params with raw tokens that the SDK doesn't auto-process).
     (async () => {
       // Manual hash-token rescue for non-PKCE redirects.
       if (typeof window !== 'undefined' && window.location.hash.includes('access_token')) {
@@ -73,7 +67,6 @@ export default function ResetClient() {
       if (session) finalise(true);
     })();
 
-    // Bail out after 4 s if nothing recognised the URL.
     timeoutId = setTimeout(() => finalise(false), 4000);
 
     return () => {
