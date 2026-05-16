@@ -31,51 +31,56 @@ export default function ResetClient() {
     }
 
     let cancelled = false;
-    async function establish() {
-      try {
-        const supabase = createClient();
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+    const supabase = createClient();
 
-        // 1) Hash-based recovery (Supabase implicit flow on /verify redirect).
-        //    The PKCE-mode client doesn't auto-detect these, so parse + set
-        //    the session ourselves before clearing the hash.
-        if (typeof window !== 'undefined' && window.location.hash.includes('access_token')) {
-          const hashParams = new URLSearchParams(window.location.hash.slice(1));
-          const access_token  = hashParams.get('access_token');
-          const refresh_token = hashParams.get('refresh_token');
-          if (access_token && refresh_token) {
-            const { error: setErr } = await supabase.auth.setSession({ access_token, refresh_token });
-            if (cancelled) return;
-            if (setErr) { setStage('invalid'); return; }
-            // Strip the tokens from the URL bar (don't leave secrets in history)
-            history.replaceState(null, '', window.location.pathname);
-            setStage('ready');
-            return;
-          }
-        }
-
-        // 2) PKCE code in the query string → exchange for session
-        const code = search.get('code');
-        if (code) {
-          const { error: exErr } = await supabase.auth.exchangeCodeForSession(code);
-          if (cancelled) return;
-          if (exErr) { setStage('invalid'); return; }
-          history.replaceState(null, '', window.location.pathname);
-          setStage('ready');
-          return;
-        }
-
-        // 3) Nothing in the URL — maybe a session already exists (user
-        //    navigated here directly while still signed in).
-        const { data: { session } } = await supabase.auth.getSession();
-        if (cancelled) return;
-        setStage(session ? 'ready' : 'invalid');
-      } catch {
-        if (!cancelled) setStage('invalid');
+    // Whatever URL shape the recovery link arrives in (?code= for PKCE, or
+    // #access_token/#refresh_token from the implicit /verify redirect), the
+    // Supabase client auto-processes it on init. We just wait for the
+    // resulting session via onAuthStateChange and getSession.
+    function finalise(ready: boolean) {
+      if (cancelled) return;
+      if (typeof window !== 'undefined' && window.location.hash.includes('access_token')) {
+        history.replaceState(null, '', window.location.pathname);
       }
+      setStage(ready ? 'ready' : 'invalid');
     }
 
-    establish();
-    return () => { cancelled = true; };
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (cancelled) return;
+        // PASSWORD_RECOVERY fires after the SDK consumes a recovery URL.
+        // SIGNED_IN fires for any successful session.
+        if (event === 'PASSWORD_RECOVERY' || (event === 'SIGNED_IN' && session)) {
+          finalise(true);
+        }
+      },
+    );
+
+    // Fast path: session already exists (page revisited while signed in,
+    // or hash params with raw tokens that the SDK doesn't auto-process).
+    (async () => {
+      // Manual hash-token rescue for non-PKCE redirects.
+      if (typeof window !== 'undefined' && window.location.hash.includes('access_token')) {
+        const hashParams = new URLSearchParams(window.location.hash.slice(1));
+        const access_token  = hashParams.get('access_token');
+        const refresh_token = hashParams.get('refresh_token');
+        if (access_token && refresh_token) {
+          await supabase.auth.setSession({ access_token, refresh_token }).catch(() => {});
+        }
+      }
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) finalise(true);
+    })();
+
+    // Bail out after 4 s if nothing recognised the URL.
+    timeoutId = setTimeout(() => finalise(false), 4000);
+
+    return () => {
+      cancelled = true;
+      subscription.unsubscribe();
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, [search]);
 
   async function handleSubmit(e: React.FormEvent) {
