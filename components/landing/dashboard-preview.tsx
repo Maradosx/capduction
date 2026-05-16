@@ -23,7 +23,7 @@ export function DashboardPreview() {
       </div>
 
       <div
-        className="max-w-[1500px] mx-auto"
+        className="max-w-[1500px] mx-auto hidden md:block"
         style={{ transform: 'rotateX(6deg)', transformOrigin: 'center top' }}
       >
         <div className="glass-strong rounded-[22px] overflow-hidden">
@@ -154,6 +154,45 @@ export function DashboardPreview() {
                 <span>EXPORT .PDF</span>
               </div>
             </main>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile-only simplified mockup */}
+      <div className="md:hidden max-w-[420px] mx-auto px-2">
+        <div className="glass-strong rounded-[20px] p-4 flex flex-col gap-3">
+          <div className="flex items-center gap-2.5 pb-3 border-b border-[var(--line)]">
+            <BrandMark className="w-7 h-7" />
+            <div className="leading-[1.15]">
+              <strong className="text-[13px] font-bold text-ink">Capduction</strong>
+              <span className="text-[9px] text-slate font-mono block">AI Script Studio</span>
+            </div>
+            <span className="ml-auto px-2 py-0.5 btn-grad rounded-full text-[9px] font-mono tracking-wider text-white font-semibold">
+              LIVE
+            </span>
+          </div>
+
+          {[
+            { label: 'Combo Mode', badge: 'NEW', grad: 'from-teal to-violet' },
+            { label: 'Script Studio',                grad: 'from-pink to-rose' },
+            { label: 'Caption Studio',               grad: 'from-violet to-pink' },
+          ].map((s) => (
+            <div key={s.label} className="glass rounded-[12px] p-3 flex items-center gap-3">
+              <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${s.grad} shadow-[0_2px_8px_rgba(124,58,237,0.3)]`} />
+              <div className="flex-1">
+                <div className="text-[13px] font-bold text-ink lang-th:font-thai">{s.label}</div>
+                <div className="text-[10px] text-ink-3 font-mono">Ready · ฿0 / 10 credits</div>
+              </div>
+              {s.badge && (
+                <span className="btn-grad text-white px-2 py-px rounded-full text-[9px] font-mono tracking-wider font-semibold">
+                  {s.badge}
+                </span>
+              )}
+            </div>
+          ))}
+
+          <div className="text-center text-[10px] text-ink-3 font-mono mt-1 lang-th:font-thai">
+            ✦ {t('dash.preview.eye').replace(/^—\s*/, '')} ✦
           </div>
         </div>
       </div>

@@ -13,15 +13,38 @@ export type Platform = (typeof PLATFORMS)[number];
 export const DURATIONS = ['15s', '30s', '60s', '90s', 'long'] as const;
 export type Duration = (typeof DURATIONS)[number];
 
+/** Generation presets for target customer (multi-select) */
+export const TARGET_PRESETS = [
+  'Gen Z (1997-2012)',
+  'Gen Y / Millennials (1981-1996)',
+  'Gen X (1965-1980)',
+  'Baby Boomers (1946-1964)',
+  'Gen Alpha (2013+)',
+  'นักศึกษา',
+  'แม่บ้าน',
+  'พ่อแม่มือใหม่',
+  'ผู้ชายสายเทค',
+  'ผู้หญิงสายบิวตี้',
+] as const;
+
+export const CATEGORY_PRESETS = [
+  'Beauty', 'Fashion', 'Food & Drink', 'Health', 'Tech',
+  'Home', 'Fitness', 'Travel', 'Education', 'Pet', 'Baby & Kids',
+] as const;
+
+export const VARIANT_COUNTS = [1, 2, 3] as const;
+export type VariantCount = (typeof VARIANT_COUNTS)[number];
+
 // ═══════════════ CAPTION STUDIO ═══════════════════
 export interface CaptionRequest {
   productName: string;
-  category?: string;
-  targetCustomer?: string;
-  tone: Tone;
+  categories?: string[];
+  targetCustomers?: string[];
+  tones: string[];                  // multi-select (Tone preset OR custom string)
   platform: Platform;
   details?: string;
   brandVoiceId?: string;
+  variants?: number;                // 1-3, default 1
 }
 
 export interface CaptionContent {
@@ -36,13 +59,15 @@ export interface CaptionContent {
 // ═══════════════ SCRIPT STUDIO ═══════════════════
 export interface ScriptRequest {
   productName: string;
-  category?: string;
-  targetCustomer?: string;
-  tone: Tone;
+  categories?: string[];
+  targetCustomers?: string[];
+  tones: string[];
   platform: Platform;
-  duration: Duration;
+  /** Either a preset like '30s', 'long', OR a custom value like '45s', '2 min' */
+  duration: string;
   details?: string;
   brandVoiceId?: string;
+  variants?: number;
 }
 
 export interface ScriptBeat {

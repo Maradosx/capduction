@@ -43,12 +43,13 @@ export function StudioShell({ mode, title, description, brandVoices = [], render
 
     // Build body — drop duration if caption (API ignores it but cleaner)
     const body: Record<string, unknown> = {
-      productName:    form.productName,
-      category:       form.category    || undefined,
-      targetCustomer: form.targetCustomer || undefined,
-      tone:           form.tone,
-      platform:       form.platform,
-      details:        form.details     || undefined,
+      productName:     form.productName,
+      categories:      form.categories,
+      targetCustomers: form.targetCustomers,
+      tones:           form.tones,
+      platform:        form.platform,
+      details:         form.details || undefined,
+      variants:        form.variants,
     };
     if (mode !== 'caption') body.duration = form.duration;
     if (projectId)    body.projectId    = projectId;

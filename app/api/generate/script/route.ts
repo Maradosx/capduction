@@ -6,18 +6,19 @@ import {
   parseBody, authenticate, checkCredits, applyRateLimit,
   saveGenerationAndDecrement, isAdversarial, resolveBrandVoiceContext,
 } from '@/lib/api-handler';
-import { TONES, PLATFORMS, DURATIONS, type ScriptRequest } from '@/types';
+import { PLATFORMS, type ScriptRequest } from '@/types';
 
 const Schema = z.object({
-  productName:    z.string().min(1).max(100).trim(),
-  category:       z.string().max(50).trim().default(''),
-  targetCustomer: z.string().max(100).trim().default(''),
-  tone:           z.enum(TONES).default('Persuasive'),
-  platform:       z.enum(PLATFORMS).default('TikTok'),
-  duration:       z.enum(DURATIONS).default('30s'),
-  details:        z.string().max(500).trim().default(''),
-  projectId:      z.string().uuid().optional(),
-  brandVoiceId:   z.string().uuid().optional(),
+  productName:     z.string().min(1).max(100).trim(),
+  categories:      z.array(z.string().max(50).trim()).max(8).default([]),
+  targetCustomers: z.array(z.string().max(100).trim()).max(8).default([]),
+  tones:           z.array(z.string().max(30).trim()).min(1).max(6).default(['Persuasive']),
+  platform:        z.enum(PLATFORMS).default('TikTok'),
+  duration:        z.string().max(20).trim().default('30s'),
+  details:         z.string().max(800).trim().default(''),
+  variants:        z.number().int().min(1).max(3).default(1),
+  projectId:       z.string().uuid().optional(),
+  brandVoiceId:    z.string().uuid().optional(),
 });
 
 export async function POST(req: Request) {
@@ -27,7 +28,8 @@ export async function POST(req: Request) {
     const body = parsed.data;
 
     // Prompt-injection guard
-    if ([body.productName, body.details, body.category].some(isAdversarial)) {
+    const adversarialInputs: string[] = [body.productName, body.details, ...body.categories];
+    if (adversarialInputs.some(isAdversarial)) {
       return NextResponse.json(
         { success: false, error: 'Input contains disallowed content.' },
         { status: 400 }
@@ -51,9 +53,9 @@ export async function POST(req: Request) {
       ctx:            auth.ctx,
       studio:         'script',
       productName:    body.productName,
-      category:       body.category,
-      targetCustomer: body.targetCustomer,
-      tone:           body.tone,
+      category:       body.categories.join(', '),
+      targetCustomer: body.targetCustomers.join(', '),
+      tone:           body.tones[0] ?? 'Persuasive',
       platform:       body.platform,
       duration:       body.duration,
       details:        body.details,

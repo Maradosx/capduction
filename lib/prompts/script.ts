@@ -3,9 +3,9 @@
  * Generates spoken video scripts with per-second timing + B-roll cues
  */
 
-import type { ScriptRequest, Duration } from '@/types';
+import type { ScriptRequest } from '@/types';
 
-const DURATION_BEATS: Record<Duration, { count: number; secondsPerBeat: string }> = {
+const DURATION_BEATS_PRESET: Record<string, { count: number; secondsPerBeat: string }> = {
   '15s':  { count: 3, secondsPerBeat: '~5 seconds each' },
   '30s':  { count: 4, secondsPerBeat: '~7 seconds each' },
   '60s':  { count: 5, secondsPerBeat: '~12 seconds each' },
@@ -13,29 +13,52 @@ const DURATION_BEATS: Record<Duration, { count: number; secondsPerBeat: string }
   'long': { count: 8, secondsPerBeat: 'flexible' },
 };
 
+/** Pick a beat count from a duration string. Supports presets ('15s'..'90s',
+ * 'long') and custom values like '45s', '2 min'. */
+function beatsFor(duration: string): { count: number; secondsPerBeat: string } {
+  if (DURATION_BEATS_PRESET[duration]) return DURATION_BEATS_PRESET[duration];
+  const secMatch = duration.match(/(\d+)\s*s?$/i);
+  if (secMatch) {
+    const s = parseInt(secMatch[1], 10);
+    if (s <= 20)  return { count: 3, secondsPerBeat: `~${Math.round(s/3)}s each` };
+    if (s <= 45)  return { count: 4, secondsPerBeat: `~${Math.round(s/4)}s each` };
+    if (s <= 75)  return { count: 5, secondsPerBeat: `~${Math.round(s/5)}s each` };
+    if (s <= 120) return { count: 6, secondsPerBeat: `~${Math.round(s/6)}s each` };
+  }
+  return { count: 6, secondsPerBeat: 'flexible' };
+}
+
+const joinOr = (arr?: string[], fallback = 'Not specified') =>
+  arr && arr.length > 0 ? arr.join(', ') : fallback;
+
 export function buildScriptPrompt(req: ScriptRequest, brandVoiceContext = ''): string {
-  const beatSpec = DURATION_BEATS[req.duration];
+  const beatSpec = beatsFor(req.duration);
+  const tonesText = joinOr(req.tones, 'Friendly');
+  const variants  = Math.max(1, Math.min(3, req.variants ?? 1));
 
   return `You are an elite Thai short-form video director and scriptwriter. Your job is to write a spoken video script that sells effectively to Thai online buyers.
 
 ═══════════ CRITICAL LANGUAGE RULES ═══════════
 1. NATURAL THAI: Use conversational, native Thai phrasing — like top Thai TikTok/Reels sellers. Never robotic, never translated-feeling.
 2. ENGLISH MIX: Naturally mix common marketing English (Best Seller, Must Have, Unbox, Review, Sold Out) where Thai sellers actually do.
-3. AUDIENCE: ${req.targetCustomer || 'General Thai shoppers'}
-4. TONE (${req.tone}):
+3. AUDIENCE: ${joinOr(req.targetCustomers, 'General Thai shoppers')}
+4. TONE — blend these styles: ${tonesText}
+   Reference styles you can mix:
    - Friendly: warm, polite particles "นะคะ/ครับ/ค่า"
    - Professional: clear, authoritative, less slang
    - Luxury: elegant, premium-positioning, exclusive feel
    - Viral: high energy, dramatic, sensational hooks
    - Persuasive: hard-selling, deep triggers, objection handling
    - Minimal: clean, calm, aesthetic restraint
+   (If the user listed a custom tone above, honor it literally.)
 
 ═══════════ PRODUCT ═══════════
-Name:     ${req.productName}
-Category: ${req.category || 'Not specified'}
-Platform: ${req.platform}
-Duration: ${req.duration} (${beatSpec.count} beats, ${beatSpec.secondsPerBeat})
-Details:  ${req.details || 'None'}
+Name:       ${req.productName}
+Categories: ${joinOr(req.categories)}
+Platform:   ${req.platform}
+Duration:   ${req.duration} (${beatSpec.count} beats, ${beatSpec.secondsPerBeat})
+Details:    ${req.details || 'None'}
+${variants > 1 ? `\n⚠ The user requested ${variants} script variants — favor the strongest take but apply the most distinctive angle.` : ''}
 
 ${brandVoiceContext ? `═══════════ BRAND VOICE ═══════════\n${brandVoiceContext}\n` : ''}
 ═══════════ YOUR TASK ═══════════

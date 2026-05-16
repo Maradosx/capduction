@@ -2,17 +2,24 @@
 
 import { useState } from 'react';
 import { Sparkles, Loader2 } from 'lucide-react';
-import { TONES, PLATFORMS, DURATIONS, type Tone, type Platform, type Duration, type StudioMode } from '@/types';
+import {
+  TONES, PLATFORMS, DURATIONS,
+  TARGET_PRESETS, CATEGORY_PRESETS, VARIANT_COUNTS,
+  type Platform, type StudioMode,
+} from '@/types';
 import { useT, useI18n } from '@/lib/i18n';
+import { MultiSelect } from '@/components/ui/multi-select';
 
 export interface StudioFormData {
   productName: string;
-  category: string;
-  targetCustomer: string;
-  tone: Tone;
+  categories: string[];
+  targetCustomers: string[];
+  tones: string[];
   platform: Platform;
-  duration: Duration;
+  /** Preset like '30s' or custom like '45s' */
+  duration: string;
   details: string;
+  variants: number;
 }
 
 interface StudioFormProps {
@@ -23,12 +30,12 @@ interface StudioFormProps {
   onSubmit: (data: StudioFormData) => void;
 }
 
-const TONE_LABELS: Record<'th' | 'en', Record<Tone, string>> = {
+const TONE_SUBLABELS: Record<'th' | 'en', Record<string, string>> = {
   th: { Friendly: 'เป็นมิตร', Professional: 'มืออาชีพ', Luxury: 'หรูหรา', Viral: 'ไวรัล', Persuasive: 'โน้มน้าว', Minimal: 'มินิมอล' },
-  en: { Friendly: 'Friendly',  Professional: 'Professional', Luxury: 'Luxury', Viral: 'Viral', Persuasive: 'Persuasive', Minimal: 'Minimal' },
+  en: { Friendly: 'warm',     Professional: 'pro',      Luxury: 'premium', Viral: 'high-energy', Persuasive: 'sales',  Minimal: 'clean' },
 };
 
-const DURATION_LABELS: Record<'th' | 'en', Record<Duration, string>> = {
+const DURATION_PRESET_LABELS: Record<'th' | 'en', Record<string, string>> = {
   th: { '15s': '15 วินาที', '30s': '30 วินาที', '60s': '1 นาที', '90s': '1.5 นาที', long: 'Long-form (>90s)' },
   en: { '15s': '15 sec',    '30s': '30 sec',    '60s': '1 min',  '90s': '1.5 min',  long: 'Long-form (>90s)' },
 };
@@ -37,13 +44,14 @@ export function StudioForm({ mode, defaults, loading, error, onSubmit }: StudioF
   const t = useT();
   const { lang } = useI18n();
   const [data, setData] = useState<StudioFormData>({
-    productName:    defaults?.productName    ?? '',
-    category:       defaults?.category       ?? '',
-    targetCustomer: defaults?.targetCustomer ?? '',
-    tone:           defaults?.tone           ?? (mode === 'caption' ? 'Friendly' : 'Persuasive'),
-    platform:       defaults?.platform       ?? 'TikTok',
-    duration:       defaults?.duration       ?? '30s',
-    details:        defaults?.details        ?? '',
+    productName:     defaults?.productName     ?? '',
+    categories:      defaults?.categories      ?? [],
+    targetCustomers: defaults?.targetCustomers ?? [],
+    tones:           defaults?.tones           ?? [mode === 'caption' ? 'Friendly' : 'Persuasive'],
+    platform:        defaults?.platform        ?? 'TikTok',
+    duration:        defaults?.duration        ?? '30s',
+    details:         defaults?.details         ?? '',
+    variants:        defaults?.variants        ?? 1,
   });
 
   const showDuration = mode === 'script' || mode === 'combo';
@@ -51,6 +59,11 @@ export function StudioForm({ mode, defaults, loading, error, onSubmit }: StudioF
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!data.productName.trim()) return;
+    if (data.tones.length === 0) {
+      // Ensure we always submit at least one tone
+      onSubmit({ ...data, tones: [mode === 'caption' ? 'Friendly' : 'Persuasive'] });
+      return;
+    }
     onSubmit(data);
   }
 
@@ -78,72 +91,88 @@ export function StudioForm({ mode, defaults, loading, error, onSubmit }: StudioF
         />
       </Field>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Field label={t('wf.category')}>
-          <input
-            type="text"
-            maxLength={50}
-            value={data.category}
-            onChange={(e) => setData({ ...data, category: e.target.value })}
-            placeholder="Beauty / Fashion / Food..."
-            className={inputCls}
-          />
-        </Field>
-        <Field label={t('wf.target')}>
-          <input
-            type="text"
-            maxLength={100}
-            value={data.targetCustomer}
-            onChange={(e) => setData({ ...data, targetCustomer: e.target.value })}
-            placeholder={t('wf.target.ph')}
-            className={inputCls}
-          />
-        </Field>
-      </div>
+      <Field label={t('wf.category')}>
+        <MultiSelect
+          options={CATEGORY_PRESETS}
+          value={data.categories}
+          onChange={(v) => setData({ ...data, categories: v })}
+          customPlaceholder="หมวดอื่นๆ..."
+        />
+      </Field>
 
-      <div className={`grid grid-cols-1 ${showDuration ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-4`}>
-        <Field label={t('wf.platform')}>
-          <select
-            value={data.platform}
-            onChange={(e) => setData({ ...data, platform: e.target.value as Platform })}
-            className={inputCls}
-          >
-            {PLATFORMS.map((p) => <option key={p} value={p}>{p}</option>)}
-          </select>
+      <Field label={t('wf.target')}>
+        <MultiSelect
+          options={TARGET_PRESETS}
+          value={data.targetCustomers}
+          onChange={(v) => setData({ ...data, targetCustomers: v })}
+          customPlaceholder="กลุ่มเป้าหมายอื่นๆ..."
+        />
+      </Field>
+
+      <Field label={t('wf.platform')}>
+        <select
+          value={data.platform}
+          onChange={(e) => setData({ ...data, platform: e.target.value as Platform })}
+          className={inputCls}
+        >
+          {PLATFORMS.map((p) => <option key={p} value={p}>{p}</option>)}
+        </select>
+      </Field>
+
+      <Field label={t('wf.tone')}>
+        <MultiSelect
+          options={TONES}
+          value={data.tones}
+          onChange={(v) => setData({ ...data, tones: v })}
+          optionSublabels={TONE_SUBLABELS[lang]}
+          customPlaceholder="โทนอื่นๆ..."
+        />
+      </Field>
+
+      {showDuration && (
+        <Field label={t('wf.duration')}>
+          <MultiSelect
+            options={DURATIONS as unknown as readonly string[]}
+            value={[data.duration]}
+            onChange={(v) => setData({ ...data, duration: v[v.length - 1] ?? '30s' })}
+            optionSublabels={DURATION_PRESET_LABELS[lang]}
+            customPlaceholder="เช่น 45s, 2 min..."
+            allowCustom
+          />
+          <p className="text-[10px] text-ink-3 mt-1.5 lang-th:font-thai">
+            เลือกได้ทีละค่าเดียว · กด &quot;อื่นๆ&quot; พิมพ์เป็นวินาทีเองได้
+          </p>
         </Field>
-        <Field label={t('wf.tone')}>
-          <select
-            value={data.tone}
-            onChange={(e) => setData({ ...data, tone: e.target.value as Tone })}
-            className={inputCls}
-          >
-            {TONES.map((tone) => (
-              <option key={tone} value={tone}>{tone} · {TONE_LABELS[lang][tone]}</option>
-            ))}
-          </select>
-        </Field>
-        {showDuration && (
-          <Field label={t('wf.duration')}>
-            <select
-              value={data.duration}
-              onChange={(e) => setData({ ...data, duration: e.target.value as Duration })}
-              className={inputCls}
+      )}
+
+      <Field label="จำนวนตัวเลือกที่จะ generate">
+        <div className="flex gap-2">
+          {VARIANT_COUNTS.map((n) => (
+            <button
+              key={n}
+              type="button"
+              data-cursor="switch"
+              onClick={() => setData({ ...data, variants: n })}
+              className={`hover-target flex-1 py-2 rounded-[10px] font-semibold text-[13px] transition-all
+                          ${data.variants === n
+                            ? 'btn-grad text-white shadow-[0_4px_12px_-2px_rgba(124,58,237,0.4)]'
+                            : 'bg-white/55 border border-white/70 text-ink-3 hover:bg-white/80 hover:text-ink'}`}
             >
-              {DURATIONS.map((d) => (
-                <option key={d} value={d}>{DURATION_LABELS[lang][d]}</option>
-              ))}
-            </select>
-          </Field>
-        )}
-      </div>
+              {n} variant{n > 1 ? 's' : ''}
+            </button>
+          ))}
+        </div>
+      </Field>
 
       <Field label={t('wf.details')}>
         <textarea
-          rows={3}
-          maxLength={500}
+          rows={4}
+          maxLength={800}
           value={data.details}
           onChange={(e) => setData({ ...data, details: e.target.value })}
-          placeholder={t('wf.details.ph')}
+          placeholder={lang === 'th'
+            ? `${t('wf.details.ph')}\n— ใส่คำขอเพิ่มได้ เช่น "แคปชั่นสั้น 2 ประโยค", "เน้นอารมณ์ตลก", "หลีกเลี่ยงคำว่า ราคาถูก"`
+            : `${t('wf.details.ph')}\n— Add any custom request: "short 2-sentence captions", "humorous tone", "avoid certain words"`}
           className={`${inputCls} resize-none`}
         />
       </Field>
@@ -184,7 +213,7 @@ const inputCls =
 function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="block font-mono text-[10px] tracking-[0.18em] text-ink-3 uppercase mb-1.5 font-semibold">
+      <span className="block font-mono text-[10px] tracking-[0.18em] text-ink-3 uppercase mb-1.5 font-semibold lang-th:font-thai lang-th:normal-case lang-th:tracking-normal">
         {label} {required && <span className="text-pink">*</span>}
       </span>
       {children}
