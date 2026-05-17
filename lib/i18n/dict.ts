@@ -209,6 +209,7 @@ export const DICT = {
   'side.section.projects':  { th: 'โปรเจกต์',  en: 'PROJECTS' },
   'side.section.resources': { th: 'เครื่องมือ', en: 'RESOURCES' },
   'side.first_project':   { th: '+ เริ่มโปรเจกต์แรก', en: '+ Start your first project' },
+  'side.admin.feedback':  { th: 'กล่อง Feedback',     en: 'Feedback Inbox' },
   'side.plan_free':       { th: 'แผน Free · 10 เครดิตให้ลอง', en: 'Free plan · 10 credits to try' },
   'side.plan_paid':       { th: 'แผน {plan}', en: '{plan} plan' },
   'side.upgrade':         { th: '↑ อัปเกรดเป็น Studio', en: '↑ Upgrade to Studio' },

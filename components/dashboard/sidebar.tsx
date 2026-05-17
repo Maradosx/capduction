@@ -5,15 +5,17 @@ import { usePathname } from 'next/navigation';
 import { useT } from '@/lib/i18n';
 import { BrandMark } from '@/components/brand-mark';
 import type { Project } from '@/types';
-import { Wand2, FileText, Type, FolderOpen, Mic2, Clock, BarChart3, Settings, Sparkles, X } from 'lucide-react';
+import { Wand2, FileText, Type, FolderOpen, Mic2, Clock, BarChart3, Settings, Sparkles, X, Inbox } from 'lucide-react';
 import { useMobileMenu } from './menu-context';
 
 interface SidebarProps {
   /** Project list for the PROJECTS section */
   projects?: Project[];
   /** User's plan + credits — shown in upgrade nudge at bottom */
-  plan?: 'free' | 'studio' | 'agency';
+  plan?: 'free' | 'creator' | 'studio' | 'agency';
   credits?: number;
+  /** When true, an admin-only "Feedback Inbox" link appears in RESOURCES. */
+  isAdmin?: boolean;
 }
 
 const STUDIO_ITEMS = [
@@ -29,7 +31,7 @@ const RESOURCE_ITEMS = [
   { href: '/dashboard/settings',    labelKey: 'sidebar.settings'  as const, icon: Settings },
 ];
 
-export function Sidebar({ projects = [], plan = 'free', credits = 10 }: SidebarProps) {
+export function Sidebar({ projects = [], plan = 'free', credits = 10, isAdmin = false }: SidebarProps) {
   const t = useT();
   const pathname = usePathname();
   const { open, setOpen } = useMobileMenu();
@@ -120,6 +122,20 @@ export function Sidebar({ projects = [], plan = 'free', credits = 10 }: SidebarP
           active={pathname?.startsWith(item.href)}
         />
       ))}
+
+      {/* Admin-only: feedback inbox. Hidden for non-admins. */}
+      {isAdmin && (
+        <>
+          <Separator />
+          <SectionHeader>ADMIN</SectionHeader>
+          <SidebarLink
+            href="/dashboard/admin/feedback"
+            icon={<Inbox size={14} />}
+            label={t('side.admin.feedback')}
+            active={pathname?.startsWith('/dashboard/admin/feedback')}
+          />
+        </>
+      )}
 
       {/* Bottom: credits + upgrade nudge */}
       <div className="mt-auto pt-4">

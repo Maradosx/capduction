@@ -5,6 +5,7 @@ import { MobileMenuProvider } from '@/components/dashboard/menu-context';
 import { createClient } from '@/lib/supabase/server';
 import { getProfile } from '@/lib/db/profiles';
 import { listProjects } from '@/lib/db/projects';
+import { isAdmin } from '@/lib/admin';
 import type { Profile, Project } from '@/types';
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -31,11 +32,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   const plan    = profile?.plan ?? 'free';
   const credits = profile?.credits_remaining ?? 10;
+  const admin   = isAdmin(user?.email);
 
   return (
     <MobileMenuProvider>
       <div className="min-h-screen">
-        <Sidebar projects={projects} plan={plan} credits={credits} />
+        <Sidebar projects={projects} plan={plan} credits={credits} isAdmin={admin} />
         <Topbar user={user} isDemoMode={isDemoMode} credits={credits} plan={plan} />
         <main className="lg:ml-[268px] pt-[88px] px-5 pb-12">
           {children}
