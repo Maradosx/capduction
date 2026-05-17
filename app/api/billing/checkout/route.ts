@@ -46,9 +46,11 @@ export async function GET(req: Request) {
     .single();
 
   try {
+    // Let Stripe auto-select payment methods based on the price's currency.
+    // PromptPay requires THB; hard-coding it breaks USD-priced products.
+    // For Thai-priced products, Stripe will offer card + PromptPay automatically.
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
-      payment_method_types: ['card', 'promptpay'],
       customer:        profile?.billing_customer_id ?? undefined,
       customer_email:  profile?.billing_customer_id ? undefined : (user.email ?? undefined),
       line_items: [{ price: priceId, quantity: 1 }],
