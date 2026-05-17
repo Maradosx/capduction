@@ -38,15 +38,31 @@ export async function POST(req: Request) {
     const auth = await authenticate(req);
     if (!auth.ok) return auth.error;
 
-    const creditsErr = await checkCredits(auth.ctx);
+    const variantCount = Math.max(1, Math.min(3, body.variants ?? 1));
+
+    const creditsErr = await checkCredits(auth.ctx, variantCount);
     if (creditsErr) return creditsErr;
 
     const rlErr = await applyRateLimit(auth.ctx);
     if (rlErr) return rlErr;
 
     const bvContext = await resolveBrandVoiceContext(body.brandVoiceId);
-    const prompt = buildCaptionPrompt(body as CaptionRequest, bvContext);
-    const caption = await generateCaption(prompt, auth.ctx.plan);
+
+    // Fan-out for variants > 1 — each call gets a distinct angle
+    // (EMOTIONAL / PROBLEM-SOLUTION / SOCIAL-PROOF) so the tabs show
+    // genuinely different captions, not 3 copies of the same vibe.
+    const captions = await Promise.all(
+      Array.from({ length: variantCount }, (_, i) => {
+        const prompt = buildCaptionPrompt(
+          body as CaptionRequest,
+          bvContext,
+          variantCount > 1 ? i : null,
+        );
+        return generateCaption(prompt, auth.ctx.plan);
+      })
+    );
+
+    const payload = variantCount === 1 ? captions[0] : { variants: captions };
 
     await saveGenerationAndDecrement({
       ctx:            auth.ctx,
@@ -58,10 +74,11 @@ export async function POST(req: Request) {
       platform:       body.platform,
       details:        body.details,
       projectId:      body.projectId,
-      payload:        caption,
+      payload,
+      credits:        variantCount,
     });
 
-    return NextResponse.json({ success: true, data: caption });
+    return NextResponse.json({ success: true, data: payload });
   } catch (err: any) {
     reportError(err, { scope: 'api/generate/caption' });
     return NextResponse.json(

@@ -76,12 +76,28 @@ Return STRICTLY this JSON (no markdown, no commentary):
 
 WARNING: ONLY the raw JSON. No \`\`\`, no preamble.`;
 
-export function buildComboPrompt(req: ComboRequest, brandVoiceContext = ''): PromptMessages {
+export function buildComboPrompt(
+  req: ComboRequest,
+  brandVoiceContext = '',
+  variantIndex: number | null = null,
+): PromptMessages {
   const beatCount = beatsFor(req.duration);
   const tonesText = joinOr(req.tones, 'Friendly');
   const variants  = Math.max(1, Math.min(3, req.variants ?? 1));
-  const captionCount  = 5 * variants;
-  const hookCount     = 5 * variants;
+
+  // Each variant picks a distinct shared-hook style so the tabs feel different.
+  const ANGLES = [
+    'EMOTIONAL — shared hook leans on identity, transformation, or feeling seen. Make the audience nod.',
+    'PROBLEM-LED — shared hook surfaces a specific pain point the audience has tried to solve and failed.',
+    'PROOF-LED — shared hook leads with a result, number, or before-after that creates instant credibility.',
+  ];
+  const angleHint = variantIndex !== null && variants > 1
+    ? `\n\n═══════════ THIS VARIANT (${variantIndex + 1}/${variants}) ═══════════\n${ANGLES[variantIndex] ?? ''}`
+    : '';
+
+  // Per-call counts. Fan-out at the route layer multiplies these across tabs.
+  const captionCount  = 5;
+  const hookCount     = 5;
 
   const user = `═══════════ THIS REQUEST ═══════════
 Audience:   ${joinOr(req.targetCustomers, 'General Thai shoppers')}
@@ -92,10 +108,9 @@ Categories: ${joinOr(req.categories)}
 Platform:   ${req.platform}
 Duration:   ${req.duration}
 Details:    ${req.details || 'None'}
-${brandVoiceContext ? `\n═══════════ BRAND VOICE ═══════════\n${brandVoiceContext}\n` : ''}
-${variants > 1 ? `\n⚠ The user requested ${variants} content variants — scale caption count and angle variety accordingly.` : ''}
+${brandVoiceContext ? `\n═══════════ BRAND VOICE ═══════════\n${brandVoiceContext}\n` : ''}${angleHint}
 
-═══════════ COUNTS ═══════════
+═══════════ COUNTS (strict — produce exactly these) ═══════════
 - script: ${beatCount} beats
 - caption: ${captionCount} captions, ${hookCount} hooks, 10 hashtags, 5 CTAs, 4 angles, 4 video ideas
 

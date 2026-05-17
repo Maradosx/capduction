@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { useT } from '@/lib/i18n';
 import {
@@ -74,30 +74,7 @@ export default function SignupClient() {
   }
 
   if (sent) {
-    return (
-      <AuthCard
-        title={t('auth.magic.sent.title')}
-        subtitle={t('auth.magic.sent.sub').replace('{email}', email)}
-        footer={
-          <Link href="/login" data-cursor="go" className="hover-target text-iridescent font-semibold no-underline hover:underline">
-            ← {t('auth.submit.login')}
-          </Link>
-        }
-      >
-        <div className="text-center py-6">
-          <div className="mx-auto mb-5 w-20 h-20 rounded-[20px] flex items-center justify-center"
-               style={{
-                 background: 'linear-gradient(135deg, #C4B5FD 0%, #F0ABFC 50%, #FBA98C 100%)',
-                 boxShadow: '0 20px 40px -10px rgba(124,58,237,0.35)',
-               }}>
-            <span className="text-white text-[36px]">✉︎</span>
-          </div>
-          <p className="text-ink-3 text-[13px] leading-relaxed lang-th:font-thai">
-            {t('auth.check_spam')}
-          </p>
-        </div>
-      </AuthCard>
-    );
+    return <SignupSentPanel email={email} />;
   }
 
   return (
@@ -185,6 +162,118 @@ export default function SignupClient() {
       </AuthOAuthButton>
 
       <TermsConsent />
+    </AuthCard>
+  );
+}
+
+/**
+ * Magic-link sent confirmation for signup. Mirrors login's MagicSentPanel
+ * — polls for a session (auto-login if email is clicked in this browser)
+ * and offers a paste-the-link fallback for the cross-browser case (macOS
+ * opens links in default browser, often Chrome, even if you clicked send
+ * from Safari).
+ */
+function SignupSentPanel({ email }: { email: string }) {
+  const t = useT();
+  const router = useRouter();
+  const [pasted, setPasted] = useState('');
+  const [exchanging, setExchanging] = useState(false);
+  const [pasteErr, setPasteErr] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const supabase = createClient();
+    const tick = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (cancelled) return;
+      if (session) {
+        router.push('/dashboard');
+        router.refresh();
+      }
+    };
+    const id = setInterval(tick, 2000);
+    return () => { cancelled = true; clearInterval(id); };
+  }, [router]);
+
+  async function handlePaste(e: React.FormEvent) {
+    e.preventDefault();
+    setPasteErr(null);
+    let code: string | null = null;
+    try {
+      const url = new URL(pasted.trim());
+      code = url.searchParams.get('code');
+    } catch {
+      setPasteErr(t('auth.paste.invalid'));
+      return;
+    }
+    if (!code) {
+      setPasteErr(t('auth.paste.no_code'));
+      return;
+    }
+    setExchanging(true);
+    const supabase = createClient();
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    setExchanging(false);
+    if (error) {
+      setPasteErr(error.message);
+      return;
+    }
+    router.push('/dashboard');
+    router.refresh();
+  }
+
+  return (
+    <AuthCard
+      title={t('auth.magic.sent.title')}
+      subtitle={t('auth.magic.sent.sub').replace('{email}', email)}
+      footer={
+        <Link href="/login" data-cursor="go" className="hover-target text-iridescent font-semibold no-underline hover:underline">
+          ← {t('auth.submit.login')}
+        </Link>
+      }
+    >
+      <div className="text-center py-4">
+        <div className="mx-auto mb-5 w-20 h-20 rounded-[20px] flex items-center justify-center"
+             style={{
+               background: 'linear-gradient(135deg, #C4B5FD 0%, #F0ABFC 50%, #FBA98C 100%)',
+               boxShadow: '0 20px 40px -10px rgba(124,58,237,0.35)',
+             }}>
+          <span className="text-white text-[36px]">✉︎</span>
+        </div>
+        <p className="text-ink-3 text-[13px] leading-relaxed lang-th:font-thai">
+          {t('auth.check_spam')}
+        </p>
+      </div>
+
+      <details className="mt-5 group glass rounded-[12px] overflow-hidden">
+        <summary className="hover-target cursor-pointer px-4 py-3 text-[12px] font-semibold text-ink-3 flex items-center justify-between gap-3 list-none lang-th:font-thai">
+          <span>{t('auth.paste.title')}</span>
+          <span className="text-ink-3 text-[18px] leading-none group-open:rotate-45 transition-transform">+</span>
+        </summary>
+        <form onSubmit={handlePaste} className="px-4 pb-4 pt-1 flex flex-col gap-2.5">
+          <p className="text-[11px] text-ink-3 leading-relaxed lang-th:font-thai">
+            {t('auth.paste.hint')}
+          </p>
+          <input
+            type="url"
+            value={pasted}
+            onChange={(e) => setPasted(e.target.value)}
+            placeholder="https://capduction.com/auth/callback?code=..."
+            className="w-full px-3 py-2 rounded-[8px] bg-white/55 border border-white/70 text-ink text-[12px] font-mono outline-none focus:ring-2 focus:ring-violet/40"
+          />
+          {pasteErr && (
+            <p className="text-[11px] text-rose-600 lang-th:font-thai">{pasteErr}</p>
+          )}
+          <button
+            type="submit"
+            disabled={exchanging || !pasted.trim()}
+            data-cursor="start"
+            className="hover-target btn-grad px-4 py-2 rounded-[8px] text-white font-semibold text-[12px] border-0 disabled:opacity-50 lang-th:font-thai"
+          >
+            {exchanging ? t('auth.paste.signing_in') : t('auth.paste.signin')}
+          </button>
+        </form>
+      </details>
     </AuthCard>
   );
 }

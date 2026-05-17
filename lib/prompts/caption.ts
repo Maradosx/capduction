@@ -55,15 +55,31 @@ Return STRICTLY this JSON schema (no markdown, no commentary):
 
 WARNING: ONLY the raw JSON. No \`\`\`, no preamble.`;
 
-export function buildCaptionPrompt(req: CaptionRequest, brandVoiceContext = ''): PromptMessages {
+export function buildCaptionPrompt(
+  req: CaptionRequest,
+  brandVoiceContext = '',
+  variantIndex: number | null = null,
+): PromptMessages {
   const tonesText = joinOr(req.tones, 'Friendly');
   const variants  = Math.max(1, Math.min(3, req.variants ?? 1));
-  // Variants scale how many captions/hooks/CTAs to deliver
-  const captionCount  = 5 * variants;
-  const hookCount     = 5 * variants;
-  const ctaCount      = Math.min(5 + (variants - 1) * 2, 9);
-  const angleCount    = Math.min(4 + (variants - 1) * 2, 8);
-  const ideaCount     = Math.min(4 + (variants - 1) * 2, 8);
+
+  // When fan-out is used, each variant gets a distinct emotional angle so
+  // the user sees real variety across tabs (not 3 copies of the same vibe).
+  const ANGLES = [
+    'EMOTIONAL angle — lean into feelings, identity, transformation. The caption should make the reader nod and feel seen.',
+    'PROBLEM-SOLUTION angle — name a specific pain the audience has tried to fix, then position the product as the answer.',
+    'SOCIAL-PROOF angle — lead with results, reviews, sold-out moments, FOMO. Numbers, credibility, momentum.',
+  ];
+  const angleHint = variantIndex !== null && variants > 1
+    ? `\n\n═══════════ THIS VARIANT (${variantIndex + 1}/${variants}) ═══════════\n${ANGLES[variantIndex] ?? ''}`
+    : '';
+
+  // Single-call counts (per variant). Fan-out at the route layer multiplies these.
+  const captionCount  = 5;
+  const hookCount     = 5;
+  const ctaCount      = 5;
+  const angleCount    = 4;
+  const ideaCount     = 4;
 
   const user = `═══════════ THIS REQUEST ═══════════
 Audience:   ${joinOr(req.targetCustomers, 'General Thai shoppers')}
@@ -73,9 +89,9 @@ Product:    ${req.productName}
 Categories: ${joinOr(req.categories)}
 Platform:   ${req.platform}
 Details:    ${req.details || 'None'}
-${brandVoiceContext ? `\n═══════════ BRAND VOICE ═══════════\n${brandVoiceContext}\n` : ''}
+${brandVoiceContext ? `\n═══════════ BRAND VOICE ═══════════\n${brandVoiceContext}\n` : ''}${angleHint}
 
-═══════════ COUNTS ═══════════
+═══════════ COUNTS (strict — produce exactly these) ═══════════
 - ${hookCount} HOOKS
 - ${captionCount} CAPTIONS
 - 8-12 HASHTAGS

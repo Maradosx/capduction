@@ -124,7 +124,10 @@ export async function authenticate(req: Request): Promise<
   };
 }
 
-export async function checkCredits(ctx: AuthContext): Promise<NextResponse | null> {
+export async function checkCredits(
+  ctx: AuthContext,
+  required: number = 1,
+): Promise<NextResponse | null> {
   if (ctx.isDemoMode || !ctx.userId) return null;
 
   const supabase = createClient();
@@ -149,18 +152,23 @@ export async function checkCredits(ctx: AuthContext): Promise<NextResponse | nul
   // Stash plan on ctx so downstream code can pick the right AI model tier.
   ctx.plan = profile.plan ?? 'free';
 
-  if (profile.credits_remaining <= 0) {
+  // Block if the user can't afford the requested run (e.g. 3 variants but
+  // only 2 credits left). Better than half-generating and refunding.
+  if (profile.credits_remaining < required) {
     await supabase.from('usage_events').insert({
       user_id: ctx.userId,
       event_type: 'generation_rejected_no_credits',
-      metadata: {},
+      metadata: { required, available: profile.credits_remaining },
     });
     return NextResponse.json(
       {
         success: false,
-        error: 'เครดิตหมดแล้ว กรุณาอัปเกรดแพลน (No credits remaining)',
+        error: required > 1
+          ? `ต้องการ ${required} เครดิตแต่เหลือ ${profile.credits_remaining} — ลดจำนวน variants หรืออัปเกรดแพลน`
+          : 'เครดิตหมดแล้ว กรุณาอัปเกรดแพลน (No credits remaining)',
         code: 'CREDITS_EXHAUSTED',
-        creditsRemaining: 0,
+        creditsRemaining: profile.credits_remaining,
+        required,
       },
       { status: 402 }
     );
@@ -201,6 +209,8 @@ export interface SaveGenerationInput {
   details?: string;
   projectId?: string;
   payload: unknown;
+  /** Number of credits to deduct (1 per variant). Default 1. */
+  credits?: number;
 }
 
 /**
@@ -251,8 +261,10 @@ export async function saveGenerationAndDecrement(input: SaveGenerationInput): Pr
     console.error('[saveGeneration] failed:', genErr.message);
   }
 
-  // Atomic credit decrement via RPC (defined in migration 004)
-  await supabase.rpc('decrement_credit', { p_user_id: input.ctx.userId });
+  // Atomic credit decrement via RPC — amount param added in migration 006
+  // so variants > 1 charges the right number of credits.
+  const amount = Math.max(1, input.credits ?? 1);
+  await supabase.rpc('decrement_credit', { p_user_id: input.ctx.userId, p_amount: amount });
 
   await supabase.from('usage_events').insert({
     user_id:    input.ctx.userId,

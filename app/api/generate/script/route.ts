@@ -40,14 +40,16 @@ export async function POST(req: Request) {
     const auth = await authenticate(req);
     if (!auth.ok) return auth.error;
 
-    const creditsErr = await checkCredits(auth.ctx);
+    const variantCount = Math.max(1, Math.min(3, body.variants ?? 1));
+
+    // Variants > 1 → N parallel OpenAI calls → cost N× → charge N credits.
+    const creditsErr = await checkCredits(auth.ctx, variantCount);
     if (creditsErr) return creditsErr;
 
     const rlErr = await applyRateLimit(auth.ctx);
     if (rlErr) return rlErr;
 
     const bvContext = await resolveBrandVoiceContext(body.brandVoiceId);
-    const variantCount = Math.max(1, Math.min(3, body.variants ?? 1));
 
     // Variants > 1: fan out in parallel so each script gets full model attention
     // and a distinct opening angle (PROOF / PROBLEM / CURIOSITY).
@@ -78,6 +80,7 @@ export async function POST(req: Request) {
       details:        body.details,
       projectId:      body.projectId,
       payload,
+      credits:        variantCount,
     });
 
     return NextResponse.json({ success: true, data: payload });

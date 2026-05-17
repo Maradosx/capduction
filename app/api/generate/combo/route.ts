@@ -39,15 +39,30 @@ export async function POST(req: Request) {
     const auth = await authenticate(req);
     if (!auth.ok) return auth.error;
 
-    const creditsErr = await checkCredits(auth.ctx);
+    const variantCount = Math.max(1, Math.min(3, body.variants ?? 1));
+
+    const creditsErr = await checkCredits(auth.ctx, variantCount);
     if (creditsErr) return creditsErr;
 
     const rlErr = await applyRateLimit(auth.ctx);
     if (rlErr) return rlErr;
 
     const bvContext = await resolveBrandVoiceContext(body.brandVoiceId);
-    const prompt = buildComboPrompt(body as ComboRequest, bvContext);
-    const combo = await generateCombo(prompt, auth.ctx.plan);
+
+    // Fan-out for variants > 1 — each call gets EMOTIONAL / PROBLEM /
+    // PROOF angle so the tabs show genuinely distinct combos.
+    const combos = await Promise.all(
+      Array.from({ length: variantCount }, (_, i) => {
+        const prompt = buildComboPrompt(
+          body as ComboRequest,
+          bvContext,
+          variantCount > 1 ? i : null,
+        );
+        return generateCombo(prompt, auth.ctx.plan);
+      })
+    );
+
+    const payload = variantCount === 1 ? combos[0] : { variants: combos };
 
     await saveGenerationAndDecrement({
       ctx:            auth.ctx,
@@ -60,10 +75,11 @@ export async function POST(req: Request) {
       duration:       body.duration,
       details:        body.details,
       projectId:      body.projectId,
-      payload:        combo,
+      payload,
+      credits:        variantCount,
     });
 
-    return NextResponse.json({ success: true, data: combo });
+    return NextResponse.json({ success: true, data: payload });
   } catch (err: any) {
     reportError(err, { scope: 'api/generate/combo' });
     return NextResponse.json(

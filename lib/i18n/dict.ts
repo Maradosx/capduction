@@ -141,6 +141,16 @@ export const DICT = {
   'auth.magic.resend':   { th: '← ส่งลิงก์อีกครั้ง',    en: '← Send another link' },
   'auth.check_spam':     { th: 'ไม่เห็นในกล่องจดหมาย? ลองดูใน Spam / Junk',
                           en: "Don't see it? Check Spam / Junk" },
+  // Paste-link fallback for the cross-browser magic-link issue (macOS opens
+  // email links in default browser, which may differ from the sender browser).
+  'auth.paste.title':    { th: 'ลิงก์เปิดในเบราว์เซอร์อื่น? คลิกที่นี่',
+                          en: 'Link opened in a different browser? Click here' },
+  'auth.paste.hint':     { th: 'ระบบเปิดอีเมลในเบราว์เซอร์เริ่มต้น (เช่น Chrome) ถ้าอยาก login ที่นี่แทน — copy URL จากในอีเมลแล้ว paste',
+                          en: 'macOS opens the email link in your default browser (e.g. Chrome). To sign in here instead, copy the URL from the email and paste it below.' },
+  'auth.paste.signin':   { th: 'เข้าสู่ระบบที่นี่', en: 'Sign in here' },
+  'auth.paste.signing_in': { th: 'กำลังเข้าสู่ระบบ...', en: 'Signing in...' },
+  'auth.paste.invalid':  { th: 'ลิงก์ไม่ถูกต้อง — ต้องเป็น URL เต็ม', en: 'Invalid link — must be a full URL' },
+  'auth.paste.no_code':  { th: 'ลิงก์นี้ไม่มี code parameter — copy อีกครั้งจากอีเมล', en: 'No code in this link — re-copy from the email' },
   'auth.pwd.min':        { th: 'รหัสผ่านต้องยาวอย่างน้อย 8 ตัวอักษร',
                           en: 'Password must be at least 8 characters.' },
   'auth.pwd.ph':         { th: 'อย่างน้อย 8 ตัวอักษร',
