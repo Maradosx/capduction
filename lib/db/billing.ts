@@ -3,7 +3,7 @@
  * Server-side helpers for billing operations.
  * These run with service-role privileges in webhook context.
  */
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { PLAN_CREDITS } from '@/types';
 
 interface BillingUpdate {
@@ -23,7 +23,7 @@ export async function updateBillingStatus(
   updates: BillingUpdate,
   stripeEventId: string
 ): Promise<{ success: boolean; error?: string }> {
-  const supabase = createClient();
+  const supabase = createAdminClient();
 
   const creditsToRefill = PLAN_CREDITS[updates.plan] ?? PLAN_CREDITS.free;
 
@@ -80,7 +80,7 @@ export async function updateBillingStatus(
 export async function getProfileByCustomerId(
   customerId: string
 ): Promise<{ id: string; plan: string } | null> {
-  const supabase = createClient();
+  const supabase = createAdminClient();
 
   const { data, error } = await supabase
     .from('profiles')
@@ -99,7 +99,7 @@ export async function linkStripeCustomer(
   userId: string,
   customerId: string
 ): Promise<void> {
-  const supabase = createClient();
+  const supabase = createAdminClient();
   await supabase
     .from('profiles')
     .update({ billing_customer_id: customerId })

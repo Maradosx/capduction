@@ -53,7 +53,7 @@ export async function decrementCredit(): Promise<boolean> {
   if (!user) return false;
 
   // Use RPC to avoid race conditions (atomic decrement)
-  const { error } = await supabase.rpc('decrement_credit', { uid: user.id });
+  const { error } = await supabase.rpc('decrement_credit', { p_user_id: user.id });
   if (error) {
     console.error('[decrementCredit]', error.message);
     return false;

@@ -189,8 +189,8 @@ export async function POST(req: Request) {
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 async function refreshCreditsForPlan(userId: string, plan: 'studio' | 'agency'): Promise<void> {
-  const { createClient } = await import('@/lib/supabase/server');
-  const supabase = createClient();
+  const { createAdminClient } = await import('@/lib/supabase/admin');
+  const supabase = createAdminClient();
   const credits = PLAN_CREDITS[plan];
   await supabase.from('profiles').update({ credits_remaining: credits }).eq('id', userId);
 }

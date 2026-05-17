@@ -232,7 +232,7 @@ function DocSection({
   id: string;
   eyebrow: string;
   title: string;
-  icon: React.ComponentType<{ size?: number; className?: string }>;
+  icon: React.ElementType;
   children: React.ReactNode;
 }) {
   return (

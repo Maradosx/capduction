@@ -99,9 +99,7 @@ export function PricingClient({ isLoggedIn, currentPlan }: Props) {
                   href={
                     plan.id === 'free'
                       ? (isLoggedIn ? '/dashboard' : '/signup')
-                      : plan.id === 'agency'
-                      ? 'mailto:hello@capduction.com'
-                      : '/api/billing/checkout?plan=studio'
+                      : `/api/billing/checkout?plan=${plan.id}`
                   }
                   data-cursor="start"
                   className={`hover-target block text-center py-3 px-4 rounded-[12px] font-semibold text-[13px] no-underline transition-all lang-th:font-thai

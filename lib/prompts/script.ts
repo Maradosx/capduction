@@ -31,12 +31,27 @@ function beatsFor(duration: string): { count: number; secondsPerBeat: string } {
 const joinOr = (arr?: string[], fallback = 'Not specified') =>
   arr && arr.length > 0 ? arr.join(', ') : fallback;
 
-export function buildScriptPrompt(req: ScriptRequest, brandVoiceContext = ''): string {
+export function buildScriptPrompt(
+  req: ScriptRequest,
+  brandVoiceContext = '',
+  variantIndex: number | null = null,
+): string {
   const beatSpec = beatsFor(req.duration);
   const tonesText = joinOr(req.tones, 'Friendly');
   const variants  = Math.max(1, Math.min(3, req.variants ?? 1));
 
-  return `You are an elite Thai short-form video director and scriptwriter. Your job is to write a spoken video script that sells effectively to Thai online buyers.
+  // When server-side parallel-fanout is used, variantIndex picks a
+  // diversification angle so each script feels distinct.
+  const ANGLES = [
+    'Lead with PROOF — start with a result/before-after that demonstrates the product works.',
+    'Lead with PROBLEM — open by surfacing a pain the audience has tried to solve and failed.',
+    'Lead with CURIOSITY — open with a surprising statement or contrarian take that demands explanation.',
+  ];
+  const angleHint = variantIndex !== null && variants > 1
+    ? `\n⚠ This is variant ${variantIndex + 1} of ${variants}. ${ANGLES[variantIndex] ?? ''}`
+    : '';
+
+  return `You are an elite Thai short-form video director and scriptwriter. Your job is to write a spoken video script that sells effectively to Thai online buyers.${angleHint}
 
 ═══════════ CRITICAL LANGUAGE RULES ═══════════
 1. NATURAL THAI: Use conversational, native Thai phrasing — like top Thai TikTok/Reels sellers. Never robotic, never translated-feeling.
@@ -58,7 +73,6 @@ Categories: ${joinOr(req.categories)}
 Platform:   ${req.platform}
 Duration:   ${req.duration} (${beatSpec.count} beats, ${beatSpec.secondsPerBeat})
 Details:    ${req.details || 'None'}
-${variants > 1 ? `\n⚠ The user requested ${variants} script variants — favor the strongest take but apply the most distinctive angle.` : ''}
 
 ${brandVoiceContext ? `═══════════ BRAND VOICE ═══════════\n${brandVoiceContext}\n` : ''}
 ═══════════ YOUR TASK ═══════════

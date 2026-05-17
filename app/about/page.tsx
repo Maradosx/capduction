@@ -158,7 +158,7 @@ function Principle({
   title,
   children,
 }: {
-  icon: React.ComponentType<{ size?: number; className?: string }>;
+  icon: React.ElementType;
   title: string;
   children: React.ReactNode;
 }) {

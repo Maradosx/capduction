@@ -46,8 +46,24 @@ export async function POST(req: Request) {
     if (rlErr) return rlErr;
 
     const bvContext = await resolveBrandVoiceContext(body.brandVoiceId);
-    const prompt = buildScriptPrompt(body as ScriptRequest, bvContext);
-    const script = await generateScript(prompt);
+    const variantCount = Math.max(1, Math.min(3, body.variants ?? 1));
+
+    // Variants > 1: fan out in parallel so each script gets full model attention
+    // and a distinct opening angle (PROOF / PROBLEM / CURIOSITY).
+    const scripts = await Promise.all(
+      Array.from({ length: variantCount }, (_, i) => {
+        const prompt = buildScriptPrompt(
+          body as ScriptRequest,
+          bvContext,
+          variantCount > 1 ? i : null,
+        );
+        return generateScript(prompt);
+      })
+    );
+
+    // Payload shape: keep single-script shape for variants=1 (backward compat),
+    // wrap as { variants: [...] } when fan-out occurred.
+    const payload = variantCount === 1 ? scripts[0] : { variants: scripts };
 
     await saveGenerationAndDecrement({
       ctx:            auth.ctx,
@@ -60,10 +76,10 @@ export async function POST(req: Request) {
       duration:       body.duration,
       details:        body.details,
       projectId:      body.projectId,
-      payload:        script,
+      payload,
     });
 
-    return NextResponse.json({ success: true, data: script });
+    return NextResponse.json({ success: true, data: payload });
   } catch (err: any) {
     console.error('[API_GENERATE_SCRIPT]', err?.message ?? err);
     return NextResponse.json(
