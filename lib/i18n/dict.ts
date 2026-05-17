@@ -50,7 +50,7 @@ export const DICT = {
   'dash.combo':             { th: 'Combo Mode',                          en: 'Combo Mode' },
   'dash.script':            { th: 'Script Studio',                       en: 'Script Studio' },
   'dash.caption':           { th: 'Caption Studio',                      en: 'Caption Studio' },
-  'dash.brand_voice':       { th: 'Brand Voice',                         en: 'Brand Voice' },
+  'dash.brand_voice':       { th: 'เสียงแบรนด์',                          en: 'Brand Voice' },
   'dash.history':           { th: 'ประวัติ',                             en: 'History' },
   'dash.projects':          { th: 'โปรเจกต์',                            en: 'Projects' },
   'dash.section':           { th: 'เลือกสตูดิโอตามจังหวะของคุณ',         en: 'Pick the studio for your moment' },
@@ -113,7 +113,7 @@ export const DICT = {
   'ft.status':     { th: 'ระบบทำงานปกติ',                       en: 'All systems operational' },
 
   // ─── SIDEBAR / DASHBOARD ───────────────────────────────────
-  'sidebar.analytics': { th: 'Analytics',  en: 'Analytics' },
+  'sidebar.analytics': { th: 'สถิติการใช้งาน',  en: 'Analytics' },
   'sidebar.settings':  { th: 'ตั้งค่า',     en: 'Settings' },
 
   // ─── AUTH ──────────────────────────────────────────────────
@@ -168,6 +168,32 @@ export const DICT = {
                               en: 'A password reset link was sent to {email} · valid for 1 hour' },
   'auth.back_to_login':  { th: '← กลับไปเข้าสู่ระบบ', en: '← Back to sign in' },
 
+  // ─── FEEDBACK WIDGET (floating in dashboard) ──────────────
+  'fb.button.label':      { th: 'แสดงความเห็น',        en: 'Feedback' },
+  'fb.button.aria':       { th: 'ส่งความเห็น',          en: 'Send feedback' },
+  'fb.eye':               { th: 'BETA FEEDBACK',       en: 'BETA FEEDBACK' },
+  'fb.title':             { th: 'บอกเราหน่อย',          en: 'Tell us anything' },
+  'fb.subtitle':          { th: 'เจอบั๊ก? อยากได้อะไรเพิ่ม? ชอบหรือไม่ชอบตรงไหน — เราอ่านทุกข้อ',
+                            en: "Found a bug? Wish something worked differently? We read every note." },
+  'fb.type.bug':          { th: 'เจอบั๊ก',              en: 'Bug' },
+  'fb.type.bug.hint':     { th: 'อะไรพังหรือใช้ไม่ได้',  en: "Something's broken" },
+  'fb.type.idea':         { th: 'อยากได้',              en: 'Idea' },
+  'fb.type.idea.hint':    { th: 'ฟีเจอร์หรือไอเดียใหม่', en: 'Feature or improvement' },
+  'fb.type.praise':       { th: 'ชอบมาก',              en: 'Praise' },
+  'fb.type.praise.hint':  { th: 'อะไรที่ใช้แล้วชอบ',     en: 'Something you loved' },
+  'fb.type.question':     { th: 'มีคำถาม',              en: 'Question' },
+  'fb.type.question.hint':{ th: 'งงตรงไหน · ตอบไม่ได้', en: "Stuck or confused" },
+  'fb.message.label':     { th: 'รายละเอียด',           en: 'Details' },
+  'fb.message.ph':        { th: 'เขียนตามที่คิดได้เลย · ภาษาไหนก็ได้',
+                            en: 'Write whatever comes to mind — any language is fine.' },
+  'fb.privacy':           { th: 'เราจะอ่านภายใน 24 ชม.', en: "We'll read this within 24 hours" },
+  'fb.submit.send':       { th: 'ส่งให้ทีม',            en: 'Send to the team' },
+  'fb.submit.sending':    { th: 'กำลังส่ง...',           en: 'Sending...' },
+  'fb.sent.title':        { th: 'ขอบคุณมาก!',           en: 'Thank you!' },
+  'fb.sent.body':         { th: 'รับเรียบร้อย · ถ้าเป็นเรื่องสำคัญเราจะตอบกลับทางอีเมล',
+                            en: "Got it. If it needs a reply, we'll get back to you by email." },
+  'fb.sent.close':        { th: 'ปิด',                  en: 'Close' },
+
   // ─── TOPBAR ────────────────────────────────────────────────
   'top.search':           { th: 'ค้นหาสคริปต์ · แคปชั่น · โปรเจกต์...', en: 'Search scripts, captions, projects...' },
   'top.credits.label':    { th: 'เครดิต', en: 'credits' },
@@ -178,6 +204,10 @@ export const DICT = {
   'top.menu.login':       { th: 'เข้าสู่ระบบ', en: 'Sign in' },
 
   // ─── SIDEBAR ───────────────────────────────────────────────
+  // Section headers in the sidebar — match the language toggle.
+  'side.section.studios':   { th: 'สตูดิโอ',   en: 'STUDIOS' },
+  'side.section.projects':  { th: 'โปรเจกต์',  en: 'PROJECTS' },
+  'side.section.resources': { th: 'เครื่องมือ', en: 'RESOURCES' },
   'side.first_project':   { th: '+ เริ่มโปรเจกต์แรก', en: '+ Start your first project' },
   'side.plan_free':       { th: 'แผน Free · 10 เครดิตให้ลอง', en: 'Free plan · 10 credits to try' },
   'side.plan_paid':       { th: 'แผน {plan}', en: '{plan} plan' },
@@ -366,6 +396,7 @@ export const DICT = {
   'wsh.err.rate':         { th: 'คุณส่งคำขอเร็วเกินไป — กรุณารอสักครู่', en: "You're sending requests too fast — please wait a moment." },
   'wsh.err.generic':      { th: 'เกิดข้อผิดพลาด กรุณาลองใหม่', en: 'Something went wrong — please try again.' },
   'wsh.tag.project':      { th: 'จะบันทึกในโปรเจกต์ที่เลือก', en: 'Will save to the selected project' },
+  'wsh.bv.label':         { th: 'เสียงแบรนด์', en: 'BRAND VOICE' },
   'wsh.bv.none':          { th: '— ไม่ใช้ —', en: '— None —' },
 
   // ─── RESULT VIEWS ──────────────────────────────────────────

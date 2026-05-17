@@ -122,7 +122,7 @@ export function StudioShell({ mode, title, description, brandVoices = [], render
           )}
           {brandVoices.length > 0 && (
             <label className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/55 border border-white/70 font-mono text-[11px] tracking-wider text-ink-3 font-semibold">
-              <span>BRAND VOICE</span>
+              <span>{t('wsh.bv.label')}</span>
               <select
                 value={brandVoiceId}
                 onChange={(e) => setBrandVoiceId(e.target.value)}

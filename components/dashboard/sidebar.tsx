@@ -74,7 +74,7 @@ export function Sidebar({ projects = [], plan = 'free', credits = 10 }: SidebarP
         </div>
       </Link>
 
-      <SectionHeader>STUDIOS</SectionHeader>
+      <SectionHeader>{t('side.section.studios')}</SectionHeader>
       {STUDIO_ITEMS.map((item) => (
         <SidebarLink
           key={item.href}
@@ -87,7 +87,7 @@ export function Sidebar({ projects = [], plan = 'free', credits = 10 }: SidebarP
       ))}
 
       <Separator />
-      <SectionHeader>PROJECTS</SectionHeader>
+      <SectionHeader>{t('side.section.projects')}</SectionHeader>
       {projects.length === 0 ? (
         <Link
           href="/dashboard/projects/new"
@@ -110,7 +110,7 @@ export function Sidebar({ projects = [], plan = 'free', credits = 10 }: SidebarP
       )}
 
       <Separator />
-      <SectionHeader>RESOURCES</SectionHeader>
+      <SectionHeader>{t('side.section.resources')}</SectionHeader>
       {RESOURCE_ITEMS.map((item) => (
         <SidebarLink
           key={item.href}

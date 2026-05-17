@@ -1,5 +1,6 @@
 import { Sidebar } from '@/components/dashboard/sidebar';
 import { Topbar } from '@/components/dashboard/topbar';
+import { FeedbackWidget } from '@/components/dashboard/feedback-widget';
 import { MobileMenuProvider } from '@/components/dashboard/menu-context';
 import { createClient } from '@/lib/supabase/server';
 import { getProfile } from '@/lib/db/profiles';
@@ -39,6 +40,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         <main className="lg:ml-[268px] pt-[88px] px-5 pb-12">
           {children}
         </main>
+        <FeedbackWidget />
       </div>
     </MobileMenuProvider>
   );
