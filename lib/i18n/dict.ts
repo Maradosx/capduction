@@ -145,8 +145,8 @@ export const DICT = {
   // email links in default browser, which may differ from the sender browser).
   'auth.paste.title':    { th: 'ลิงก์เปิดในเบราว์เซอร์อื่น? คลิกที่นี่',
                           en: 'Link opened in a different browser? Click here' },
-  'auth.paste.hint':     { th: 'ระบบเปิดอีเมลในเบราว์เซอร์เริ่มต้น (เช่น Chrome) — ถ้าอยากเข้าสู่ระบบที่นี่แทน ให้คัดลอก URL จากในอีเมลมาวางด้านล่าง',
-                          en: 'macOS opens the email link in your default browser (e.g. Chrome). To sign in here instead, copy the URL from the email and paste it below.' },
+  'auth.paste.hint':     { th: 'macOS เปิดอีเมลในเบราว์เซอร์เริ่มต้น (เช่น Chrome) เสมอ — ถ้าอยากเข้าสู่ระบบที่นี่แทน: ในเมล ให้คลิกขวาที่ปุ่ม "Confirm your email" → "Copy Link" แล้ววางด้านล่าง · ลิงก์ใช้ได้ครั้งเดียวเท่านั้น',
+                          en: 'macOS opens email links in your default browser (e.g. Chrome). To sign in here instead: in the email, right-click the "Confirm your email" button → "Copy Link" → paste it below. The link works once.' },
   'auth.paste.signin':   { th: 'เข้าสู่ระบบที่นี่', en: 'Sign in here' },
   'auth.paste.signing_in': { th: 'กำลังเข้าสู่ระบบ...', en: 'Signing in...' },
   'auth.paste.invalid':  { th: 'ลิงก์ไม่ถูกต้อง — ต้องเป็น URL เต็ม', en: 'Invalid link — must be a full URL' },

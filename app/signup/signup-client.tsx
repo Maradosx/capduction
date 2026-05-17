@@ -198,28 +198,44 @@ function SignupSentPanel({ email }: { email: string }) {
   async function handlePaste(e: React.FormEvent) {
     e.preventDefault();
     setPasteErr(null);
-    let code: string | null = null;
+
+    let url: URL;
     try {
-      const url = new URL(pasted.trim());
-      code = url.searchParams.get('code');
+      url = new URL(pasted.trim());
     } catch {
       setPasteErr(t('auth.paste.invalid'));
       return;
     }
-    if (!code) {
-      setPasteErr(t('auth.paste.no_code'));
+
+    // Two URL shapes (see login-client for the full rationale):
+    //  1. Supabase verify URL (...supabase.co/auth/v1/verify?token=…)
+    //     → navigate, let Supabase redirect → /auth/callback runs PKCE exchange.
+    //  2. Our own callback URL (?code=…) → exchange directly.
+    const allowed =
+      url.hostname.endsWith('.supabase.co') ||
+      url.hostname === window.location.hostname;
+    if (!allowed) {
+      setPasteErr(t('auth.paste.invalid'));
       return;
     }
+
+    const code = url.searchParams.get('code');
+    if (code) {
+      setExchanging(true);
+      const supabase = createClient();
+      const { error } = await supabase.auth.exchangeCodeForSession(code);
+      setExchanging(false);
+      if (error) {
+        setPasteErr(error.message);
+        return;
+      }
+      router.push('/dashboard');
+      router.refresh();
+      return;
+    }
+
     setExchanging(true);
-    const supabase = createClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
-    setExchanging(false);
-    if (error) {
-      setPasteErr(error.message);
-      return;
-    }
-    router.push('/dashboard');
-    router.refresh();
+    window.location.href = url.toString();
   }
 
   return (
@@ -258,7 +274,7 @@ function SignupSentPanel({ email }: { email: string }) {
             type="url"
             value={pasted}
             onChange={(e) => setPasted(e.target.value)}
-            placeholder="https://capduction.com/auth/callback?code=..."
+            placeholder="https://...supabase.co/auth/v1/verify?token=..."
             className="w-full px-3 py-2 rounded-[8px] bg-white/55 border border-white/70 text-ink text-[12px] font-mono outline-none focus:ring-2 focus:ring-violet/40"
           />
           {pasteErr && (

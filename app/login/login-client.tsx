@@ -225,28 +225,49 @@ function MagicSentPanel({ email, onResend, next }: { email: string; onResend: ()
   async function handlePaste(e: React.FormEvent) {
     e.preventDefault();
     setPasteErr(null);
-    let code: string | null = null;
+
+    let url: URL;
     try {
-      const url = new URL(pasted.trim());
-      code = url.searchParams.get('code');
+      url = new URL(pasted.trim());
     } catch {
       setPasteErr(t('auth.paste.invalid'));
       return;
     }
-    if (!code) {
-      setPasteErr(t('auth.paste.no_code'));
+
+    // Two shapes of URL can be pasted:
+    //  1. Supabase verify URL  → https://<project>.supabase.co/auth/v1/verify?token=…&redirect_to=…
+    //  2. Our callback URL     → https://capduction.com/auth/callback?code=…
+    // For (1) navigate so Supabase verifies + redirects → callback runs the
+    // PKCE exchange against THIS browser's verifier (works cross-browser).
+    // For (2) we can exchange directly without navigating.
+    const allowed =
+      url.hostname.endsWith('.supabase.co') ||
+      url.hostname === window.location.hostname;
+    if (!allowed) {
+      setPasteErr(t('auth.paste.invalid'));
       return;
     }
+
+    const code = url.searchParams.get('code');
+    if (code) {
+      // Callback URL → exchange directly, faster than a full navigation.
+      setExchanging(true);
+      const supabase = createClient();
+      const { error } = await supabase.auth.exchangeCodeForSession(code);
+      setExchanging(false);
+      if (error) {
+        setPasteErr(error.message);
+        return;
+      }
+      router.push(next);
+      router.refresh();
+      return;
+    }
+
+    // Verify URL (or any other shape) → just navigate. The redirect chain
+    // ends at /auth/callback?code=… which exchanges the code and signs in.
     setExchanging(true);
-    const supabase = createClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
-    setExchanging(false);
-    if (error) {
-      setPasteErr(error.message);
-      return;
-    }
-    router.push(next);
-    router.refresh();
+    window.location.href = url.toString();
   }
 
   return (
@@ -291,7 +312,7 @@ function MagicSentPanel({ email, onResend, next }: { email: string; onResend: ()
             type="url"
             value={pasted}
             onChange={(e) => setPasted(e.target.value)}
-            placeholder="https://capduction.com/auth/callback?code=..."
+            placeholder="https://...supabase.co/auth/v1/verify?token=..."
             className="w-full px-3 py-2 rounded-[8px] bg-white/55 border border-white/70 text-ink text-[12px] font-mono outline-none focus:ring-2 focus:ring-violet/40"
           />
           {pasteErr && (
