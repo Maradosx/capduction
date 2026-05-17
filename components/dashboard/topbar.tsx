@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
-import { Search, Bell, ChevronDown, LogOut, Settings, Menu } from 'lucide-react';
+import { Search, Zap, ChevronDown, LogOut, Settings, Menu } from 'lucide-react';
 import { LangToggle } from '@/components/lang-toggle';
 import { useT } from '@/lib/i18n';
 import { useMobileMenu } from './menu-context';
@@ -10,9 +10,11 @@ import { useMobileMenu } from './menu-context';
 interface TopbarProps {
   user?: { email: string; full_name?: string | null; avatar_url?: string | null } | null;
   isDemoMode?: boolean;
+  credits?: number;
+  plan?: string;
 }
 
-export function Topbar({ user, isDemoMode }: TopbarProps) {
+export function Topbar({ user, isDemoMode, credits = 0, plan = 'free' }: TopbarProps) {
   const t = useT();
   const [menuOpen, setMenuOpen] = useState(false);
   const { setOpen: setDrawerOpen } = useMobileMenu();
@@ -86,14 +88,26 @@ export function Topbar({ user, isDemoMode }: TopbarProps) {
 
       <LangToggle />
 
-      <button
-        data-cursor="open"
-        className="hover-target w-9 h-9 flex items-center justify-center text-ink-3 hover:text-ink
-                   bg-white/40 hover:bg-white/70 rounded-[10px] transition-all"
-        aria-label="Notifications"
+      {/* Credits indicator — always visible, links to Pricing for top-up.
+          Replaces the dead Bell button (no notifications feature yet). */}
+      <Link
+        href="/pricing"
+        data-cursor="go"
+        aria-label={t('top.credits.aria')}
+        title={t('top.credits.tooltip')}
+        className={`hover-target inline-flex items-center gap-1.5 px-3 h-9 rounded-[10px] font-semibold text-[12px] transition-all no-underline whitespace-nowrap
+          ${credits <= 0
+            ? 'bg-rose-100 border border-rose-200 text-rose-700 hover:bg-rose-200'
+            : credits <= 5
+            ? 'bg-amber-100 border border-amber-200 text-amber-800 hover:bg-amber-200'
+            : 'bg-white/55 border border-white/70 text-ink hover:bg-white/80'}`}
       >
-        <Bell size={16} />
-      </button>
+        <Zap size={13} className={credits > 5 ? 'text-iridescent' : ''} />
+        <span>
+          <strong className="font-bold">{credits}</strong>
+          <span className="opacity-70 ml-1 hidden sm:inline">{t('top.credits.label')}</span>
+        </span>
+      </Link>
 
       {/* Avatar dropdown */}
       <div ref={menuRef} className="relative">

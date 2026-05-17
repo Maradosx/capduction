@@ -35,7 +35,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
     <MobileMenuProvider>
       <div className="min-h-screen">
         <Sidebar projects={projects} plan={plan} credits={credits} />
-        <Topbar user={user} isDemoMode={isDemoMode} />
+        <Topbar user={user} isDemoMode={isDemoMode} credits={credits} plan={plan} />
         <main className="lg:ml-[268px] pt-[88px] px-5 pb-12">
           {children}
         </main>
