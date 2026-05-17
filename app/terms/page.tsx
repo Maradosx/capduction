@@ -54,8 +54,9 @@ export default function TermsPage() {
           <h2>3. แผนและการชำระเงิน</h2>
           <ul>
             <li><b>Free:</b> 10 generations ให้ทดลอง · ไม่ต้องใช้บัตรเครดิต</li>
-            <li><b>Studio:</b> ฿349/เดือน · 500 generations/เดือน · เครดิต reset ทุกรอบบิล (ไม่สะสม)</li>
-            <li><b>Agency:</b> ฿1,290/เดือน · generations ไม่จำกัด (ใช้งานตามจริงและสุจริต · ระบบ rate-limit ใช้เพื่อป้องกัน abuse)</li>
+            <li><b>Creator:</b> ฿199/เดือน · 100 generations/เดือน · เหมาะกับครีเอเตอร์เริ่มต้น</li>
+            <li><b>Studio:</b> ฿549/เดือน · 500 generations/เดือน · Brand Voice + Projects · เครดิต reset ทุกรอบบิล (ไม่สะสม)</li>
+            <li><b>Agency:</b> ฿1,890/เดือน · 3,000 generations/เดือน (ประมาณ 100 ครั้ง/วัน) · brand voice ไม่จำกัด · สำหรับเอเจนซี่ดูแลหลายแบรนด์</li>
             <li>การชำระเงินผ่าน <b>Stripe</b> · เรียกเก็บอัตโนมัติทุกเดือนจนกว่าจะยกเลิก</li>
             <li>ราคาเป็น THB · ยังไม่รวม VAT (จะแยกแสดงในใบเสร็จเมื่อใช้บัญชีนิติบุคคล)</li>
           </ul>

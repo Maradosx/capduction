@@ -16,32 +16,36 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? 'sk_test_place
 });
 
 // ─── Plan registry ───────────────────────────────────────────────────────────
-// Capduction plans: free / studio / agency
-// Studio (฿349/mo)  → 500 generations
-// Agency (฿1,290/mo) → unlimited (99,999)
+// Capduction plans: free / creator / studio / agency
+// Creator (฿199/mo) → 100 generations · entry tier for first-time buyers
+// Studio  (฿549/mo) → 500 generations · main tier
+// Agency  (฿1,890/mo) → 3,000 generations · capped (no more "unlimited" abuse risk)
 export const PRICE_IDS = {
-  studio: process.env.STRIPE_STUDIO_PRICE_ID ?? '',
-  agency: process.env.STRIPE_AGENCY_PRICE_ID ?? '',
+  creator: process.env.STRIPE_CREATOR_PRICE_ID ?? '',
+  studio:  process.env.STRIPE_STUDIO_PRICE_ID  ?? '',
+  agency:  process.env.STRIPE_AGENCY_PRICE_ID  ?? '',
 } as const;
 
 export type PaidPlan = keyof typeof PRICE_IDS;
 export type AnyPlan = 'free' | PaidPlan;
 
 export const PLAN_META: Record<PaidPlan, { name: string; credits: number; price: string }> = {
-  studio: { name: 'Studio', credits: 500,   price: '฿349/mo' },
-  agency: { name: 'Agency', credits: 99999, price: '฿1,290/mo' },
+  creator: { name: 'Creator', credits: 100,  price: '฿199/mo' },
+  studio:  { name: 'Studio',  credits: 500,  price: '฿549/mo' },
+  agency:  { name: 'Agency',  credits: 3000, price: '฿1,890/mo' },
 };
 
 /** Map a Stripe Price ID back to a plan name. Returns null for unknown. */
 export function planFromPriceId(priceId: string): PaidPlan | null {
-  if (priceId === PRICE_IDS.studio) return 'studio';
-  if (priceId === PRICE_IDS.agency) return 'agency';
+  if (priceId === PRICE_IDS.creator) return 'creator';
+  if (priceId === PRICE_IDS.studio)  return 'studio';
+  if (priceId === PRICE_IDS.agency)  return 'agency';
   return null;
 }
 
 /** Validate a plan name passed via URL/query. */
 export function isPaidPlan(s: string): s is PaidPlan {
-  return s === 'studio' || s === 'agency';
+  return s === 'creator' || s === 'studio' || s === 'agency';
 }
 
 export function isStripeConfigured(): boolean {

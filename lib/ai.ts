@@ -6,10 +6,28 @@
 
 import type { ScriptContent, CaptionContent, ComboContent } from '@/types';
 
+/** Prompt builders return this so we can ship system + user as separate
+ *  messages to OpenAI — maximises automatic prompt-cache hits on the
+ *  static `system` prefix (~50% off cached input tokens). */
+export type PromptInput = string | { system: string; user: string };
+
 const OPENAI_URL = 'https://api.openai.com/v1/chat/completions';
-const MODEL = 'gpt-4o';
+
+/** Default model for paid tiers — quality moat of the product.
+ *  Env `OPENAI_MODEL_PAID` overrides without redeploy. */
+const MODEL_PAID = process.env.OPENAI_MODEL_PAID || 'gpt-4o';
+
+/** Cheaper model for free tier — acquisition cost saver.
+ *  Env `OPENAI_MODEL_FREE` overrides without redeploy. */
+const MODEL_FREE = process.env.OPENAI_MODEL_FREE || 'gpt-4o-mini';
+
 /** Hard cap to avoid Vercel killing the function uncontrolled at ~60s. */
 const OPENAI_TIMEOUT_MS = 45_000;
+
+/** Pick the right model for the caller's plan. */
+function modelForPlan(plan: string | undefined): string {
+  return (plan === 'free' || !plan) ? MODEL_FREE : MODEL_PAID;
+}
 
 class MissingApiKeyError extends Error {
   constructor() {
@@ -18,11 +36,20 @@ class MissingApiKeyError extends Error {
   }
 }
 
-async function callOpenAI<T>(prompt: string): Promise<T> {
+async function callOpenAI<T>(prompt: PromptInput, model: string = MODEL_PAID): Promise<T> {
   const key = process.env.OPENAI_API_KEY;
   if (!key || key === 'sk-proj-yourapikeyhere' || key.includes('REPLACE')) {
     throw new MissingApiKeyError();
   }
+
+  // Build messages array — split system/user gives much better cache hit
+  // because OpenAI sees the static system prefix is identical across calls.
+  const messages = typeof prompt === 'string'
+    ? [{ role: 'user' as const, content: prompt }]
+    : [
+        { role: 'system' as const, content: prompt.system },
+        { role: 'user'   as const, content: prompt.user   },
+      ];
 
   let res: Response;
   try {
@@ -33,8 +60,8 @@ async function callOpenAI<T>(prompt: string): Promise<T> {
         Authorization:   `Bearer ${key}`,
       },
       body: JSON.stringify({
-        model: MODEL,
-        messages: [{ role: 'user', content: prompt }],
+        model,
+        messages,
         temperature: 0.75,
         response_format: { type: 'json_object' },
       }),
@@ -62,28 +89,29 @@ async function callOpenAI<T>(prompt: string): Promise<T> {
 }
 
 // ─── Public generators (with mock fallback) ──────────────────────────────────
+// Optional `plan` controls model selection — pass user's plan from the route.
 
-export async function generateScript(prompt: string): Promise<ScriptContent> {
+export async function generateScript(prompt: PromptInput, plan?: string): Promise<ScriptContent> {
   try {
-    return await callOpenAI<ScriptContent>(prompt);
+    return await callOpenAI<ScriptContent>(prompt, modelForPlan(plan));
   } catch (e) {
     if (e instanceof MissingApiKeyError) return mockScript();
     throw e;
   }
 }
 
-export async function generateCaption(prompt: string): Promise<CaptionContent> {
+export async function generateCaption(prompt: PromptInput, plan?: string): Promise<CaptionContent> {
   try {
-    return await callOpenAI<CaptionContent>(prompt);
+    return await callOpenAI<CaptionContent>(prompt, modelForPlan(plan));
   } catch (e) {
     if (e instanceof MissingApiKeyError) return mockCaption();
     throw e;
   }
 }
 
-export async function generateCombo(prompt: string): Promise<ComboContent> {
+export async function generateCombo(prompt: PromptInput, plan?: string): Promise<ComboContent> {
   try {
-    return await callOpenAI<ComboContent>(prompt);
+    return await callOpenAI<ComboContent>(prompt, modelForPlan(plan));
   } catch (e) {
     if (e instanceof MissingApiKeyError) return mockCombo();
     throw e;

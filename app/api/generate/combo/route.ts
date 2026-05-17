@@ -47,7 +47,7 @@ export async function POST(req: Request) {
 
     const bvContext = await resolveBrandVoiceContext(body.brandVoiceId);
     const prompt = buildComboPrompt(body as ComboRequest, bvContext);
-    const combo = await generateCombo(prompt);
+    const combo = await generateCombo(prompt, auth.ctx.plan);
 
     await saveGenerationAndDecrement({
       ctx:            auth.ctx,

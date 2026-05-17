@@ -46,7 +46,7 @@ export async function POST(req: Request) {
         if (session.mode !== 'subscription') break;
 
         const userId = session.metadata?.supabase_user_id;
-        const plan   = session.metadata?.plan as 'studio' | 'agency' | undefined;
+        const plan   = session.metadata?.plan as 'creator' | 'studio' | 'agency' | undefined;
         const customerId = typeof session.customer === 'string' ? session.customer : null;
         if (!userId || !plan || !customerId) {
           console.error('[stripe-webhook] checkout missing metadata');
@@ -102,7 +102,7 @@ export async function POST(req: Request) {
         };
 
         await updateBillingStatus(profile.id, {
-          plan: newPlan as 'free' | 'studio' | 'agency',
+          plan: newPlan as 'free' | 'creator' | 'studio' | 'agency',
           subscription_status: statusMap[sub.status] ?? 'inactive',
           stripe_price_id: priceId,
           current_period_end: periodEnd,
@@ -110,7 +110,7 @@ export async function POST(req: Request) {
 
         // Plan upgrade: top up credits to new plan allocation
         if (newPlan !== 'free' && newPlan !== profile.plan) {
-          await refreshCreditsForPlan(profile.id, newPlan as 'studio' | 'agency');
+          await refreshCreditsForPlan(profile.id, newPlan as 'creator' | 'studio' | 'agency');
         }
         break;
       }
@@ -159,8 +159,8 @@ export async function POST(req: Request) {
         }
 
         const newPlan = priceId
-          ? (planFromPriceId(priceId) ?? (profile.plan as 'free' | 'studio' | 'agency'))
-          : (profile.plan as 'free' | 'studio' | 'agency');
+          ? (planFromPriceId(priceId) ?? (profile.plan as 'free' | 'creator' | 'studio' | 'agency'))
+          : (profile.plan as 'free' | 'creator' | 'studio' | 'agency');
 
         await updateBillingStatus(profile.id, {
           plan: newPlan,
@@ -170,7 +170,7 @@ export async function POST(req: Request) {
         }, event.id);
 
         // Refill credits for the new month
-        if (newPlan !== 'free') await refreshCreditsForPlan(profile.id, newPlan as 'studio' | 'agency');
+        if (newPlan !== 'free') await refreshCreditsForPlan(profile.id, newPlan as 'creator' | 'studio' | 'agency');
         break;
       }
 
@@ -188,7 +188,7 @@ export async function POST(req: Request) {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-async function refreshCreditsForPlan(userId: string, plan: 'studio' | 'agency'): Promise<void> {
+async function refreshCreditsForPlan(userId: string, plan: 'creator' | 'studio' | 'agency'): Promise<void> {
   const { createAdminClient } = await import('@/lib/supabase/admin');
   const supabase = createAdminClient();
   const credits = PLAN_CREDITS[plan];

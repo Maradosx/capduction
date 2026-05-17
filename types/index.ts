@@ -139,10 +139,15 @@ export interface BillingEvent {
   created_at: string;
 }
 
+/** Monthly credit allocation per plan.
+ *  Agency cap = 3,000 = ~100 generations/day. The previous "unlimited"
+ *  (99,999) was an abuse vector — a single heavy user could cost more
+ *  in OpenAI tokens than the entire plan revenue. */
 export const PLAN_CREDITS: Record<string, number> = {
-  free: 10,
-  studio: 500,
-  agency: 99999,
+  free:    10,
+  creator: 100,
+  studio:  500,
+  agency:  3000,
 };
 
 /** Universal Generation row — holds all studio types */

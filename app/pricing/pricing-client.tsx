@@ -23,9 +23,18 @@ export function PricingClient({ isLoggedIn, currentPlan }: Props) {
       featured: false,
     },
     {
+      id: 'creator' as const,
+      name: 'Creator',
+      price: '฿199',
+      description: t('pr.creator.desc'),
+      features: [t('pr.creator.f1'), t('pr.creator.f2'), t('pr.creator.f3'), t('pr.creator.f4')],
+      ctaLabel: t('pr.creator.cta'),
+      featured: false,
+    },
+    {
       id: 'studio' as const,
       name: 'Studio',
-      price: '฿349',
+      price: '฿549',
       description: t('pr.studio.desc'),
       features: [t('pr.studio.f1'), t('pr.studio.f2'), t('pr.studio.f3'), t('pr.studio.f4'), t('pr.studio.f5'), t('pr.studio.f6')],
       ctaLabel: t('pr.studio.cta'),
@@ -34,7 +43,7 @@ export function PricingClient({ isLoggedIn, currentPlan }: Props) {
     {
       id: 'agency' as const,
       name: 'Agency',
-      price: '฿1,290',
+      price: '฿1,890',
       description: t('pr.agency.desc'),
       features: [t('pr.agency.f1'), t('pr.agency.f2'), t('pr.agency.f3'), t('pr.agency.f4'), t('pr.agency.f5'), t('pr.agency.f6')],
       ctaLabel: t('pr.agency.cta'),
@@ -56,7 +65,7 @@ export function PricingClient({ isLoggedIn, currentPlan }: Props) {
         <p className="text-ink-3 text-[16px] lang-th:font-thai">{t('pr.sub')}</p>
       </header>
 
-      <section className="max-w-[1200px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-5">
+      <section className="max-w-[1300px] mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {PLANS.map((plan) => {
           const isCurrent = isLoggedIn && currentPlan === plan.id;
           return (

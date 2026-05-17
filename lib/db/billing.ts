@@ -6,7 +6,7 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 
 interface BillingUpdate {
-  plan: 'free' | 'studio' | 'agency';
+  plan: 'free' | 'creator' | 'studio' | 'agency';
   subscription_status: string;
   billing_customer_id?: string;
   stripe_price_id?: string | null;

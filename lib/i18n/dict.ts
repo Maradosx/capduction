@@ -16,13 +16,13 @@ export const DICT = {
   'nav.login':    { th: 'เข้าสู่ระบบ', en: 'Log in' },
 
   // ─── HERO ──────────────────────────────────────────────────
-  // Specific value prop: time + audience-fit promise.
-  // Avoid generic "AI for creators" templated copy.
-  'hero.h.serif':    { th: 'สคริปต์ TikTok',          en: 'TikTok scripts' },
-  'hero.h.iri':      { th: 'ที่คนไทยพูดจริง',          en: 'that sound Thai.' },
+  // Differentiation angle: ChatGPT/Jasper produce stiff Thai. We don't.
+  // Headline names the competitor pain implicitly ("เหมือนครีเอเตอร์ไทยจริงๆ").
+  'hero.h.serif':    { th: 'AI ที่เขียนภาษาไทย',           en: 'AI scripts that' },
+  'hero.h.iri':      { th: 'เหมือนครีเอเตอร์ไทยจริงๆ',     en: 'sound like a Thai creator.' },
   'hero.sub': {
-    th: 'หยุดนั่งคิด hook 3 วิ ทั้งคืน — Capduction สร้าง<strong>สคริปต์</strong>และ<strong>แคปชั่น</strong>ที่ตรงสไตล์ครีเอเตอร์ไทย เสร็จใน 15 วินาที',
-    en: 'Stop staring at TikTok at 2am writing hooks. Capduction crafts <strong>spoken scripts</strong> and <strong>captions</strong> in the voice of Thai creators — in 15 seconds.',
+    th: 'เลิกใช้ ChatGPT แล้วได้คำว่า "จงตื่นเต้น" — Capduction เขียน<strong>สคริปต์</strong>และ<strong>แคปชั่น</strong>ในสำเนียงครีเอเตอร์ไทยจริงๆ เสร็จใน 15 วินาที',
+    en: 'No more "ChatGPT-translated" stiff Thai. Capduction writes <strong>scripts</strong> and <strong>captions</strong> in the actual voice of Thai short-form creators — in 15 seconds.',
   },
   'hero.cta':        { th: 'เจนสคริปต์แรกเลย →',      en: 'Generate your first script →' },
   'hero.trust':      { th: '10 ครั้งฟรี · ไม่ต้องใช้บัตรเครดิต · ยกเลิกได้ตลอด', en: '10 free generations · no credit card · cancel anytime' },
@@ -244,7 +244,7 @@ export const DICT = {
                             en: 'AI uses this as context on every generation — be as specific as you like.' },
   'set.save':             { th: 'บันทึก', en: 'Save' },
   'set.saved':            { th: 'บันทึกแล้ว', en: 'Saved' },
-  'set.upgrade_btn':      { th: 'อัปเกรดเป็น Studio · ฿349/mo', en: 'Upgrade to Studio · ฿349/mo' },
+  'set.upgrade_btn':      { th: 'อัปเกรดเป็น Studio · ฿549/mo', en: 'Upgrade to Studio · ฿549/mo' },
   'set.manage_billing':   { th: 'จัดการการชำระเงิน · {plan}', en: 'Manage billing · {plan}' },
   'set.logout':           { th: 'ออกจากระบบ', en: 'Sign out' },
 
@@ -293,6 +293,15 @@ export const DICT = {
   'pr.free.f3':           { th: 'ประวัติการเจนทั้งหมด',              en: 'Full generation history' },
   'pr.free.f4':           { th: 'อีเมลซัพพอร์ต',                    en: 'Email support' },
   'pr.free.cta':          { th: 'เริ่มฟรี',                          en: 'Start free' },
+
+  // ─── Creator tier (entry · ฿199 / 100 gens) ─────────────────────
+  'pr.creator.desc':      { th: 'สำหรับครีเอเตอร์ที่อยากลองจริงจัง · ไม่กดดัน',
+                            en: 'For creators ready to go beyond trial — no pressure.' },
+  'pr.creator.f1':        { th: '100 generations / เดือน',          en: '100 generations / month' },
+  'pr.creator.f2':        { th: 'ทุก studio · ทุกแพลตฟอร์ม',         en: 'Every studio · every platform' },
+  'pr.creator.f3':        { th: 'ค้นหา + ฟิลเตอร์ประวัติเจน',          en: 'History search + filter' },
+  'pr.creator.f4':        { th: 'อีเมลซัพพอร์ต · ตอบใน 24 ชม.',     en: 'Email support · 24-hr response' },
+  'pr.creator.cta':       { th: 'เริ่มที่ Creator',                  en: 'Start with Creator' },
   'pr.studio.desc':       { th: 'สำหรับครีเอเตอร์และร้านค้าที่โพสต์ทุกวัน · คุ้มที่สุดในเซต',
                             en: 'For daily-posting creators & shops · the sweet spot.' },
   'pr.studio.f1':         { th: '500 generations / เดือน',         en: '500 generations / month' },
@@ -304,8 +313,8 @@ export const DICT = {
   'pr.studio.cta':        { th: 'อัปเกรดเป็น Studio',                en: 'Upgrade to Studio' },
   'pr.agency.desc':       { th: 'สำหรับเอเจนซี่ที่ดูแลหลายแบรนด์พร้อมกัน',
                             en: 'For agencies managing multiple brands.' },
-  'pr.agency.f1':         { th: 'Unlimited generations',           en: 'Unlimited generations' },
-  'pr.agency.f2':         { th: 'Brand voice ไม่จำกัดจำนวน',         en: 'Unlimited brand voices' },
+  'pr.agency.f1':         { th: '3,000 generations / เดือน',        en: '3,000 generations / month' },
+  'pr.agency.f2':         { th: 'Brand voice ไม่จำกัด',             en: 'Unlimited brand voices' },
   'pr.agency.f3':         { th: 'จัด project แบ่งสีได้ไม่จำกัด',     en: 'Unlimited colour-coded projects' },
   'pr.agency.f4':         { th: 'Analytics + usage breakdown',     en: 'Analytics + usage breakdown' },
   'pr.agency.f5':         { th: 'ทุกอย่างใน Studio',                en: 'Everything in Studio' },

@@ -58,7 +58,7 @@ export async function POST(req: Request) {
           bvContext,
           variantCount > 1 ? i : null,
         );
-        return generateScript(prompt);
+        return generateScript(prompt, auth.ctx.plan);
       })
     );
 

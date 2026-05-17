@@ -46,7 +46,7 @@ export async function POST(req: Request) {
 
     const bvContext = await resolveBrandVoiceContext(body.brandVoiceId);
     const prompt = buildCaptionPrompt(body as CaptionRequest, bvContext);
-    const caption = await generateCaption(prompt);
+    const caption = await generateCaption(prompt, auth.ctx.plan);
 
     await saveGenerationAndDecrement({
       ctx:            auth.ctx,

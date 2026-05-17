@@ -178,7 +178,7 @@ export default function DocsPage() {
             <DocSection id="faq" eyebrow="QUESTIONS" title="คำถามที่พบบ่อย" icon={Settings2}>
               <Faq q="เครดิตหมดแล้วต้องทำยังไง?">
                 อัปเกรดที่ <Link href="/pricing" className="text-iridescent">/pricing</Link>
-                {' '}— Studio ฿349/เดือน ได้ 500 generations หรือ Agency ฿1,290/เดือน ใช้ไม่จำกัด
+                {' '}— Creator ฿199 ได้ 100 ครั้ง · Studio ฿549 ได้ 500 ครั้ง · Agency ฿1,890 ได้ 3,000 ครั้ง
               </Faq>
               <Faq q="คอนเทนต์ที่สร้างเก็บไว้ที่ไหน?">
                 ทุก generation ถูกบันทึกใน{' '}

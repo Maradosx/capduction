@@ -87,6 +87,8 @@ export interface AuthContext {
   userEmail: string | null;
   identifier: string;        // for rate limiting (userId or IP)
   isDemoMode: boolean;       // true when Supabase isn't configured
+  /** Populated by checkCredits() — used to pick AI model tier. */
+  plan?: string;
 }
 
 export async function authenticate(req: Request): Promise<
@@ -140,8 +142,12 @@ export async function checkCredits(ctx: AuthContext): Promise<NextResponse | nul
       credits_remaining: 10,
       plan: 'free',
     });
+    ctx.plan = 'free';
     return null;
   }
+
+  // Stash plan on ctx so downstream code can pick the right AI model tier.
+  ctx.plan = profile.plan ?? 'free';
 
   if (profile.credits_remaining <= 0) {
     await supabase.from('usage_events').insert({

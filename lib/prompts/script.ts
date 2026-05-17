@@ -1,6 +1,10 @@
 /**
  * Capduction — Script Studio prompt builder
  * Generates spoken video scripts with per-second timing + B-roll cues
+ *
+ * Returns { system, user } so OpenAI's automatic prompt caching can hit
+ * the longest static prefix (the `system` portion is identical across
+ * every script call regardless of product/audience).
  */
 
 import type { ScriptRequest } from '@/types';
@@ -31,53 +35,23 @@ function beatsFor(duration: string): { count: number; secondsPerBeat: string } {
 const joinOr = (arr?: string[], fallback = 'Not specified') =>
   arr && arr.length > 0 ? arr.join(', ') : fallback;
 
-export function buildScriptPrompt(
-  req: ScriptRequest,
-  brandVoiceContext = '',
-  variantIndex: number | null = null,
-): string {
-  const beatSpec = beatsFor(req.duration);
-  const tonesText = joinOr(req.tones, 'Friendly');
-  const variants  = Math.max(1, Math.min(3, req.variants ?? 1));
-
-  // When server-side parallel-fanout is used, variantIndex picks a
-  // diversification angle so each script feels distinct.
-  const ANGLES = [
-    'Lead with PROOF — start with a result/before-after that demonstrates the product works.',
-    'Lead with PROBLEM — open by surfacing a pain the audience has tried to solve and failed.',
-    'Lead with CURIOSITY — open with a surprising statement or contrarian take that demands explanation.',
-  ];
-  const angleHint = variantIndex !== null && variants > 1
-    ? `\n⚠ This is variant ${variantIndex + 1} of ${variants}. ${ANGLES[variantIndex] ?? ''}`
-    : '';
-
-  return `You are an elite Thai short-form video director and scriptwriter. Your job is to write a spoken video script that sells effectively to Thai online buyers.${angleHint}
+/** Identical for every script call → OpenAI caches this prefix (50% off). */
+const SYSTEM_PROMPT = `You are an elite Thai short-form video director and scriptwriter. Your job is to write a spoken video script that sells effectively to Thai online buyers.
 
 ═══════════ CRITICAL LANGUAGE RULES ═══════════
 1. NATURAL THAI: Use conversational, native Thai phrasing — like top Thai TikTok/Reels sellers. Never robotic, never translated-feeling.
 2. ENGLISH MIX: Naturally mix common marketing English (Best Seller, Must Have, Unbox, Review, Sold Out) where Thai sellers actually do.
-3. AUDIENCE: ${joinOr(req.targetCustomers, 'General Thai shoppers')}
-4. TONE — blend these styles: ${tonesText}
-   Reference styles you can mix:
+3. Reference TONE styles you can mix:
    - Friendly: warm, polite particles "นะคะ/ครับ/ค่า"
    - Professional: clear, authoritative, less slang
    - Luxury: elegant, premium-positioning, exclusive feel
    - Viral: high energy, dramatic, sensational hooks
    - Persuasive: hard-selling, deep triggers, objection handling
    - Minimal: clean, calm, aesthetic restraint
-   (If the user listed a custom tone above, honor it literally.)
+   (If the user lists a custom tone, honor it literally.)
 
-═══════════ PRODUCT ═══════════
-Name:       ${req.productName}
-Categories: ${joinOr(req.categories)}
-Platform:   ${req.platform}
-Duration:   ${req.duration} (${beatSpec.count} beats, ${beatSpec.secondsPerBeat})
-Details:    ${req.details || 'None'}
-
-${brandVoiceContext ? `═══════════ BRAND VOICE ═══════════\n${brandVoiceContext}\n` : ''}
-═══════════ YOUR TASK ═══════════
-
-Write a complete spoken video script broken into ${beatSpec.count} timed beats:
+═══════════ STRUCTURE ═══════════
+A complete spoken video script broken into timed beats:
 - BEAT 1: HOOK (first 1-3 seconds — must stop the scroll)
 - MIDDLE BEATS: BODY / PROOF / OBJECTION
 - LAST BEAT: CTA (clear next step)
@@ -112,4 +86,44 @@ Return STRICTLY this JSON schema (no markdown, no commentary):
 }
 
 WARNING: ONLY the raw JSON. No \`\`\`, no preamble.`;
+
+export interface PromptMessages {
+  system: string;
+  user: string;
+}
+
+export function buildScriptPrompt(
+  req: ScriptRequest,
+  brandVoiceContext = '',
+  variantIndex: number | null = null,
+): PromptMessages {
+  const beatSpec = beatsFor(req.duration);
+  const tonesText = joinOr(req.tones, 'Friendly');
+  const variants  = Math.max(1, Math.min(3, req.variants ?? 1));
+
+  // When server-side parallel-fanout is used, variantIndex picks a
+  // diversification angle so each script feels distinct.
+  const ANGLES = [
+    'Lead with PROOF — start with a result/before-after that demonstrates the product works.',
+    'Lead with PROBLEM — open by surfacing a pain the audience has tried to solve and failed.',
+    'Lead with CURIOSITY — open with a surprising statement or contrarian take that demands explanation.',
+  ];
+  const angleHint = variantIndex !== null && variants > 1
+    ? `\n⚠ This is variant ${variantIndex + 1} of ${variants}. ${ANGLES[variantIndex] ?? ''}`
+    : '';
+
+  const user = `═══════════ THIS REQUEST ═══════════
+Audience:   ${joinOr(req.targetCustomers, 'General Thai shoppers')}
+Tone blend: ${tonesText}
+
+Product:    ${req.productName}
+Categories: ${joinOr(req.categories)}
+Platform:   ${req.platform}
+Duration:   ${req.duration} (${beatSpec.count} beats, ${beatSpec.secondsPerBeat})
+Details:    ${req.details || 'None'}
+${brandVoiceContext ? `\n═══════════ BRAND VOICE ═══════════\n${brandVoiceContext}\n` : ''}${angleHint}
+
+Generate a complete script with exactly ${beatSpec.count} beats following the structure and output format above.`;
+
+  return { system: SYSTEM_PROMPT, user };
 }
