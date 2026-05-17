@@ -8,6 +8,8 @@ import type { ScriptContent, CaptionContent, ComboContent } from '@/types';
 
 const OPENAI_URL = 'https://api.openai.com/v1/chat/completions';
 const MODEL = 'gpt-4o';
+/** Hard cap to avoid Vercel killing the function uncontrolled at ~60s. */
+const OPENAI_TIMEOUT_MS = 45_000;
 
 class MissingApiKeyError extends Error {
   constructor() {
@@ -22,19 +24,28 @@ async function callOpenAI<T>(prompt: string): Promise<T> {
     throw new MissingApiKeyError();
   }
 
-  const res = await fetch(OPENAI_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type':  'application/json',
-      Authorization:   `Bearer ${key}`,
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      messages: [{ role: 'user', content: prompt }],
-      temperature: 0.75,
-      response_format: { type: 'json_object' },
-    }),
-  });
+  let res: Response;
+  try {
+    res = await fetch(OPENAI_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type':  'application/json',
+        Authorization:   `Bearer ${key}`,
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.75,
+        response_format: { type: 'json_object' },
+      }),
+      signal: AbortSignal.timeout(OPENAI_TIMEOUT_MS),
+    });
+  } catch (e: any) {
+    if (e?.name === 'TimeoutError' || e?.name === 'AbortError') {
+      throw new Error('AI request timed out — please try again');
+    }
+    throw e;
+  }
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));

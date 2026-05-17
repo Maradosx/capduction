@@ -16,10 +16,16 @@ export function ScriptResult({ data, loading, onRegenerate }: ScriptResultProps)
   if (loading) return <ResultSkeleton label={t('rs.script.loading')} />;
   if (!data)   return <EmptyResult />;
 
+  // Defensive: AI sometimes omits keys despite json_object format.
+  // Don't tear down the whole page — show what we have.
+  const beats = Array.isArray(data.beats) ? data.beats : [];
+  const totalSeconds = data.totalSeconds ?? 0;
+  const checklist = Array.isArray(data.postingChecklist) ? data.postingChecklist : [];
+
   return (
     <div className="glass-strong rounded-[20px] p-6 md:p-7 flex flex-col gap-5">
       <ResultHeader
-        title={`Script · ${data.beats.length} beats · ${data.totalSeconds}s`}
+        title={`Script · ${beats.length} beats · ${totalSeconds}s`}
         onCopyAll={() => copyText(formatScriptForCopy(data))}
         onRegenerate={onRegenerate}
         onExport={() => downloadText(formatScriptForCopy(data), 'capduction-script.txt')}
@@ -27,7 +33,7 @@ export function ScriptResult({ data, loading, onRegenerate }: ScriptResultProps)
 
       {/* Beats list */}
       <div className="flex flex-col gap-3">
-        {data.beats.map((beat, i) => (
+        {beats.map((beat, i) => (
           <BeatCard key={i} index={i + 1} {...beat} />
         ))}
       </div>
@@ -44,11 +50,11 @@ export function ScriptResult({ data, loading, onRegenerate }: ScriptResultProps)
       )}
 
       {/* Posting checklist */}
-      {data.postingChecklist?.length > 0 && (
+      {checklist.length > 0 && (
         <Section label="POSTING CHECKLIST">
           <div className="glass rounded-[12px] p-4">
             <ul className="flex flex-col gap-2">
-              {data.postingChecklist.map((item, i) => (
+              {checklist.map((item, i) => (
                 <li key={i} className="flex items-start gap-2.5 text-[13px] text-ink font-thai">
                   <span className="text-iridescent font-bold leading-none mt-0.5">✶</span>
                   {item}

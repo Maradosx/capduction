@@ -4,7 +4,6 @@
  * These run with service-role privileges in webhook context.
  */
 import { createAdminClient } from '@/lib/supabase/admin';
-import { PLAN_CREDITS } from '@/types';
 
 interface BillingUpdate {
   plan: 'free' | 'studio' | 'agency';
@@ -15,8 +14,20 @@ interface BillingUpdate {
 }
 
 /**
- * Update a profile's billing state and refill credits.
- * Uses the Supabase service client (bypasses RLS) — only call from server/webhook context.
+ * Update a profile's billing columns ONLY (plan, status, period_end, customer_id).
+ *
+ * Does NOT touch credits_remaining — that's the caller's job via
+ * `refreshCreditsForPlan` (called explicitly only on:
+ *   - checkout.session.completed   (initial activation)
+ *   - invoice.paid (cycle)         (monthly renewal)
+ *   - subscription tier upgrade    (e.g. studio → agency)
+ * ).
+ *
+ * Previously this function also reset credits on every webhook call — that
+ * leaked free credits when Stripe fired subscription.updated for trivial
+ * reasons (card update, address change, status flip).
+ *
+ * Uses the Supabase service client (bypasses RLS) — webhook context only.
  */
 export async function updateBillingStatus(
   userId: string,
@@ -24,8 +35,6 @@ export async function updateBillingStatus(
   stripeEventId: string
 ): Promise<{ success: boolean; error?: string }> {
   const supabase = createAdminClient();
-
-  const creditsToRefill = PLAN_CREDITS[updates.plan] ?? PLAN_CREDITS.free;
 
   // Idempotency guard: skip if we've already processed this Stripe event
   const { data: existing } = await supabase
@@ -39,7 +48,7 @@ export async function updateBillingStatus(
     return { success: true };
   }
 
-  // Update profile billing columns + refill credits
+  // Update profile billing columns (NOT credits — see comment above)
   const { error: profileErr } = await supabase
     .from('profiles')
     .update({
@@ -48,7 +57,6 @@ export async function updateBillingStatus(
       billing_customer_id: updates.billing_customer_id,
       stripe_price_id: updates.stripe_price_id ?? null,
       current_period_end: updates.current_period_end ?? null,
-      credits_remaining: creditsToRefill,
       updated_at: new Date().toISOString(),
     })
     .eq('id', userId);
@@ -65,7 +73,6 @@ export async function updateBillingStatus(
     stripe_event_id: stripeEventId,
     metadata: {
       plan: updates.plan,
-      credits_refilled: creditsToRefill,
       current_period_end: updates.current_period_end,
     },
   });

@@ -12,10 +12,14 @@ interface MultiSelectProps {
   onChange: (next: string[]) => void;
   /** Optional sub-label appearing next to each preset (e.g. Thai gloss) */
   optionSublabels?: Record<string, string>;
+  /** Optional display label override per option (value still emits the canonical key) */
+  optionLabels?: Record<string, string>;
   /** Allow users to add their own values via "+ Other" */
   allowCustom?: boolean;
   /** Placeholder for the custom-value input */
   customPlaceholder?: string;
+  /** Label for the "+ add custom" button (default: 'อื่นๆ') */
+  addLabel?: string;
   /** If set, only show this many presets initially with a "+N more" expand chip. Selected presets are always visible. */
   initialVisibleCount?: number;
 }
@@ -31,8 +35,10 @@ export function MultiSelect({
   value,
   onChange,
   optionSublabels,
+  optionLabels,
   allowCustom = true,
   customPlaceholder = 'พิมพ์เอง...',
+  addLabel = 'อื่นๆ',
   initialVisibleCount,
 }: MultiSelectProps) {
   const [adding, setAdding]     = useState(false);
@@ -88,7 +94,7 @@ export function MultiSelect({
                           : 'bg-white/55 border-white/70 text-ink-3 hover:bg-white/80 hover:text-ink'}`}
           >
             {active && <Check size={11} />}
-            <span>{opt}</span>
+            <span>{optionLabels?.[opt] ?? opt}</span>
             {optionSublabels?.[opt] && (
               <span className={`text-[10px] ${active ? 'opacity-80' : 'opacity-60'}`}>
                 · {optionSublabels[opt]}
@@ -140,7 +146,7 @@ export function MultiSelect({
                      text-[12px] font-semibold border border-dashed border-violet/35
                      text-violet hover:bg-violet/10 transition-all lang-th:font-thai"
         >
-          <Plus size={11} /> อื่นๆ
+          <Plus size={11} /> {addLabel}
         </button>
       )}
 

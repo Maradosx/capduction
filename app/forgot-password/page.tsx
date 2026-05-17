@@ -41,11 +41,11 @@ export default function ForgotPasswordPage() {
   if (sent) {
     return (
       <AuthCard
-        title="✦ ส่งลิงก์รีเซ็ตแล้ว"
-        subtitle={`ส่งลิงก์รีเซ็ตรหัสผ่านไปที่ ${email} — กดในอีเมลเพื่อตั้งรหัสใหม่`}
+        title={t('auth.forgot.sent.title')}
+        subtitle={t('auth.forgot.sent.sub').replace('{email}', email)}
         footer={
           <Link href="/login" data-cursor="go" className="hover-target text-iridescent font-semibold no-underline hover:underline">
-            ← {t('auth.submit.login')}
+            {t('auth.back_to_login')}
           </Link>
         }
       >
@@ -56,9 +56,6 @@ export default function ForgotPasswordPage() {
               background: 'radial-gradient(circle at 35% 28%, white, var(--peach) 30%, var(--rose) 70%, var(--pink))',
             }}
           />
-          <p className="text-ink-3 text-[14px] leading-relaxed lang-th:font-thai">
-            ลิงก์จะหมดอายุใน <strong className="text-ink">1 ชั่วโมง</strong>
-          </p>
         </div>
       </AuthCard>
     );
@@ -66,15 +63,12 @@ export default function ForgotPasswordPage() {
 
   return (
     <AuthCard
-      title="ลืมรหัสผ่าน?"
-      subtitle="ใส่อีเมลที่ใช้สมัคร — เราจะส่งลิงก์รีเซ็ตให้"
+      title={t('auth.forgot.title')}
+      subtitle={t('auth.forgot.sub')}
       footer={
-        <>
-          จำได้แล้ว?{' '}
-          <Link href="/login" data-cursor="go" className="hover-target text-iridescent font-semibold no-underline hover:underline">
-            {t('auth.submit.login')}
-          </Link>
-        </>
+        <Link href="/login" data-cursor="go" className="hover-target text-iridescent font-semibold no-underline hover:underline">
+          {t('auth.back_to_login')}
+        </Link>
       }
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -98,7 +92,7 @@ export default function ForgotPasswordPage() {
         )}
 
         <AuthButton type="submit" loading={loading}>
-          ส่งลิงก์รีเซ็ต
+          {t('auth.forgot.send')}
         </AuthButton>
       </form>
     </AuthCard>

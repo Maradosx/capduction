@@ -35,6 +35,24 @@ const TONE_SUBLABELS: Record<'th' | 'en', Record<string, string>> = {
   en: { Friendly: 'warm',     Professional: 'pro',      Luxury: 'premium', Viral: 'high-energy', Persuasive: 'sales',  Minimal: 'clean' },
 };
 
+// Canonical labels (sent to backend) → display labels per language.
+// Only TH localizes English-canonical labels; EN view keeps canonical as-is
+// (so the LLM still receives consistent strings regardless of UI language).
+const CATEGORY_LABELS_TH: Record<string, string> = {
+  Beauty: 'ความงาม', Fashion: 'แฟชั่น', 'Food & Drink': 'อาหาร & เครื่องดื่ม',
+  Health: 'สุขภาพ', Tech: 'เทคโนโลยี', Home: 'ของใช้ในบ้าน',
+  Fitness: 'ฟิตเนส', Travel: 'ท่องเที่ยว', Education: 'การศึกษา',
+  Pet: 'สัตว์เลี้ยง', 'Baby & Kids': 'เด็ก & แม่และเด็ก',
+};
+
+const TARGET_LABELS_EN: Record<string, string> = {
+  'นักศึกษา': 'University students',
+  'แม่บ้าน': 'Homemakers',
+  'พ่อแม่มือใหม่': 'New parents',
+  'ผู้ชายสายเทค': 'Tech-savvy men',
+  'ผู้หญิงสายบิวตี้': 'Beauty-conscious women',
+};
+
 const DURATION_PRESET_LABELS: Record<'th' | 'en', Record<string, string>> = {
   th: { '15s': '15 วินาที', '30s': '30 วินาที', '60s': '1 นาที', '90s': '1.5 นาที', long: 'Long-form (>90s)' },
   en: { '15s': '15 sec',    '30s': '30 sec',    '60s': '1 min',  '90s': '1.5 min',  long: 'Long-form (>90s)' },
@@ -96,7 +114,9 @@ export function StudioForm({ mode, defaults, loading, error, onSubmit }: StudioF
           options={CATEGORY_PRESETS}
           value={data.categories}
           onChange={(v) => setData({ ...data, categories: v })}
+          optionLabels={lang === 'th' ? CATEGORY_LABELS_TH : undefined}
           customPlaceholder={lang === 'th' ? 'หมวดอื่น...' : 'Other category...'}
+          addLabel={lang === 'th' ? 'อื่นๆ' : 'Other'}
           initialVisibleCount={6}
         />
       </Field>
@@ -106,7 +126,9 @@ export function StudioForm({ mode, defaults, loading, error, onSubmit }: StudioF
           options={TARGET_PRESETS}
           value={data.targetCustomers}
           onChange={(v) => setData({ ...data, targetCustomers: v })}
+          optionLabels={lang === 'en' ? TARGET_LABELS_EN : undefined}
           customPlaceholder={lang === 'th' ? 'กลุ่มอื่น...' : 'Other audience...'}
+          addLabel={lang === 'th' ? 'อื่นๆ' : 'Other'}
           initialVisibleCount={6}
         />
       </Field>
@@ -127,7 +149,8 @@ export function StudioForm({ mode, defaults, loading, error, onSubmit }: StudioF
           value={data.tones}
           onChange={(v) => setData({ ...data, tones: v })}
           optionSublabels={TONE_SUBLABELS[lang]}
-          customPlaceholder="โทนอื่นๆ..."
+          customPlaceholder={lang === 'th' ? 'โทนอื่น...' : 'Other tone...'}
+          addLabel={lang === 'th' ? 'อื่นๆ' : 'Other'}
         />
       </Field>
 
@@ -139,6 +162,7 @@ export function StudioForm({ mode, defaults, loading, error, onSubmit }: StudioF
             onChange={(v) => setData({ ...data, duration: v[v.length - 1] ?? '30s' })}
             optionSublabels={DURATION_PRESET_LABELS[lang]}
             customPlaceholder={lang === 'th' ? 'เช่น 45 วินาที' : 'e.g. 45s'}
+            addLabel={lang === 'th' ? 'อื่นๆ' : 'Other'}
             allowCustom
           />
           <p className="text-[10px] text-ink-3 mt-1.5 lang-th:font-thai">

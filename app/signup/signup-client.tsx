@@ -43,7 +43,7 @@ export default function SignupClient() {
     e.preventDefault();
     setError(null);
     if (password.length < 8) {
-      setError('Password must be at least 8 characters.');
+      setError(t('auth.pwd.min'));
       return;
     }
     setLoading(true);
@@ -161,7 +161,7 @@ export default function SignupClient() {
               minLength={8}
               value={password}
               onChange={(e) => setPwd(e.target.value)}
-              placeholder="อย่างน้อย 8 ตัวอักษร"
+              placeholder={t('auth.pwd.ph')}
               autoComplete="new-password"
             />
           </div>
@@ -178,13 +178,24 @@ export default function SignupClient() {
         {t('auth.google')}
       </AuthOAuthButton>
 
-      <p className="text-[11px] text-ink-3 text-center mt-4 lang-th:font-thai">
-        กด {t('auth.submit.signup')} = ยอมรับ{' '}
-        <Link href="/terms" data-cursor="read" className="hover-target underline">Terms</Link>{' '}
-        และ{' '}
-        <Link href="/privacy" data-cursor="read" className="hover-target underline">Privacy Policy</Link>
-      </p>
+      <TermsConsent />
     </AuthCard>
+  );
+}
+
+function TermsConsent() {
+  const t = useT();
+  // Build "By creating an account... {terms} and {privacy}" with real links inline
+  const template = t('auth.terms_consent');
+  const parts = template.split(/\{terms\}|\{privacy\}/);
+  return (
+    <p className="text-[11px] text-ink-3 text-center mt-4 lang-th:font-thai">
+      {parts[0]}
+      <Link href="/terms" data-cursor="read" className="hover-target underline">{t('auth.terms_link')}</Link>
+      {parts[1]}
+      <Link href="/privacy" data-cursor="read" className="hover-target underline">{t('auth.privacy_link')}</Link>
+      {parts[2]}
+    </p>
   );
 }
 
