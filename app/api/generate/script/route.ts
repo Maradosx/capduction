@@ -6,6 +6,7 @@ import {
   parseBody, authenticate, checkCredits, applyRateLimit,
   saveGenerationAndDecrement, isAdversarial, resolveBrandVoiceContext,
 } from '@/lib/api-handler';
+import { reportError } from '@/lib/error';
 import { PLATFORMS, type ScriptRequest } from '@/types';
 
 const Schema = z.object({
@@ -81,7 +82,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true, data: payload });
   } catch (err: any) {
-    console.error('[API_GENERATE_SCRIPT]', err?.message ?? err);
+    reportError(err, { scope: 'api/generate/script' });
     return NextResponse.json(
       { success: false, error: 'เกิดข้อผิดพลาด กรุณาลองใหม่' },
       { status: 500 }

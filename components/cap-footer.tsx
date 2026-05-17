@@ -19,7 +19,7 @@ const COLS = [
     links: [
       { href: '/docs',       label: 'Documentation' },
       { href: '/changelog',  label: 'Changelog' },
-      { href: '/api-docs',   label: 'API' },
+      { href: '/pricing',    label: 'Pricing' },
       { href: '/status',     label: 'Status' },
     ],
   },
@@ -27,9 +27,9 @@ const COLS = [
     h5: 'COMPANY',
     links: [
       { href: '/about',   label: 'About' },
-      { href: '/careers', label: 'Careers' },
       { href: '/contact', label: 'Contact' },
       { href: '/privacy', label: 'Privacy' },
+      { href: '/terms',   label: 'Terms' },
     ],
   },
 ];

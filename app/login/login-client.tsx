@@ -11,10 +11,20 @@ import {
 
 type Method = 'magic' | 'password';
 
+/** Only allow same-origin paths for the ?next= redirect. */
+function safeNext(raw: string | null): string {
+  if (!raw) return '/dashboard';
+  if (!raw.startsWith('/') || raw.startsWith('//') || raw.startsWith('/\\')) {
+    return '/dashboard';
+  }
+  return raw;
+}
+
 export default function LoginClient() {
   const t = useT();
   const router = useRouter();
   const search = useSearchParams();
+  const next = safeNext(search.get('next'));
 
   const [method, setMethod]   = useState<Method>('magic');
   const [email, setEmail]     = useState(search.get('email') ?? '');
@@ -30,7 +40,7 @@ export default function LoginClient() {
     const supabase = createClient();
     const { error: authErr } = await supabase.auth.signInWithPassword({ email, password });
     if (authErr) { setError(authErr.message); setLoading(false); return; }
-    router.push('/dashboard');
+    router.push(next);
     router.refresh();
   }
 
@@ -39,9 +49,12 @@ export default function LoginClient() {
     setError(null);
     setLoading(true);
     const supabase = createClient();
+    // Forward `next` through the magic-link callback so deep-link lands right.
+    const callbackUrl = new URL('/auth/callback', window.location.origin);
+    if (next !== '/dashboard') callbackUrl.searchParams.set('next', next);
     const { error: authErr } = await supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+      options: { emailRedirectTo: callbackUrl.toString() },
     });
     setLoading(false);
     if (authErr) { setError(authErr.message); return; }
@@ -50,11 +63,22 @@ export default function LoginClient() {
 
   async function handleGoogle() {
     setLoading(true);
-    const supabase = createClient();
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
-    });
+    try {
+      const supabase = createClient();
+      const callbackUrl = new URL('/auth/callback', window.location.origin);
+      if (next !== '/dashboard') callbackUrl.searchParams.set('next', next);
+      const { error: oauthErr } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: callbackUrl.toString() },
+      });
+      // If OAuth dispatch failed (popup blocked, network, etc), surface it.
+      // On success the browser navigates away and this code never runs.
+      if (oauthErr) setError(oauthErr.message);
+    } finally {
+      // Always reset — if user cancels/closes popup or navigation is blocked,
+      // the button must come back to life.
+      setLoading(false);
+    }
   }
 
   if (magicSent) {

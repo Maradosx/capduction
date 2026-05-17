@@ -60,11 +60,17 @@ export default function SignupClient() {
 
   async function handleGoogle() {
     setLoading(true);
-    const supabase = createClient();
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
-    });
+    try {
+      const supabase = createClient();
+      const { error: oauthErr } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: `${window.location.origin}/auth/callback` },
+      });
+      if (oauthErr) setError(oauthErr.message);
+    } finally {
+      // Reset so the button comes back to life if the popup is closed/blocked.
+      setLoading(false);
+    }
   }
 
   if (sent) {

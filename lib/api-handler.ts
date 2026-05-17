@@ -36,13 +36,19 @@ function getRateLimiter(): Ratelimit | null {
 }
 
 // ─── Prompt-injection guard ──────────────────────────────────────────────────
+// Match phrasal patterns that real injection attempts use, not single English
+// words. Earlier version blocked any product description containing
+// "instruction" or "bypass" — Thai marketers writing "ลิปบาล์มที่ bypass
+// ปัญหาริมฝีปากแห้ง" or "follow the instructions on the box" were rejected.
 const BLOCKED_PATTERNS = [
-  /ignore\s+previous/i,
-  /system\s+prompt/i,
-  /\binstruction\b/i,
-  /bypass/i,
+  /ignore\s+(?:all\s+)?(?:previous|prior|above)/i,
+  /disregard\s+(?:all\s+)?(?:previous|prior|above|instructions)/i,
+  /system\s*prompt\s*[:=]/i,
+  /you\s+are\s+now\s+(?:a|an|the)\s/i,
+  /forget\s+(?:everything|all|your)\s/i,
   /jailbreak/i,
-  /<\s*script/i,
+  /<\s*script[\s>]/i,        // XSS attempt, not the word "script"
+  /\bDAN\b.*(?:mode|prompt)/i,
 ];
 export function isAdversarial(text: string): boolean {
   return BLOCKED_PATTERNS.some((p) => p.test(text));
