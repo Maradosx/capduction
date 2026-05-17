@@ -226,7 +226,8 @@ export function StudioForm({ mode, defaults, loading, error, onSubmit }: StudioF
         ) : (
           <>
             <Sparkles size={16} />
-            {t('wf.generate')}
+            {/* Cost-clarity: tell user exactly how many credits this will burn */}
+            {t('wf.generate')} · {t('wf.cost', { n: data.variants })}
           </>
         )}
       </button>

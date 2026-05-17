@@ -132,7 +132,7 @@ export default function SignupClient() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="your@email.com"
+              placeholder={t("hero.email.placeholder")}
               autoComplete="email"
             />
             <p className="text-[11px] text-ink-3 mt-2 lang-th:font-thai leading-relaxed">
@@ -154,7 +154,7 @@ export default function SignupClient() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="your@email.com"
+              placeholder={t("hero.email.placeholder")}
               autoComplete="email"
             />
           </div>

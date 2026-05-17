@@ -25,9 +25,11 @@ export default async function DashboardHome() {
     } catch { /* swallow */ }
   }
 
+  // Prefer the human's actual identifier. "creator" merge-tag fallback
+  // looks like a CRM fail — only hit if a profile somehow has no email at all.
   const displayName = profile?.full_name?.split(' ')[0]
     ?? profile?.email?.split('@')[0]
-    ?? (isDemoMode ? 'Demo' : 'creator');
+    ?? (isDemoMode ? 'Demo' : 'friend');
   const credits = profile?.credits_remaining ?? 10;
   const plan    = profile?.plan ?? 'free';
 

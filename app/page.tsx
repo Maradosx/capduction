@@ -14,6 +14,7 @@
 import { CapNav } from '@/components/cap-nav';
 import { CapFooter } from '@/components/cap-footer';
 import { LandingHero } from '@/components/landing/hero';
+import { ShowcaseSection } from '@/components/landing/showcase-section';
 import { DashboardPreview } from '@/components/landing/dashboard-preview';
 import { StudiosSection } from '@/components/landing/studios-section';
 import { BottomCta } from '@/components/landing/bottom-cta';
@@ -27,6 +28,9 @@ export default function HomePage() {
 
       <main>
         <LandingHero />
+        {/* Proof-of-output BEFORE workspace preview — answers
+            "what do I actually get?" while interest is highest. */}
+        <ShowcaseSection />
         <DashboardPreview />
         <StudiosSection />
         <BottomCta />

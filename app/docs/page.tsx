@@ -178,12 +178,12 @@ export default function DocsPage() {
             <DocSection id="faq" eyebrow="QUESTIONS" title="คำถามที่พบบ่อย" icon={Settings2}>
               <Faq q="เครดิตหมดแล้วต้องทำยังไง?">
                 อัปเกรดที่ <Link href="/pricing" className="text-iridescent">/pricing</Link>
-                — เริ่มต้น ฿199/เดือน ได้ 100 generations
+                {' '}— Studio ฿349/เดือน ได้ 500 generations หรือ Agency ฿1,290/เดือน ใช้ไม่จำกัด
               </Faq>
               <Faq q="คอนเทนต์ที่สร้างเก็บไว้ที่ไหน?">
                 ทุก generation ถูกบันทึกใน{' '}
                 <Link href="/dashboard/history" className="text-iridescent">/dashboard/history</Link>
-                {' '}— ค้นหา · คัดลอก · export เป็น .pdf ได้
+                {' '}— ค้นหา · คัดลอก · คัดลอกข้อความครบทุก field
               </Faq>
               <Faq q="คอนเทนต์ของผมจะถูกนำไปเทรน AI ไหม?">
                 ไม่ — Capduction ไม่นำคอนเทนต์ของผู้ใช้ไปเทรนโมเดล

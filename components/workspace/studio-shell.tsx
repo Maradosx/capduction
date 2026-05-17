@@ -26,10 +26,27 @@ const ENDPOINT: Record<StudioMode, string> = {
   combo:   '/api/generate/combo',
 };
 
+/** Curated demo prefills for first-time users — keyed off `?demo=…`.
+ *  Keeps the form fields canonical (no surprise non-preset values). */
+const DEMO_PREFILLS: Record<string, Partial<StudioFormData>> = {
+  lipstick: {
+    productName:     'ลิปสติกแดงแมตต์ ติด 12 ชั่วโมง',
+    categories:      ['Beauty'],
+    targetCustomers: ['Gen Z (1997-2012)', 'ผู้หญิงสายบิวตี้'],
+    tones:           ['Persuasive', 'Viral'],
+    platform:        'TikTok',
+    duration:        '30s',
+    details:         'ราคา ฿299 · ส่งฟรี · ลด 20% เฉพาะ 50 คนแรก',
+    variants:        1,
+  },
+};
+
 export function StudioShell({ mode, title, description, brandVoices = [], renderResult }: StudioShellProps) {
   const t = useT();
   const search = useSearchParams();
   const projectId = search.get('projectId') ?? undefined;
+  const demoKey = search.get('demo');
+  const defaults = demoKey && DEMO_PREFILLS[demoKey] ? DEMO_PREFILLS[demoKey] : undefined;
 
   const [brandVoiceId, setBrandVoiceId] = useState<string>(search.get('brandVoiceId') ?? '');
   const [data,    setData]    = useState<ScriptContent | CaptionContent | ComboContent | null>(null);
@@ -126,6 +143,7 @@ export function StudioShell({ mode, title, description, brandVoices = [], render
         <div>
           <StudioForm
             mode={mode}
+            defaults={defaults}
             loading={loading}
             error={error}
             onSubmit={(d) => {

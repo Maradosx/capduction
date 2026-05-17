@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Check, ArrowLeft } from 'lucide-react';
+import { Check, ArrowLeft, ShieldCheck, RefreshCw, Lock, CreditCard } from 'lucide-react';
 import { useT } from '@/lib/i18n';
 
 interface Props {
@@ -115,16 +115,34 @@ export function PricingClient({ isLoggedIn, currentPlan }: Props) {
         })}
       </section>
 
-      <section className="max-w-[800px] mx-auto mt-20 glass-strong rounded-[20px] p-8 text-center">
-        <h2 className="font-display font-bold text-[22px] text-ink mb-2 lang-th:font-thai">{t('pr.faq.h')}</h2>
-        <p className="text-ink-3 text-[14px] mb-4 lang-th:font-thai">{t('pr.faq.p')}</p>
-        <Link
-          href="mailto:hello@capduction.com"
-          data-cursor="go"
-          className="hover-target inline-flex items-center gap-2 text-iridescent font-semibold text-[14px] no-underline hover:underline"
-        >
-          hello@capduction.com →
-        </Link>
+      {/* Risk reversal row — answers "is this safe to try?" before scroll */}
+      <section className="max-w-[1000px] mx-auto mt-12 grid grid-cols-2 md:grid-cols-4 gap-3">
+        <RiskBadge icon={CreditCard}  label={t('pr.risk.nocard')} />
+        <RiskBadge icon={RefreshCw}   label={t('pr.risk.cancel')} />
+        <RiskBadge icon={ShieldCheck} label={t('pr.risk.pdpa')}  />
+        <RiskBadge icon={Lock}        label={t('pr.risk.stripe')} />
+      </section>
+
+      {/* Inline FAQ — keep purchase intent on this page */}
+      <section className="max-w-[760px] mx-auto mt-20">
+        <h2 className="font-display font-bold text-[26px] md:text-[30px] text-ink mb-6 text-center lang-th:font-thai">
+          {t('pr.faq.h')}
+        </h2>
+        <div className="flex flex-col gap-2.5">
+          <PriceFaq q={t('pr.faq.q1')}>{t('pr.faq.a1')}</PriceFaq>
+          <PriceFaq q={t('pr.faq.q2')}>{t('pr.faq.a2')}</PriceFaq>
+          <PriceFaq q={t('pr.faq.q3')}>{t('pr.faq.a3')}</PriceFaq>
+          <PriceFaq q={t('pr.faq.q4')}>{t('pr.faq.a4')}</PriceFaq>
+          <PriceFaq q={t('pr.faq.q5')}>{t('pr.faq.a5')}</PriceFaq>
+          <PriceFaq q={t('pr.faq.q6')}>{t('pr.faq.a6')}</PriceFaq>
+        </div>
+
+        <div className="mt-6 text-center text-[13px] text-ink-3 lang-th:font-thai">
+          {t('pr.faq.more')}{' '}
+          <Link href="mailto:hello@capduction.com" data-cursor="go" className="text-iridescent font-semibold no-underline hover:underline">
+            hello@capduction.com
+          </Link>
+        </div>
       </section>
 
       <div className="text-center mt-12">
@@ -138,5 +156,28 @@ export function PricingClient({ isLoggedIn, currentPlan }: Props) {
         </Link>
       </div>
     </main>
+  );
+}
+
+function RiskBadge({ icon: Icon, label }: { icon: React.ElementType; label: string }) {
+  return (
+    <div className="glass rounded-[12px] px-4 py-3 flex items-center gap-2.5">
+      <Icon size={16} className="text-iridescent flex-shrink-0" />
+      <span className="text-[12px] text-ink font-semibold leading-tight lang-th:font-thai">{label}</span>
+    </div>
+  );
+}
+
+function PriceFaq({ q, children }: { q: string; children: React.ReactNode }) {
+  return (
+    <details className="group glass rounded-[12px] overflow-hidden">
+      <summary className="hover-target cursor-pointer px-5 py-3.5 text-[14px] font-semibold text-ink flex items-center justify-between gap-3 list-none lang-th:font-thai">
+        {q}
+        <span className="text-ink-3 text-[20px] leading-none group-open:rotate-45 transition-transform">+</span>
+      </summary>
+      <div className="px-5 pb-4 text-[13px] text-ink-3 leading-[1.65] lang-th:font-thai">
+        {children}
+      </div>
+    </details>
   );
 }

@@ -93,16 +93,10 @@ export function LandingHero() {
         </button>
       </form>
 
-      <div className="mt-6 inline-flex items-center gap-2.5 font-mono text-[11px] text-ink-3 tracking-[0.1em] uppercase">
-        <div className="flex">
-          <Avatar gradient="linear-gradient(135deg, var(--pink), var(--violet))" />
-          <Avatar gradient="linear-gradient(135deg, var(--peach), var(--rose))" />
-          <Avatar gradient="linear-gradient(135deg, var(--mint), var(--teal))" />
-        </div>
-        <span>
-          <strong className="text-ink font-bold">10</strong>{' '}
-          <span className="lang-th:font-thai">{t('hero.trust')}</span>
-        </span>
+      {/* Honest trust line — no fabricated user counts or avatar stacks.
+          Three concrete promises that reduce purchase risk for new users. */}
+      <div className="mt-6 inline-flex flex-wrap items-center justify-center gap-x-4 gap-y-2 font-mono text-[11px] text-ink-3 tracking-[0.1em] uppercase">
+        <span className="lang-th:font-thai">{t('hero.trust')}</span>
       </div>
 
       {/* Hint to scroll */}
@@ -120,11 +114,3 @@ export function LandingHero() {
   );
 }
 
-function Avatar({ gradient }: { gradient: string }) {
-  return (
-    <div
-      className="w-5 h-5 rounded-full border-2 -ml-1.5 first:ml-0"
-      style={{ background: gradient, borderColor: 'var(--bg)' }}
-    />
-  );
-}

@@ -24,6 +24,9 @@ export function DashboardClient({ displayName, credits, plan, total, recent, isD
   const t = useT();
   const lowOnCredits = credits > 0 && credits <= 3;
   const outOfCredits = credits === 0;
+  // First-run = no generations yet AND not in demo mode (demo accounts get
+  // their own banner). Triggers the opinionated onboarding card.
+  const isFirstRun = total === 0 && !isDemoMode;
 
   return (
     <div className="max-w-[1200px] mx-auto flex flex-col gap-8">
@@ -32,7 +35,9 @@ export function DashboardClient({ displayName, credits, plan, total, recent, isD
         <h1 className="font-display font-bold text-[clamp(28px,3.5vw,42px)] tracking-[-0.025em] text-ink lang-th:font-thai">
           {t('dh.welcome')}, <span className="text-iridescent">{displayName}</span>
         </h1>
-        <p className="text-ink-3 text-[15px] lang-th:font-thai">{t('dh.subtitle')}</p>
+        <p className="text-ink-3 text-[15px] lang-th:font-thai">
+          {isFirstRun ? t('dh.subtitle.first') : t('dh.subtitle')}
+        </p>
       </div>
 
       {/* ─── Banners ─────────────────────────────────────── */}
@@ -52,10 +57,54 @@ export function DashboardClient({ displayName, credits, plan, total, recent, isD
         </Banner>
       )}
 
+      {/* ─── First-run onboarding ─────────────────────── */}
+      {isFirstRun && (
+        <section className="glass-strong rounded-[22px] p-7 md:p-9 relative overflow-hidden">
+          <div
+            aria-hidden
+            className="absolute -top-20 -right-20 w-64 h-64 rounded-full opacity-50 blur-3xl pointer-events-none"
+            style={{
+              background: 'radial-gradient(circle, var(--peach), transparent 70%)',
+            }}
+          />
+          <div className="relative">
+            <div className="font-mono text-[10px] tracking-[0.22em] text-iridescent uppercase mb-3 font-semibold">
+              ✦ {t('dh.first.eye')}
+            </div>
+            <h2 className="font-display font-bold text-[24px] md:text-[30px] text-ink leading-[1.15] mb-3 lang-th:font-thai max-w-[640px]">
+              {t('dh.first.h')}
+            </h2>
+            <p className="text-[14px] text-ink-3 leading-relaxed mb-6 lang-th:font-thai max-w-[560px]">
+              {t('dh.first.p')}
+            </p>
+            <div className="flex flex-wrap items-center gap-3">
+              <Link
+                href="/dashboard/workspace/script?demo=lipstick"
+                data-cursor="start"
+                className="hover-target btn-grad inline-flex items-center gap-2 px-6 py-3 rounded-[12px] text-white font-semibold text-[14px] no-underline lang-th:font-thai"
+              >
+                <Sparkles size={15} />
+                {t('dh.first.cta')}
+              </Link>
+              <Link
+                href="/dashboard/workspace/script"
+                data-cursor="go"
+                className="hover-target inline-flex items-center gap-2 px-5 py-3 rounded-[12px] bg-white/55 border border-white/70 text-ink font-semibold text-[13px] no-underline hover:bg-white/80 lang-th:font-thai"
+              >
+                {t('dh.first.alt')}
+              </Link>
+            </div>
+            <p className="mt-5 font-mono text-[10px] tracking-[0.14em] uppercase text-ink-3">
+              {t('dh.first.note')}
+            </p>
+          </div>
+        </section>
+      )}
+
       {/* ─── Quick start: 3 studios ─────────────────────── */}
       <section>
         <h2 className="font-mono text-[10px] tracking-[0.22em] text-ink-3 uppercase mb-4 font-semibold lang-th:font-thai lang-th:normal-case lang-th:tracking-normal">
-          {t('dh.section')}
+          {isFirstRun ? t('dh.first.studios') : t('dh.section')}
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <StudioQuickCard

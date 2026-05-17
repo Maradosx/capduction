@@ -12,19 +12,37 @@ export const DICT = {
   'nav.pricing':  { th: 'ราคา',        en: 'Pricing' },
   'nav.showcase': { th: 'ตัวอย่าง',    en: 'Showcase' },
   'nav.faq':      { th: 'คำถามพบบ่อย', en: 'FAQ' },
-  'nav.cta':      { th: 'เริ่มเลย',    en: 'Get started' },
+  'nav.cta':      { th: 'เริ่มฟรี 10 ครั้ง',    en: 'Start free · 10 credits' },
   'nav.login':    { th: 'เข้าสู่ระบบ', en: 'Log in' },
 
   // ─── HERO ──────────────────────────────────────────────────
-  'hero.h.serif':    { th: 'Smart Scripts,',          en: 'Smart Scripts,' },
-  'hero.h.iri':      { th: 'Built By Creators',       en: 'Built By Creators' },
+  // Specific value prop: time + audience-fit promise.
+  // Avoid generic "AI for creators" templated copy.
+  'hero.h.serif':    { th: 'สคริปต์ TikTok',          en: 'TikTok scripts' },
+  'hero.h.iri':      { th: 'ที่คนไทยพูดจริง',          en: 'that sound Thai.' },
   'hero.sub': {
-    th: 'สตูดิโอ AI สำหรับครีเอเตอร์วิดีโอสั้นไทย — ปั้น<strong>สคริปต์การพูด</strong>และ<strong>แคปชั่นหน้าจอ</strong>ที่เข้าใจสไตล์ไทย ครบในไฟล์เดียว',
-    en: 'An AI studio for Thai short-form creators — craft <strong>spoken scripts</strong> and <strong>on-screen captions</strong> that understand Thai style. All in one file.',
+    th: 'หยุดนั่งคิด hook 3 วิ ทั้งคืน — Capduction สร้าง<strong>สคริปต์</strong>และ<strong>แคปชั่น</strong>ที่ตรงสไตล์ครีเอเตอร์ไทย เสร็จใน 15 วินาที',
+    en: 'Stop staring at TikTok at 2am writing hooks. Capduction crafts <strong>spoken scripts</strong> and <strong>captions</strong> in the voice of Thai creators — in 15 seconds.',
   },
-  'hero.cta':        { th: 'เริ่มฟรี →',              en: 'Start free →' },
-  'hero.trust':      { th: 'ครั้งฟรี · ไม่ต้องใช้บัตรเครดิต', en: 'free generations · no credit card required' },
+  'hero.cta':        { th: 'เจนสคริปต์แรกเลย →',      en: 'Generate your first script →' },
+  'hero.trust':      { th: '10 ครั้งฟรี · ไม่ต้องใช้บัตรเครดิต · ยกเลิกได้ตลอด', en: '10 free generations · no credit card · cancel anytime' },
   'hero.email.placeholder': { th: 'อีเมลของคุณ',      en: 'your@email.com' },
+
+  // ─── SHOWCASE SECTION (on landing — proof-of-output) ──────
+  'sh.eye':         { th: 'SEE THE OUTPUT FIRST',           en: 'SEE THE OUTPUT FIRST' },
+  'sh.h.left':      { th: 'นี่คือสิ่งที่ Capduction',         en: 'This is what Capduction' },
+  'sh.h.iri':       { th: 'สร้างให้คุณ',                      en: 'creates for you' },
+  'sh.sub': {
+    th: 'ตัวอย่างผลลัพธ์จริงจาก prompt เดียว · ใช้เวลา ~15 วินาที · ไม่ต้องสมัครเพื่อดู',
+    en: 'Real outputs from one prompt · about 15 seconds · no signup needed to see this.',
+  },
+  'sh.tab.script':  { th: 'Script',                         en: 'Script' },
+  'sh.tab.caption': { th: 'Caption',                        en: 'Caption' },
+  'sh.tab.combo':   { th: 'Combo',                          en: 'Combo' },
+  'sh.footnote': {
+    th: '↑ ตัวอย่างจริงจากระบบ · ผลลัพธ์จริงของคุณอาจต่างไปตามแบรนด์และโปรโมชั่น',
+    en: '↑ Actual output samples · your real results vary by brand and promo details.',
+  },
 
   // ─── DASHBOARD PREVIEW (on landing) ────────────────────────
   'dash.preview.eye':       { th: '— LIVE PREVIEW · WORKSPACE',          en: '— LIVE PREVIEW · WORKSPACE' },
@@ -47,6 +65,7 @@ export const DICT = {
     en: 'An assistant who works 24 × 7 for your content',
   },
   'dash.create':            { th: 'สร้าง',                                en: 'Create' },
+  'dash.preview.cta':       { th: 'ดูตัวจริง',                              en: 'See it live' },
 
   // ─── STUDIOS section ───────────────────────────────────────
   'st.eye':       { th: 'THREE STUDIOS · ONE WORKFLOW',          en: 'THREE STUDIOS · ONE WORKFLOW' },
@@ -83,7 +102,7 @@ export const DICT = {
     th: 'เริ่มต้นใช้ Capduction ฟรี 10 ครั้ง · ไม่ต้องใช้บัตรเครดิต · ยกเลิกได้ทุกเมื่อ',
     en: 'Try Capduction free for 10 generations · no credit card · cancel anytime.',
   },
-  'bcta.btn': { th: 'เริ่มเลย →', en: 'Get started →' },
+  'bcta.btn': { th: 'เริ่มสร้างฟรี →', en: 'Start creating free →' },
 
   // ─── FOOTER ────────────────────────────────────────────────
   'ft.tag': {
@@ -147,7 +166,7 @@ export const DICT = {
 
   // ─── SIDEBAR ───────────────────────────────────────────────
   'side.first_project':   { th: '+ เริ่มโปรเจกต์แรก', en: '+ Start your first project' },
-  'side.plan_free':       { th: 'แผน Free · ฟรี 10 ครั้ง/เดือน', en: 'Free plan · 10 free credits/mo' },
+  'side.plan_free':       { th: 'แผน Free · 10 credits ให้ลอง', en: 'Free plan · 10 credits to try' },
   'side.plan_paid':       { th: 'แผน {plan}', en: '{plan} plan' },
   'side.upgrade':         { th: '↑ Upgrade to Studio', en: '↑ Upgrade to Studio' },
   'side.credits':         { th: 'Credits', en: 'Credits' },
@@ -157,6 +176,18 @@ export const DICT = {
   'dh.welcome':           { th: 'ยินดีต้อนรับกลับ', en: 'Welcome back' },
   'dh.subtitle':          { th: 'พร้อมสร้างคอนเทนต์วันนี้แล้วใช่ไหม? เลือกสตูดิโอเพื่อเริ่ม',
                             en: 'Ready to create today? Pick a studio to begin.' },
+  'dh.subtitle.first':    { th: 'เริ่มต้นด้วยตัวอย่าง · เห็นผลลัพธ์ใน 15 วินาที',
+                            en: 'Start with a sample · see your first result in 15 seconds.' },
+  'dh.first.eye':         { th: 'GETTING STARTED', en: 'GETTING STARTED' },
+  'dh.first.h':           { th: 'ลองครั้งแรกด้วยตัวอย่างพร้อมใช้ — ดูว่า Capduction ทำได้ขนาดไหน',
+                            en: 'Try your first generation with a prefilled sample — see what Capduction can do.' },
+  'dh.first.p':           { th: 'ฟอร์มถูกเติมข้อมูลครบแล้ว (ลิปสติกแดงแมตต์ · TikTok · 30 วินาที) แค่กด Generate ใน 15 วินาทีจะเห็นสคริปต์พร้อมใช้ครั้งแรก',
+                            en: 'The form is filled in for you (matte red lipstick · TikTok · 30s). Just hit Generate — your first complete script appears in 15 seconds.' },
+  'dh.first.cta':         { th: 'เจนตัวอย่างแรกของฉัน', en: 'Generate my first sample' },
+  'dh.first.alt':         { th: 'หรือเริ่มจากสินค้าของคุณเอง', en: 'Or start from your own product' },
+  'dh.first.note':        { th: 'ใช้ 1 เครดิต · เหลือ 9 หลังจากนี้',
+                            en: 'Uses 1 credit · 9 remaining after this' },
+  'dh.first.studios':     { th: '— หรือเลือกสตูดิโอเอง', en: '— Or pick a studio yourself' },
   'dh.demo':              { th: 'Demo mode · ยังไม่ได้ตั้ง Supabase — ทุกอย่างทำงานในโหมดทดลอง ข้อมูลจะไม่ถูกบันทึก',
                             en: 'Demo mode · Supabase not configured — everything runs in test mode, nothing is saved.' },
   'dh.credits.out':       { th: 'Credits หมดแล้ว · อัปเกรดเพื่อสร้างคอนเทนต์ต่อ ข้อมูลของคุณยังปลอดภัย',
@@ -225,9 +256,34 @@ export const DICT = {
                             en: '10 free credits to start · upgrade when ready · cancel anytime.' },
   'pr.recommended':       { th: '★ RECOMMENDED', en: '★ RECOMMENDED' },
   'pr.current':           { th: '✓ แผนปัจจุบัน', en: '✓ Current plan' },
-  'pr.faq.h':             { th: 'มีคำถาม?', en: 'Got questions?' },
+  'pr.faq.h':             { th: 'คำถามที่พบบ่อย', en: 'Frequently asked' },
   'pr.faq.p':             { th: 'ติดต่อทีม support — ตอบทุกช่องทาง email · LINE · TikTok DM',
                             en: 'Reach support — we reply on email · LINE · TikTok DM.' },
+  'pr.faq.more':          { th: 'ยังไม่เจอคำตอบ? ส่งอีเมลมาได้เลย', en: 'Still have questions? Drop us an email' },
+  'pr.faq.q1':            { th: 'เครดิต 1 ครั้งคืออะไร?', en: 'What counts as 1 credit?' },
+  'pr.faq.a1':            { th: '1 credit = 1 generation (1 script, 1 caption pack, หรือ 1 combo). เลือก 3 variants = ใช้ 3 credits',
+                            en: '1 credit = 1 generation (one script, one caption pack, or one combo). Picking 3 variants uses 3 credits.' },
+  'pr.faq.q2':            { th: 'เครดิต roll over ไหม?', en: 'Do credits roll over each month?' },
+  'pr.faq.a2':            { th: 'ไม่ — เครดิต reset ทุกรอบบิล (ไม่สะสม). ทำให้คุณคาดเดาต้นทุนได้ และเราคาดเดา cost ได้',
+                            en: 'No — credits reset each billing cycle (no rollover). Keeps both your spend and our cost predictable.' },
+  'pr.faq.q3':            { th: 'ยกเลิกได้เมื่อไหร่?', en: 'When can I cancel?' },
+  'pr.faq.a3':            { th: 'ตลอด · ผ่าน Settings → Billing · ไม่มีค่ายกเลิก · ใช้ต่อได้จนสิ้นรอบบิลปัจจุบัน',
+                            en: 'Anytime via Settings → Billing. No cancellation fee. You keep access until the current cycle ends.' },
+  'pr.faq.q4':            { th: 'จ่ายด้วย PromptPay / โอนได้ไหม?', en: 'Can I pay with PromptPay / bank transfer?' },
+  'pr.faq.a4':            { th: 'ได้ — Stripe Checkout รองรับบัตรเครดิต/เดบิต และ PromptPay สำหรับลูกค้าไทย',
+                            en: 'Yes — Stripe Checkout supports card and PromptPay for Thai customers.' },
+  'pr.faq.q5':            { th: 'คอนเทนต์ที่สร้างเป็นของใคร?', en: 'Who owns the generated content?' },
+  'pr.faq.a5':            { th: 'ของคุณ 100% — ใช้, แก้, ขายต่อเชิงพาณิชย์ได้ทั้งหมด. เราไม่ถือลิขสิทธิ์ และไม่นำไปเทรน AI',
+                            en: 'You do — 100%. Use, modify, and sell commercially. We claim no rights and never train on your content.' },
+  'pr.faq.q6':            { th: 'ใช้ครบเครดิตแล้วจะเป็นยังไง?', en: 'What happens when I run out of credits?' },
+  'pr.faq.a6':            { th: 'แค่กดอัปเกรดหรือซื้อเครดิตเพิ่มเดือนถัดไป · คอนเทนต์เก่ายังอยู่ครบใน History',
+                            en: 'Upgrade your plan or wait for the next cycle — your existing history is preserved either way.' },
+
+  // Risk badges below the pricing tiers
+  'pr.risk.nocard':       { th: 'ไม่ต้องใช้บัตรเริ่ม', en: 'No card to start' },
+  'pr.risk.cancel':       { th: 'ยกเลิกได้ตลอด', en: 'Cancel anytime' },
+  'pr.risk.pdpa':         { th: 'PDPA Compliant', en: 'PDPA compliant' },
+  'pr.risk.stripe':       { th: 'Stripe Secure', en: 'Stripe-secure payment' },
   'pr.back.dash':         { th: 'กลับไป Dashboard', en: 'Back to Dashboard' },
   'pr.back.home':         { th: 'กลับหน้าหลัก', en: 'Back to home' },
   'pr.free.desc':         { th: 'ทดลองทุก studio ก่อนตัดสินใจ — ไม่ต้องใส่บัตรเครดิต',
@@ -280,6 +336,7 @@ export const DICT = {
                             en: '฿299 · free shipping · 20% off first 50 buyers' },
   'wf.generating':        { th: 'กำลังสร้าง...', en: 'Generating...' },
   'wf.generate':          { th: 'สร้างเลย', en: 'Generate' },
+  'wf.cost':              { th: 'ใช้ {n} เครดิต', en: 'uses {n} credit(s)' },
 
   // ─── STUDIO SHELL (errors / project context) ───────────────
   'wsh.err.credit':       { th: 'เครดิตหมดแล้ว — กรุณาอัปเกรดแผน', en: "You're out of credits — please upgrade your plan." },
