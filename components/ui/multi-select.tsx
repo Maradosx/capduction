@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Check, Plus, X } from 'lucide-react';
+import { Check, Plus, X, ChevronDown } from 'lucide-react';
 
 interface MultiSelectProps {
   /** Preset options shown as togglable chips */
@@ -16,6 +16,8 @@ interface MultiSelectProps {
   allowCustom?: boolean;
   /** Placeholder for the custom-value input */
   customPlaceholder?: string;
+  /** If set, only show this many presets initially with a "+N more" expand chip. Selected presets are always visible. */
+  initialVisibleCount?: number;
 }
 
 /**
@@ -31,9 +33,11 @@ export function MultiSelect({
   optionSublabels,
   allowCustom = true,
   customPlaceholder = 'พิมพ์เอง...',
+  initialVisibleCount,
 }: MultiSelectProps) {
-  const [adding, setAdding] = useState(false);
-  const [draft, setDraft]   = useState('');
+  const [adding, setAdding]     = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const [draft, setDraft]       = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { if (adding) inputRef.current?.focus(); }, [adding]);
@@ -41,6 +45,17 @@ export function MultiSelect({
   const presetSet = new Set(options);
   const presetSelected = value.filter((v) => presetSet.has(v));
   const custom = value.filter((v) => !presetSet.has(v));
+
+  // Collapse mode: show the first N + any selected presets, hide the rest
+  // behind a "+N more" chip until expanded.
+  const collapseActive =
+    typeof initialVisibleCount === 'number' &&
+    !expanded &&
+    options.length > initialVisibleCount;
+  const visibleOptions = collapseActive
+    ? options.filter((o, i) => i < initialVisibleCount! || presetSelected.includes(o))
+    : options;
+  const hiddenCount = options.length - visibleOptions.length;
 
   function toggle(opt: string) {
     if (value.includes(opt)) onChange(value.filter((v) => v !== opt));
@@ -58,7 +73,7 @@ export function MultiSelect({
 
   return (
     <div className="flex flex-wrap gap-1.5">
-      {options.map((opt) => {
+      {visibleOptions.map((opt) => {
         const active = presetSelected.includes(opt);
         return (
           <button
@@ -102,6 +117,19 @@ export function MultiSelect({
           </button>
         </span>
       ))}
+
+      {collapseActive && hiddenCount > 0 && (
+        <button
+          type="button"
+          data-cursor="open"
+          onClick={() => setExpanded(true)}
+          className="hover-target inline-flex items-center gap-1 px-3 py-1.5 rounded-full
+                     text-[12px] font-semibold bg-white/40 border border-white/70
+                     text-ink-3 hover:bg-white/70 hover:text-ink transition-all lang-th:font-thai"
+        >
+          +{hiddenCount} <ChevronDown size={11} />
+        </button>
+      )}
 
       {allowCustom && !adding && (
         <button

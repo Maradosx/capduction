@@ -38,7 +38,7 @@ export const DICT = {
   'dash.section':           { th: 'เลือก studio ตามจังหวะของคุณ',         en: 'Pick the studio for your moment' },
   'dash.h5':                { th: 'เริ่มจากศูนย์',                       en: 'From Scratch' },
   'dash.p':                 {
-    th: 'สร้างจาก scratch เพื่อปรับ creator experience ในแบบที่คุณต้องการ 100%',
+    th: 'เริ่มจากศูนย์ ปรับประสบการณ์ครีเอเตอร์ให้ตรงสไตล์คุณ 100%',
     en: 'Begin from the ground up for a fully personalized creator experience.',
   },
   'dash.card.title':        { th: 'Real-Time Script Generator',          en: 'Real-Time Script Generator' },
@@ -66,13 +66,13 @@ export const DICT = {
   'st.2.name': { th: 'Caption Studio', en: 'Caption Studio' },
   'st.2.tag':  { th: 'POSTS · HOOKS · TAGS', en: 'POSTS · HOOKS · TAGS' },
   'st.2.desc': {
-    th: 'แคปชั่น 5 variants, hooks ดึงสายตา, hashtags ตรงเทรนด์, CTA ปิดการขาย — ปรับโทนตามแพลตฟอร์มอัตโนมัติ',
+    th: 'แคปชั่น 5 แบบ, hook ดึงสายตา, hashtag ตรงเทรนด์, CTA ปิดการขาย — ปรับโทนตามแพลตฟอร์มอัตโนมัติ',
     en: '5 caption variants, scroll-stopping hooks, trend-matched hashtags, closing CTAs — tone auto-tunes per platform.',
   },
   'st.3.name': { th: 'Combo Mode',     en: 'Combo Mode' },
   'st.3.tag':  { th: 'ALIGNED · PACKAGED · READY', en: 'ALIGNED · PACKAGED · READY' },
   'st.3.desc': {
-    th: 'ปั้น script และ caption ใช้ hook เดียวกัน package พร้อมโพสต์ครบในไฟล์เดียว เหมาะกับ campaign ใหญ่',
+    th: 'สคริปต์และแคปชั่นบน hook เดียวกัน — ชุดพร้อมโพสต์ครบในไฟล์เดียว เหมาะกับแคมเปญใหญ่',
     en: 'Script and caption on the same hook — ready-to-post package in one file. Built for major campaigns.',
   },
 
@@ -91,7 +91,7 @@ export const DICT = {
     en: 'The AI studio between idea and upload — built in Bangkok, for Thai creators everywhere.',
   },
   'ft.copyright':  { th: '© 2026 CAPDUCTION · สร้างในกรุงเทพฯ', en: '© 2026 CAPDUCTION · Made in Bangkok' },
-  'ft.status':     { th: 'ระบบทำงานปกติ · 99.98%',              en: 'All systems operational · 99.98%' },
+  'ft.status':     { th: 'ระบบทำงานปกติ',                       en: 'All systems operational' },
 
   // ─── SIDEBAR / DASHBOARD ───────────────────────────────────
   'sidebar.analytics': { th: 'Analytics',  en: 'Analytics' },
@@ -150,9 +150,9 @@ export const DICT = {
   'dh.section':           { th: '— เลือกสตูดิโอ', en: '— Pick a studio' },
   'dh.script.desc':       { th: 'สคริปต์การพูดสำหรับวิดีโอ พร้อม timing + B-roll',
                             en: 'Spoken video scripts with timing markers + B-roll cues.' },
-  'dh.caption.desc':      { th: 'แคปชั่น 5 variants + hooks + hashtags ตรงเทรนด์',
+  'dh.caption.desc':      { th: 'แคปชั่น 5 แบบ + hook + hashtag ตรงเทรนด์',
                             en: '5 caption variants + hooks + on-trend hashtags.' },
-  'dh.combo.desc':        { th: 'Script + Caption ใน hook เดียวกัน — package ครบ',
+  'dh.combo.desc':        { th: 'สคริปต์ + แคปชั่น บน hook เดียวกัน — ชุดครบ',
                             en: 'Script + Caption on one hook — fully packaged.' },
   'dh.stat.total':        { th: 'ทั้งหมด', en: 'Total' },
   'dh.stat.credits':      { th: 'Credits คงเหลือ', en: 'Credits left' },
@@ -243,9 +243,9 @@ export const DICT = {
   // ─── STUDIO PAGES (script/caption/combo descriptions) ──────
   'ws.script.desc':       { th: 'สคริปต์การพูดสำหรับวิดีโอสั้น พร้อม timing markers ทุกวินาที B-roll cues และข้อความหน้าจอ',
                             en: 'Spoken video scripts with per-second timing markers, B-roll cues, and on-screen text.' },
-  'ws.caption.desc':      { th: 'แคปชั่น 5 variants พร้อมใช้ + hooks + hashtags ตรงเทรนด์ + CTAs ปิดการขาย',
+  'ws.caption.desc':      { th: 'แคปชั่น 5 แบบพร้อมใช้ + hook + hashtag ตรงเทรนด์ + CTA ปิดการขาย',
                             en: 'Ready-to-post caption variants + hooks + trend-matched hashtags + closing CTAs.' },
-  'ws.combo.desc':        { th: 'Script + Caption บน hook เดียวกัน · package พร้อมโพสต์ครบในไฟล์เดียว',
+  'ws.combo.desc':        { th: 'สคริปต์ + แคปชั่น บน hook เดียวกัน · ชุดพร้อมโพสต์ครบในไฟล์เดียว',
                             en: 'Script + Caption on one hook · ready-to-post package in one file.' },
 
   // ─── STUDIO FORM ───────────────────────────────────────────
@@ -257,6 +257,7 @@ export const DICT = {
   'wf.platform':          { th: 'แพลตฟอร์ม', en: 'Platform' },
   'wf.tone':              { th: 'โทน', en: 'Tone' },
   'wf.duration':          { th: 'ความยาว', en: 'Duration' },
+  'wf.variants':          { th: 'จำนวนแบบที่ต้องการ', en: 'How many variants?' },
   'wf.details':           { th: 'รายละเอียดเพิ่มเติม / โปรโมชั่น (ทางเลือก)',
                             en: 'Additional details / promo (optional)' },
   'wf.details.ph':        { th: 'ราคา ฿299 · ส่งฟรี · ลด 20% เฉพาะ 50 คนแรก',

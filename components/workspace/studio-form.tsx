@@ -96,7 +96,8 @@ export function StudioForm({ mode, defaults, loading, error, onSubmit }: StudioF
           options={CATEGORY_PRESETS}
           value={data.categories}
           onChange={(v) => setData({ ...data, categories: v })}
-          customPlaceholder="หมวดอื่นๆ..."
+          customPlaceholder={lang === 'th' ? 'หมวดอื่น...' : 'Other category...'}
+          initialVisibleCount={6}
         />
       </Field>
 
@@ -105,7 +106,8 @@ export function StudioForm({ mode, defaults, loading, error, onSubmit }: StudioF
           options={TARGET_PRESETS}
           value={data.targetCustomers}
           onChange={(v) => setData({ ...data, targetCustomers: v })}
-          customPlaceholder="กลุ่มเป้าหมายอื่นๆ..."
+          customPlaceholder={lang === 'th' ? 'กลุ่มอื่น...' : 'Other audience...'}
+          initialVisibleCount={6}
         />
       </Field>
 
@@ -136,16 +138,18 @@ export function StudioForm({ mode, defaults, loading, error, onSubmit }: StudioF
             value={[data.duration]}
             onChange={(v) => setData({ ...data, duration: v[v.length - 1] ?? '30s' })}
             optionSublabels={DURATION_PRESET_LABELS[lang]}
-            customPlaceholder="เช่น 45s, 2 min..."
+            customPlaceholder={lang === 'th' ? 'เช่น 45 วินาที' : 'e.g. 45s'}
             allowCustom
           />
           <p className="text-[10px] text-ink-3 mt-1.5 lang-th:font-thai">
-            เลือกได้ทีละค่าเดียว · กด &quot;อื่นๆ&quot; พิมพ์เป็นวินาทีเองได้
+            {lang === 'th'
+              ? 'เลือกได้ทีละค่า · กด "อื่นๆ" เพื่อพิมพ์เอง'
+              : 'Pick one · tap "อื่นๆ" to enter a custom length'}
           </p>
         </Field>
       )}
 
-      <Field label="จำนวนตัวเลือกที่จะ generate">
+      <Field label={t('wf.variants')}>
         <div className="flex gap-2">
           {VARIANT_COUNTS.map((n) => (
             <button
@@ -153,12 +157,12 @@ export function StudioForm({ mode, defaults, loading, error, onSubmit }: StudioF
               type="button"
               data-cursor="switch"
               onClick={() => setData({ ...data, variants: n })}
-              className={`hover-target flex-1 py-2 rounded-[10px] font-semibold text-[13px] transition-all
+              className={`hover-target flex-1 py-2 rounded-[10px] font-semibold text-[13px] transition-all lang-th:font-thai
                           ${data.variants === n
                             ? 'btn-grad text-white shadow-[0_4px_12px_-2px_rgba(124,58,237,0.4)]'
                             : 'bg-white/55 border border-white/70 text-ink-3 hover:bg-white/80 hover:text-ink'}`}
             >
-              {n} variant{n > 1 ? 's' : ''}
+              {lang === 'th' ? `${n} แบบ` : `${n} variant${n > 1 ? 's' : ''}`}
             </button>
           ))}
         </div>
