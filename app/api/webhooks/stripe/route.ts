@@ -62,13 +62,19 @@ export async function POST(req: Request) {
           priceId   = sub.items.data[0]?.price.id ?? null;
         }
 
-        await updateBillingStatus(userId, {
+        // updateBillingStatus returns {success, error} — log loudly if it
+        // fails so silent DB rejections (CHECK constraints, RLS, bad keys)
+        // surface in Vercel logs instead of being lost to the outer catch.
+        const billingRes = await updateBillingStatus(userId, {
           plan,
           subscription_status: 'active',
           billing_customer_id: customerId,
           stripe_price_id:     priceId,
           current_period_end:  periodEnd,
         }, event.id);
+        if (!billingRes.success) {
+          console.error(`[stripe-webhook] DB WRITE FAILED for user=${userId} plan=${plan}: ${billingRes.error}`);
+        }
 
         // First-time activation: refresh credits to plan allocation
         await refreshCreditsForPlan(userId, plan);
