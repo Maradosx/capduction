@@ -81,6 +81,28 @@ export async function updateBillingStatus(
 }
 
 /**
+ * Idempotency check for the WHOLE webhook event — call this at the very top of
+ * the handler, before any side effects (credit grants, plan changes).
+ *
+ * The previous design only guarded `updateBillingStatus`, but
+ * `refreshCreditsForPlan` ran separately and unguarded — so a duplicate
+ * `invoice.paid` retry (Stripe retries on any non-2xx or timeout) would
+ * re-grant a full month of credits mid-cycle. Checking here covers every
+ * side effect for the event.
+ *
+ * Returns true if we've already recorded this Stripe event id.
+ */
+export async function hasProcessedStripeEvent(stripeEventId: string): Promise<boolean> {
+  const supabase = createAdminClient();
+  const { data } = await supabase
+    .from('billing_events')
+    .select('id')
+    .eq('stripe_event_id', stripeEventId)
+    .maybeSingle();
+  return Boolean(data);
+}
+
+/**
  * Find a user profile by their Stripe customer ID.
  * Used in webhook handlers where we only have the Stripe customer ID.
  */

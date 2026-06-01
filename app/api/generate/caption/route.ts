@@ -3,8 +3,8 @@ import { z } from 'zod';
 import { buildCaptionPrompt } from '@/lib/prompts/caption';
 import { generateCaption } from '@/lib/ai';
 import {
-  parseBody, authenticate, checkCredits, applyRateLimit,
-  saveGenerationAndDecrement, isAdversarial, resolveBrandVoiceContext,
+  parseBody, authenticate, reserveCredits, refundCredits, applyRateLimit,
+  saveGeneration, isAdversarial, resolveBrandVoiceContext,
 } from '@/lib/api-handler';
 import { reportError } from '@/lib/error';
 import { PLATFORMS, type CaptionRequest } from '@/types';
@@ -40,31 +40,39 @@ export async function POST(req: Request) {
 
     const variantCount = Math.max(1, Math.min(3, body.variants ?? 1));
 
-    const creditsErr = await checkCredits(auth.ctx, variantCount);
-    if (creditsErr) return creditsErr;
-
+    // Rate-limit BEFORE charging so throttled requests never spend credits.
     const rlErr = await applyRateLimit(auth.ctx);
     if (rlErr) return rlErr;
 
-    const bvContext = await resolveBrandVoiceContext(body.brandVoiceId);
+    // Atomic reserve up front closes the concurrency race (no free AI runs).
+    const creditsErr = await reserveCredits(auth.ctx, variantCount);
+    if (creditsErr) return creditsErr;
 
-    // Fan-out for variants > 1 — each call gets a distinct angle
-    // (EMOTIONAL / PROBLEM-SOLUTION / SOCIAL-PROOF) so the tabs show
-    // genuinely different captions, not 3 copies of the same vibe.
-    const captions = await Promise.all(
-      Array.from({ length: variantCount }, (_, i) => {
-        const prompt = buildCaptionPrompt(
-          body as CaptionRequest,
-          bvContext,
-          variantCount > 1 ? i : null,
-        );
-        return generateCaption(prompt, auth.ctx.plan);
-      })
-    );
+    let payload: unknown;
+    try {
+      const bvContext = await resolveBrandVoiceContext(body.brandVoiceId);
 
-    const payload = variantCount === 1 ? captions[0] : { variants: captions };
+      // Fan-out for variants > 1 — each call gets a distinct angle
+      // (EMOTIONAL / PROBLEM-SOLUTION / SOCIAL-PROOF) so the tabs show
+      // genuinely different captions, not 3 copies of the same vibe.
+      const captions = await Promise.all(
+        Array.from({ length: variantCount }, (_, i) => {
+          const prompt = buildCaptionPrompt(
+            body as CaptionRequest,
+            bvContext,
+            variantCount > 1 ? i : null,
+          );
+          return generateCaption(prompt, auth.ctx.plan);
+        })
+      );
 
-    await saveGenerationAndDecrement({
+      payload = variantCount === 1 ? captions[0] : { variants: captions };
+    } catch (genErr) {
+      await refundCredits(auth.ctx, variantCount);
+      throw genErr;
+    }
+
+    await saveGeneration({
       ctx:            auth.ctx,
       studio:         'caption',
       productName:    body.productName,

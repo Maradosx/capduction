@@ -124,6 +124,12 @@ export async function authenticate(req: Request): Promise<
   };
 }
 
+/**
+ * @deprecated Prefer `reserveCredits()`. This is a non-atomic pre-flight read:
+ * it reports "no credits" nicely but does NOT reserve anything, so two
+ * concurrent requests can both pass it. Kept only for callers that just need
+ * the friendly check + plan stash without charging.
+ */
 export async function checkCredits(
   ctx: AuthContext,
   required: number = 1,
@@ -160,20 +166,123 @@ export async function checkCredits(
       event_type: 'generation_rejected_no_credits',
       metadata: { required, available: profile.credits_remaining },
     });
-    return NextResponse.json(
-      {
-        success: false,
-        error: required > 1
-          ? `ต้องการ ${required} เครดิตแต่เหลือ ${profile.credits_remaining} — ลดจำนวน variants หรืออัปเกรดแพลน`
-          : 'เครดิตหมดแล้ว กรุณาอัปเกรดแพลน (No credits remaining)',
-        code: 'CREDITS_EXHAUSTED',
-        creditsRemaining: profile.credits_remaining,
-        required,
-      },
-      { status: 402 }
-    );
+    return creditsExhaustedResponse(required, profile.credits_remaining);
   }
   return null;
+}
+
+function creditsExhaustedResponse(required: number, remaining: number): NextResponse {
+  return NextResponse.json(
+    {
+      success: false,
+      error: required > 1
+        ? `ต้องการ ${required} เครดิตแต่เหลือ ${remaining} — ลดจำนวน variants หรืออัปเกรดแพลน`
+        : 'เครดิตหมดแล้ว กรุณาอัปเกรดแพลน (No credits remaining)',
+      code: 'CREDITS_EXHAUSTED',
+      creditsRemaining: Math.max(0, remaining),
+      required,
+    },
+    { status: 402 }
+  );
+}
+
+/**
+ * Atomically RESERVE `required` credits BEFORE the (costly) generation runs.
+ *
+ * This is the authoritative, race-safe credit gate. It calls the conditional
+ * `decrement_credit` RPC, which only subtracts when `credits_remaining >=
+ * required` and returns -1 otherwise. Because the decrement is a single atomic
+ * UPDATE, N concurrent requests from a user with C credits will have at most C
+ * of them succeed — closing the TOCTOU window where everyone passed a plain
+ * read-then-check and got free AI runs.
+ *
+ * Side effects:
+ *  - Stashes the user's plan on `ctx.plan` (for AI model tier selection).
+ *  - Auto-creates the profile row on first use (trigger race fallback).
+ *
+ * MUST be paired with `refundCredits()` on the failure path so users aren't
+ * charged for generations that error out.
+ *
+ * Returns a 402 NextResponse when the user can't afford the run, else null.
+ */
+export async function reserveCredits(
+  ctx: AuthContext,
+  required: number = 1,
+): Promise<NextResponse | null> {
+  if (ctx.isDemoMode || !ctx.userId) return null;
+
+  const amount = Math.max(1, required);
+  const supabase = createClient();
+
+  // Fetch plan for model tier + ensure the profile exists. We don't gate on
+  // this read (that would re-introduce the race) — the RPC below is the gate.
+  const { data: profile, error } = await supabase
+    .from('profiles')
+    .select('plan')
+    .eq('id', ctx.userId)
+    .single();
+
+  if (error || !profile) {
+    // First login before the create-profile trigger fired: seed 10 free credits.
+    await supabase.from('profiles').upsert({
+      id: ctx.userId,
+      email: ctx.userEmail!,
+      credits_remaining: 10,
+      plan: 'free',
+    });
+    ctx.plan = 'free';
+  } else {
+    ctx.plan = profile.plan ?? 'free';
+  }
+
+  // Atomic conditional reserve. `remaining` is the new balance, or -1 sentinel.
+  const { data: remaining, error: rpcErr } = await supabase
+    .rpc('decrement_credit', { p_user_id: ctx.userId, p_amount: amount });
+
+  if (rpcErr) {
+    // Fail-open (matches prior posture where the decrement result was ignored)
+    // so a transient RPC hiccup never blocks a paying user from generating.
+    console.error('[reserveCredits] decrement_credit rpc error:', rpcErr.message);
+    return null;
+  }
+
+  if (typeof remaining === 'number' && remaining < 0) {
+    await supabase.from('usage_events').insert({
+      user_id: ctx.userId,
+      event_type: 'generation_rejected_no_credits',
+      metadata: { required: amount },
+    });
+    return creditsExhaustedResponse(amount, 0);
+  }
+
+  return null;
+}
+
+/**
+ * Refund `amount` credits that `reserveCredits()` took, when the generation
+ * later failed. Uses the service-role admin client because the atomic
+ * `increment_credit` RPC is intentionally NOT granted to the `authenticated`
+ * role (otherwise any logged-in user could top up their own credits).
+ *
+ * Best-effort: a failed refund is logged but never throws, so it can't mask
+ * the original generation error. Requires migration 008 (increment_credit) to
+ * be applied; until then this logs and the credit stays spent.
+ */
+export async function refundCredits(ctx: AuthContext, amount: number = 1): Promise<void> {
+  if (ctx.isDemoMode || !ctx.userId) return;
+  try {
+    const { createAdminClient } = await import('@/lib/supabase/admin');
+    const supabase = createAdminClient();
+    const { error } = await supabase.rpc('increment_credit', {
+      p_user_id: ctx.userId,
+      p_amount: Math.max(1, amount),
+    });
+    if (error) {
+      console.error('[refundCredits] increment_credit failed (apply migration 008?):', error.message);
+    }
+  } catch (e: any) {
+    console.error('[refundCredits] unexpected:', e?.message ?? e);
+  }
 }
 
 export async function applyRateLimit(ctx: AuthContext): Promise<NextResponse | null> {
@@ -235,7 +344,12 @@ export async function resolveBrandVoiceContext(brandVoiceId?: string): Promise<s
   }
 }
 
-export async function saveGenerationAndDecrement(input: SaveGenerationInput): Promise<void> {
+/**
+ * Persist the generation row + success usage event. Does NOT touch credits —
+ * the new flow reserves credits up front via `reserveCredits()`, so charging
+ * here would double-bill. Use this in routes that call `reserveCredits()`.
+ */
+export async function saveGeneration(input: SaveGenerationInput): Promise<void> {
   if (input.ctx.isDemoMode || !input.ctx.userId) return;
 
   const supabase = createClient();
@@ -261,11 +375,6 @@ export async function saveGenerationAndDecrement(input: SaveGenerationInput): Pr
     console.error('[saveGeneration] failed:', genErr.message);
   }
 
-  // Atomic credit decrement via RPC — amount param added in migration 006
-  // so variants > 1 charges the right number of credits.
-  const amount = Math.max(1, input.credits ?? 1);
-  await supabase.rpc('decrement_credit', { p_user_id: input.ctx.userId, p_amount: amount });
-
   await supabase.from('usage_events').insert({
     user_id:    input.ctx.userId,
     event_type: 'generation_success',
@@ -277,4 +386,19 @@ export async function saveGenerationAndDecrement(input: SaveGenerationInput): Pr
       product_name:  input.productName,
     },
   });
+}
+
+/**
+ * @deprecated Legacy "charge after success" path. Decrements credits AFTER the
+ * generation already ran, which leaks free AI runs under concurrency (the
+ * decrement is atomic but the costly work already happened). Prefer the
+ * `reserveCredits()` → generate → `saveGeneration()` (+`refundCredits()` on
+ * error) flow. Retained for any out-of-tree callers.
+ */
+export async function saveGenerationAndDecrement(input: SaveGenerationInput): Promise<void> {
+  if (input.ctx.isDemoMode || !input.ctx.userId) return;
+  const supabase = createClient();
+  await saveGeneration(input);
+  const amount = Math.max(1, input.credits ?? 1);
+  await supabase.rpc('decrement_credit', { p_user_id: input.ctx.userId, p_amount: amount });
 }

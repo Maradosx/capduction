@@ -3,8 +3,8 @@ import { z } from 'zod';
 import { buildScriptPrompt } from '@/lib/prompts/script';
 import { generateScript } from '@/lib/ai';
 import {
-  parseBody, authenticate, checkCredits, applyRateLimit,
-  saveGenerationAndDecrement, isAdversarial, resolveBrandVoiceContext,
+  parseBody, authenticate, reserveCredits, refundCredits, applyRateLimit,
+  saveGeneration, isAdversarial, resolveBrandVoiceContext,
 } from '@/lib/api-handler';
 import { reportError } from '@/lib/error';
 import { PLATFORMS, type ScriptRequest } from '@/types';
@@ -42,33 +42,42 @@ export async function POST(req: Request) {
 
     const variantCount = Math.max(1, Math.min(3, body.variants ?? 1));
 
-    // Variants > 1 → N parallel OpenAI calls → cost N× → charge N credits.
-    const creditsErr = await checkCredits(auth.ctx, variantCount);
-    if (creditsErr) return creditsErr;
-
+    // Rate-limit BEFORE charging so throttled requests never spend credits.
     const rlErr = await applyRateLimit(auth.ctx);
     if (rlErr) return rlErr;
 
-    const bvContext = await resolveBrandVoiceContext(body.brandVoiceId);
+    // Variants > 1 → N parallel OpenAI calls → cost N× → reserve N credits.
+    // Atomic reserve up front closes the concurrency race (no free AI runs).
+    const creditsErr = await reserveCredits(auth.ctx, variantCount);
+    if (creditsErr) return creditsErr;
 
-    // Variants > 1: fan out in parallel so each script gets full model attention
-    // and a distinct opening angle (PROOF / PROBLEM / CURIOSITY).
-    const scripts = await Promise.all(
-      Array.from({ length: variantCount }, (_, i) => {
-        const prompt = buildScriptPrompt(
-          body as ScriptRequest,
-          bvContext,
-          variantCount > 1 ? i : null,
-        );
-        return generateScript(prompt, auth.ctx.plan);
-      })
-    );
+    let payload: unknown;
+    try {
+      const bvContext = await resolveBrandVoiceContext(body.brandVoiceId);
 
-    // Payload shape: keep single-script shape for variants=1 (backward compat),
-    // wrap as { variants: [...] } when fan-out occurred.
-    const payload = variantCount === 1 ? scripts[0] : { variants: scripts };
+      // Variants > 1: fan out in parallel so each script gets full model attention
+      // and a distinct opening angle (PROOF / PROBLEM / CURIOSITY).
+      const scripts = await Promise.all(
+        Array.from({ length: variantCount }, (_, i) => {
+          const prompt = buildScriptPrompt(
+            body as ScriptRequest,
+            bvContext,
+            variantCount > 1 ? i : null,
+          );
+          return generateScript(prompt, auth.ctx.plan);
+        })
+      );
 
-    await saveGenerationAndDecrement({
+      // Payload shape: keep single-script shape for variants=1 (backward compat),
+      // wrap as { variants: [...] } when fan-out occurred.
+      payload = variantCount === 1 ? scripts[0] : { variants: scripts };
+    } catch (genErr) {
+      // Generation failed after we reserved — give the credits back.
+      await refundCredits(auth.ctx, variantCount);
+      throw genErr;
+    }
+
+    await saveGeneration({
       ctx:            auth.ctx,
       studio:         'script',
       productName:    body.productName,

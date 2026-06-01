@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import Stripe from 'stripe';
 import { stripe, planFromPriceId } from '@/lib/stripe';
-import { updateBillingStatus, getProfileByCustomerId } from '@/lib/db/billing';
+import { updateBillingStatus, getProfileByCustomerId, hasProcessedStripeEvent } from '@/lib/db/billing';
 import { PLAN_CREDITS } from '@/types';
 
 export const dynamic = 'force-dynamic';
@@ -37,6 +37,20 @@ export async function POST(req: Request) {
   }
 
   console.log(`[stripe-webhook] ${event.type} (${event.id})`);
+
+  // Idempotency guard for the ENTIRE event (covers credit grants too, not just
+  // the billing-column write). Stripe retries deliveries; without this a
+  // duplicate invoice.paid would re-grant a full month of credits mid-cycle.
+  try {
+    if (await hasProcessedStripeEvent(event.id)) {
+      console.log(`[stripe-webhook] duplicate ${event.id} — already processed, skipping`);
+      return NextResponse.json({ received: true, duplicate: true });
+    }
+  } catch (e: any) {
+    // If the idempotency lookup itself fails, fall through and process — the
+    // per-write guard in updateBillingStatus is a second line of defence.
+    console.error('[stripe-webhook] idempotency check failed:', e?.message ?? e);
+  }
 
   try {
     switch (event.type) {
@@ -152,9 +166,11 @@ export async function POST(req: Request) {
         const profile = await getProfileByCustomerId(customerId);
         if (!profile) break;
 
-        const subscriptionId = typeof (invoice as any).subscription === 'string'
-          ? (invoice as any).subscription as string
-          : null;
+        // `invoice.subscription` is deprecated in newer Stripe API versions.
+        // Read it if present (pinned 2024-04-10 still has it), else fall back
+        // to the subscription id carried on the invoice line items — so a
+        // future API-version bump can't silently break monthly credit refills.
+        const subscriptionId = extractSubscriptionId(invoice);
 
         let periodEnd: string | null = null;
         let priceId:   string | null = null;
@@ -193,6 +209,25 @@ export async function POST(req: Request) {
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
+
+/**
+ * Resolve the subscription id from an invoice across Stripe API versions.
+ * Tries the (deprecated) top-level `invoice.subscription` first, then the
+ * `subscription_details` / `subscription` carried on each line item.
+ */
+function extractSubscriptionId(invoice: Stripe.Invoice): string | null {
+  const top = (invoice as any).subscription;
+  if (typeof top === 'string') return top;
+  if (top && typeof top === 'object' && typeof top.id === 'string') return top.id;
+
+  for (const line of invoice.lines?.data ?? []) {
+    const fromDetails = (line as any).subscription_details?.subscription;
+    if (typeof fromDetails === 'string') return fromDetails;
+    const fromLine = (line as any).subscription ?? (line as any).parent?.subscription_item_details?.subscription;
+    if (typeof fromLine === 'string') return fromLine;
+  }
+  return null;
+}
 
 async function refreshCreditsForPlan(userId: string, plan: 'creator' | 'studio' | 'agency'): Promise<void> {
   const { createAdminClient } = await import('@/lib/supabase/admin');
