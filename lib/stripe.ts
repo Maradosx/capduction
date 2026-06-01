@@ -37,6 +37,9 @@ export const PLAN_META: Record<PaidPlan, { name: string; credits: number; price:
 
 /** Map a Stripe Price ID back to a plan name. Returns null for unknown. */
 export function planFromPriceId(priceId: string): PaidPlan | null {
+  // Guard against an empty/missing priceId matching an unconfigured env var
+  // (PRICE_IDS.* default to ''), which would mis-assign the 'creator' plan.
+  if (!priceId) return null;
   if (priceId === PRICE_IDS.creator) return 'creator';
   if (priceId === PRICE_IDS.studio)  return 'studio';
   if (priceId === PRICE_IDS.agency)  return 'agency';
