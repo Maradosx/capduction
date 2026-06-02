@@ -5,7 +5,7 @@ import { Sparkles, Loader2 } from 'lucide-react';
 import {
   TONES, PLATFORMS, DURATIONS,
   TARGET_PRESETS, CATEGORY_PRESETS, VARIANT_COUNTS,
-  type Platform, type StudioMode,
+  type Platform, type StudioMode, type OutputLanguage,
 } from '@/types';
 import { useT, useI18n } from '@/lib/i18n';
 import { MultiSelect } from '@/components/ui/multi-select';
@@ -20,6 +20,8 @@ export interface StudioFormData {
   duration: string;
   details: string;
   variants: number;
+  /** Language the AI writes the output in (independent of UI language). */
+  outputLanguage: OutputLanguage;
 }
 
 interface StudioFormProps {
@@ -70,6 +72,9 @@ export function StudioForm({ mode, defaults, loading, error, onSubmit }: StudioF
     duration:        defaults?.duration        ?? '30s',
     details:         defaults?.details         ?? '',
     variants:        defaults?.variants        ?? 1,
+    // Default the OUTPUT language to the current UI language — Thai UI → Thai
+    // output, English UI → English output — but it's explicitly switchable below.
+    outputLanguage:  defaults?.outputLanguage  ?? lang,
   });
 
   const showDuration = mode === 'script' || mode === 'combo';
@@ -172,6 +177,33 @@ export function StudioForm({ mode, defaults, loading, error, onSubmit }: StudioF
           </p>
         </Field>
       )}
+
+      <Field label={t('wf.outlang')}>
+        <div className="flex gap-2">
+          {([
+            { v: 'th' as OutputLanguage, label: 'ไทย',    sub: 'Thai' },
+            { v: 'en' as OutputLanguage, label: 'English', sub: 'English' },
+          ]).map((opt) => (
+            <button
+              key={opt.v}
+              type="button"
+              data-cursor="switch"
+              onClick={() => setData({ ...data, outputLanguage: opt.v })}
+              className={`hover-target flex-1 py-2 rounded-[10px] font-semibold text-[13px] transition-all lang-th:font-thai
+                          ${data.outputLanguage === opt.v
+                            ? 'btn-grad text-white shadow-[0_4px_12px_-2px_rgba(124,58,237,0.4)]'
+                            : 'bg-white/55 border border-white/70 text-ink-3 hover:bg-white/80 hover:text-ink'}`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+        <p className="text-[10px] text-ink-3 mt-1.5 lang-th:font-thai">
+          {lang === 'th'
+            ? 'ภาษาที่ AI จะเขียนผลลัพธ์ออกมา (แยกจากภาษาหน้าเว็บ)'
+            : 'The language the AI writes the output in (separate from the site language)'}
+        </p>
+      </Field>
 
       <Field label={t('wf.variants')}>
         <div className="flex gap-2">

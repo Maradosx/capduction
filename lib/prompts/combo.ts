@@ -5,7 +5,7 @@
  * Returns { system, user } for OpenAI prompt-cache prefix matching.
  */
 
-import type { ComboRequest } from '@/types';
+import type { ComboRequest, OutputLanguage } from '@/types';
 import type { PromptMessages } from './script';
 
 const DURATION_BEATS_PRESET: Record<string, number> = {
@@ -28,8 +28,8 @@ function beatsFor(duration: string): number {
 const joinOr = (arr?: string[], fallback = 'Not specified') =>
   arr && arr.length > 0 ? arr.join(', ') : fallback;
 
-/** Static system prompt — identical for every combo call → cached. */
-const SYSTEM_PROMPT = `You are an elite Thai short-form video director AND caption strategist. Your job is to generate BOTH a spoken video script AND a post caption that share the SAME core hook — perfectly aligned for one cohesive content package.
+/** Static Thai system prompt — identical for every Thai combo call → cached. */
+const SYSTEM_PROMPT_TH = `You are an elite Thai short-form video director AND caption strategist. Your job is to generate BOTH a spoken video script AND a post caption that share the SAME core hook — perfectly aligned for one cohesive content package.
 
 ═══════════ CRITICAL RULES ═══════════
 1. ONE HOOK, TWO USES: the sharedHook is the emotional pull. Both script's first beat and caption opening must echo it.
@@ -76,13 +76,69 @@ Return STRICTLY this JSON (no markdown, no commentary):
 
 WARNING: ONLY the raw JSON. No \`\`\`, no preamble.`;
 
+/** English-output counterpart. Same JSON schema as the Thai combo prompt. */
+const SYSTEM_PROMPT_EN = `You are an elite short-form video director AND caption strategist for English-speaking online audiences. Your job is to generate BOTH a spoken video script AND a post caption that share the SAME core hook — perfectly aligned for one cohesive content package.
+
+═══════════ CRITICAL RULES ═══════════
+1. ONE HOOK, TWO USES: the sharedHook is the emotional pull. Both the script's first beat and the caption opening must echo it.
+2. NATURAL ENGLISH throughout — modern creator voice, punchy and conversational.
+3. Reference TONE styles (honor any custom tone literally):
+   - Friendly: warm, approachable
+   - Luxury: elegant, premium, exclusive
+   - Viral: high energy, sensational
+   - Persuasive: hard-sell, deep triggers
+   - Minimal: clean, soft, aesthetic
+   - Professional: clear, authoritative
+
+═══════════ STRUCTURE ═══════════
+Three things in ONE response:
+
+1. sharedHook — single English sentence (under 80 chars) that captures the core emotional pull
+2. script — beats with timecode/role/spoken/broll/onScreenText, plus totalSeconds, thumbnailCopy, postingChecklist
+3. caption — captions, hooks, hashtags, CTAs, angles, video ideas
+
+The script's first beat (HOOK) MUST be a direct expansion of sharedHook.
+The first caption variant MUST open with words from sharedHook.
+
+═══════════ OUTPUT FORMAT ═══════════
+Return STRICTLY this JSON (no markdown, no commentary):
+{
+  "sharedHook": "...",
+  "script": {
+    "beats": [
+      { "timecode": "00:00", "role": "HOOK", "spoken": "...", "broll": "...", "onScreenText": "..." }
+    ],
+    "totalSeconds": 30,
+    "thumbnailCopy": "...",
+    "postingChecklist": ["...", "..."]
+  },
+  "caption": {
+    "captions":     ["...", "..."],
+    "hooks":        ["...", "..."],
+    "hashtags":     ["#tag1", "..."],
+    "cta":          ["...", "..."],
+    "angles":       ["...", "..."],
+    "contentIdeas": ["...", "..."]
+  }
+}
+
+WARNING: ONLY the raw JSON. No \`\`\`, no preamble.`;
+
+/** Pre-computed per language at module load → each is a static cacheable prefix. */
+const SYSTEM_PROMPTS: Record<OutputLanguage, string> = {
+  th: SYSTEM_PROMPT_TH,
+  en: SYSTEM_PROMPT_EN,
+};
+
 export function buildComboPrompt(
   req: ComboRequest,
   brandVoiceContext = '',
   variantIndex: number | null = null,
 ): PromptMessages {
+  const lang: OutputLanguage = req.outputLanguage === 'en' ? 'en' : 'th';
   const beatCount = beatsFor(req.duration);
   const tonesText = joinOr(req.tones, 'Friendly');
+  const audienceFallback = lang === 'en' ? 'General online shoppers' : 'General Thai shoppers';
   const variants  = Math.max(1, Math.min(3, req.variants ?? 1));
 
   // Each variant picks a distinct shared-hook style so the tabs feel different.
@@ -100,7 +156,7 @@ export function buildComboPrompt(
   const hookCount     = 5;
 
   const user = `═══════════ THIS REQUEST ═══════════
-Audience:   ${joinOr(req.targetCustomers, 'General Thai shoppers')}
+Audience:   ${joinOr(req.targetCustomers, audienceFallback)}
 Tone blend: ${tonesText}
 
 Product:    ${req.productName}
@@ -116,5 +172,5 @@ ${brandVoiceContext ? `\n═══════════ BRAND VOICE ═══
 
 Deliver sharedHook + script + caption per the output format above.`;
 
-  return { system: SYSTEM_PROMPT, user };
+  return { system: SYSTEM_PROMPTS[lang], user };
 }

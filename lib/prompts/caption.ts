@@ -6,14 +6,14 @@
  * every caption call regardless of product/audience).
  */
 
-import type { CaptionRequest } from '@/types';
+import type { CaptionRequest, OutputLanguage } from '@/types';
 import type { PromptMessages } from './script';
 
 const joinOr = (arr?: string[], fallback = 'Not specified') =>
   arr && arr.length > 0 ? arr.join(', ') : fallback;
 
-/** Static system prompt — identical for every caption call → cached. */
-const SYSTEM_PROMPT = `You are an elite Thai marketing copywriter and social media strategist with years of experience driving sales for e-commerce brands in Thailand. Write high-converting, natural-sounding Thai content.
+/** Static Thai system prompt — identical for every Thai caption call → cached. */
+const SYSTEM_PROMPT_TH = `You are an elite Thai marketing copywriter and social media strategist with years of experience driving sales for e-commerce brands in Thailand. Write high-converting, natural-sounding Thai content.
 
 ═══════════ CRITICAL LANGUAGE RULES ═══════════
 1. Natural Thai phrasing — like top Thai online sellers. Never robotic or translated.
@@ -55,12 +55,63 @@ Return STRICTLY this JSON schema (no markdown, no commentary):
 
 WARNING: ONLY the raw JSON. No \`\`\`, no preamble.`;
 
+/** English-output counterpart. Same six fields / JSON schema as the Thai prompt. */
+const SYSTEM_PROMPT_EN = `You are an elite marketing copywriter and social media strategist with years of experience driving sales for e-commerce brands. Write high-converting, natural-sounding English content for online sellers.
+
+═══════════ CRITICAL LANGUAGE RULES ═══════════
+1. Natural English phrasing — like top online sellers and creators. Never robotic or translated.
+2. Modern social-commerce voice — punchy, scannable, conversational. Emojis where they help.
+3. Reference TONE styles you can mix:
+   - Friendly: warm, approachable
+   - Luxury: elegant, premium, exclusive
+   - Viral: high energy, sensational
+   - Persuasive: hard-sell, deep triggers
+   - Minimal: clean, soft, aesthetic
+   - Professional: clear, authoritative
+   (If the user lists a custom tone, honor it literally.)
+
+═══════════ DELIVERABLES (per request) ═══════════
+You'll be told how many of each to produce. Always deliver these six fields:
+
+CAPTIONS — distinct medium-length captions, copy-paste ready. Online-seller spacing (short paragraphs, line breaks for mobile). Mix psychological triggers: Urgency, Scarcity, Social Proof, Benefit-focus. Vary openings.
+
+HOOKS — 3 seconds of scroll-stopping power. Curiosity / shock / relatable pain.
+
+HASHTAGS — 8-12 specific, trend-matched. No spammy generic tags.
+
+CTAs — very short, e-commerce style: "DM us now" · "Add to cart before it's gone" · etc.
+
+SELLING ANGLES — distinct angles like Emotional / Problem-Solving / Premium / Budget. 1-2 sentences each.
+
+VIDEO CONTENT IDEAS — actionable for TikTok/Reels/Shorts. POV / Storytime / Before-After / ASMR / etc.
+
+═══════════ OUTPUT FORMAT ═══════════
+Return STRICTLY this JSON schema (no markdown, no commentary):
+{
+  "captions":     ["...", "..."],
+  "hooks":        ["...", "..."],
+  "hashtags":     ["#tag1", "#tag2", "..."],
+  "cta":          ["...", "..."],
+  "angles":       ["...", "..."],
+  "contentIdeas": ["...", "..."]
+}
+
+WARNING: ONLY the raw JSON. No \`\`\`, no preamble.`;
+
+/** Pre-computed per language at module load → each is a static cacheable prefix. */
+const SYSTEM_PROMPTS: Record<OutputLanguage, string> = {
+  th: SYSTEM_PROMPT_TH,
+  en: SYSTEM_PROMPT_EN,
+};
+
 export function buildCaptionPrompt(
   req: CaptionRequest,
   brandVoiceContext = '',
   variantIndex: number | null = null,
 ): PromptMessages {
+  const lang: OutputLanguage = req.outputLanguage === 'en' ? 'en' : 'th';
   const tonesText = joinOr(req.tones, 'Friendly');
+  const audienceFallback = lang === 'en' ? 'General online shoppers' : 'General Thai shoppers';
   const variants  = Math.max(1, Math.min(3, req.variants ?? 1));
 
   // When fan-out is used, each variant gets a distinct emotional angle so
@@ -82,7 +133,7 @@ export function buildCaptionPrompt(
   const ideaCount     = 4;
 
   const user = `═══════════ THIS REQUEST ═══════════
-Audience:   ${joinOr(req.targetCustomers, 'General Thai shoppers')}
+Audience:   ${joinOr(req.targetCustomers, audienceFallback)}
 Tone blend: ${tonesText}
 
 Product:    ${req.productName}
@@ -101,5 +152,5 @@ ${brandVoiceContext ? `\n═══════════ BRAND VOICE ═══
 
 Deliver all six fields per the output format above.`;
 
-  return { system: SYSTEM_PROMPT, user };
+  return { system: SYSTEM_PROMPTS[lang], user };
 }

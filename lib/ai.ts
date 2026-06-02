@@ -4,7 +4,7 @@
  * - Falls back to mock data when OPENAI_API_KEY is absent (demo mode)
  */
 
-import type { ScriptContent, CaptionContent, ComboContent } from '@/types';
+import type { ScriptContent, CaptionContent, ComboContent, OutputLanguage } from '@/types';
 
 /** Prompt builders return this so we can ship system + user as separate
  *  messages to OpenAI — maximises automatic prompt-cache hits on the
@@ -90,37 +90,40 @@ async function callOpenAI<T>(prompt: PromptInput, model: string = MODEL_PAID): P
 
 // ─── Public generators (with mock fallback) ──────────────────────────────────
 // Optional `plan` controls model selection — pass user's plan from the route.
+// Optional `lang` only affects the DEMO mock (no API key) so local/demo runs
+// preview the right language; the real output language is driven by the prompt.
 
-export async function generateScript(prompt: PromptInput, plan?: string): Promise<ScriptContent> {
+export async function generateScript(prompt: PromptInput, plan?: string, lang: OutputLanguage = 'th'): Promise<ScriptContent> {
   try {
     return await callOpenAI<ScriptContent>(prompt, modelForPlan(plan));
   } catch (e) {
-    if (e instanceof MissingApiKeyError) return mockScript();
+    if (e instanceof MissingApiKeyError) return mockScript(lang);
     throw e;
   }
 }
 
-export async function generateCaption(prompt: PromptInput, plan?: string): Promise<CaptionContent> {
+export async function generateCaption(prompt: PromptInput, plan?: string, lang: OutputLanguage = 'th'): Promise<CaptionContent> {
   try {
     return await callOpenAI<CaptionContent>(prompt, modelForPlan(plan));
   } catch (e) {
-    if (e instanceof MissingApiKeyError) return mockCaption();
+    if (e instanceof MissingApiKeyError) return mockCaption(lang);
     throw e;
   }
 }
 
-export async function generateCombo(prompt: PromptInput, plan?: string): Promise<ComboContent> {
+export async function generateCombo(prompt: PromptInput, plan?: string, lang: OutputLanguage = 'th'): Promise<ComboContent> {
   try {
     return await callOpenAI<ComboContent>(prompt, modelForPlan(plan));
   } catch (e) {
-    if (e instanceof MissingApiKeyError) return mockCombo();
+    if (e instanceof MissingApiKeyError) return mockCombo(lang);
     throw e;
   }
 }
 
 // ─── DEMO MODE MOCKS ─────────────────────────────────────────────────────────
 
-function mockScript(): ScriptContent {
+function mockScript(lang: OutputLanguage = 'th'): ScriptContent {
+  if (lang === 'en') return mockScriptEN();
   return {
     beats: [
       {
@@ -163,7 +166,8 @@ function mockScript(): ScriptContent {
   };
 }
 
-function mockCaption(): CaptionContent {
+function mockCaption(lang: OutputLanguage = 'th'): CaptionContent {
+  if (lang === 'en') return mockCaptionEN();
   return {
     captions: [
       `🚨 Must Have ลิปแดงตัวที่ลูกค้าตามหาเยอะที่สุด!\n\nใครกำลังเบื่อลิปสีเดิมๆ ต้องลองตัวนี้ค่า 💖 เนื้อแมตต์ ติด 12 ชั่วโมง ใส่กับชุดอะไรก็ปัง\n\n✅ ไม่กินผิว ไม่ลอกเป็นแผ่น\n✅ สีคลาสสิคใส่ได้ทุกโอกาส\n✅ รีวิว 5 ดาวจาก 2,000+ ลูกค้า\n\n🔥 โปรนี้มีจำกัด ลด 20% เฉพาะ 50 คนแรก รีบทักด่วน!`,
@@ -206,10 +210,105 @@ function mockCaption(): CaptionContent {
   };
 }
 
-function mockCombo(): ComboContent {
+function mockCombo(lang: OutputLanguage = 'th'): ComboContent {
+  if (lang === 'en') {
+    return {
+      sharedHook: 'The red lip everyone turns to look at — 12 hours, zero touch-ups.',
+      script: mockScriptEN(),
+      caption: mockCaptionEN(),
+    };
+  }
   return {
     sharedHook: 'ริมฝีปากแดงที่คนหันมามอง — ติด 12 ชั่วโมง ไม่ต้องแตะเลย',
     script: mockScript(),
     caption: mockCaption(),
+  };
+}
+
+// ─── English demo mocks ──────────────────────────────────────────────────────
+
+function mockScriptEN(): ScriptContent {
+  return {
+    beats: [
+      {
+        timecode: '00:00',
+        role: 'HOOK',
+        spoken: '"The red lip everyone turns to look at — 12 hours, zero touch-ups."',
+        broll: 'Close-up of model applying lipstick, mirror reflection',
+        onScreenText: '12 hours · no touch-ups',
+      },
+      {
+        timecode: '00:05',
+        role: 'BODY',
+        spoken: '"A matte finish that never dries you out, in a classic shade for any outfit. Swipe it on at 8am — still flawless by dinner."',
+        broll: 'Texture demo on hand swatch + outfit changes timelapse',
+        onScreenText: 'Matte × long-wear × never lets you down',
+      },
+      {
+        timecode: '00:18',
+        role: 'PROOF',
+        spoken: '"Over 2,000 five-star reviews · free shipping nationwide."',
+        broll: 'Quick montage of customer reviews / 5-star screenshots',
+        onScreenText: '2,000+ reviews ★★★★★',
+      },
+      {
+        timecode: '00:25',
+        role: 'CTA',
+        spoken: '"Tap the link in bio — 20% off today, first 50 only."',
+        broll: 'Phone screen showing checkout',
+        onScreenText: '20% off · first 50 only',
+      },
+    ],
+    totalSeconds: 30,
+    thumbnailCopy: 'Red lip · 12hr · no touch-ups',
+    postingChecklist: [
+      'Add the product link in your bio',
+      'Schedule the post for 7-9pm',
+      'Reply to comments in the first 30 minutes',
+      'Prep an FAQ for shade/price questions',
+    ],
+  };
+}
+
+function mockCaptionEN(): CaptionContent {
+  return {
+    captions: [
+      `🚨 The Must-Have red lip our customers keep coming back for!\n\nBored of the same old shades? You need this one 💖 Matte finish, 12-hour wear, pairs with any outfit.\n\n✅ Won't dry out or flake\n✅ A classic shade for every occasion\n✅ 5-star rated by 2,000+ customers\n\n🔥 Limited drop — 20% off, first 50 only. DM us fast!`,
+      `📢 Restocked! Last drop sold out in 2 hours 🔥\n\nOur Best-Seller matte red that customers DM us for every day — only 100 units back in stock.\n\nA classic red that makes you glow instantly, whether it's a work day or a night out.\n\nDon't sleep on it — tap to order 👇`,
+      `Honest 12-hour wear test 💄 a lip that truly doesn't budge.\n\nPut it on at 8am — coffee, lunch, back-to-back calls all day. Color stayed put. No flaking, no transfer onto the cup.\n\nThink matte means dry lips? Not this one. Soft, smooth, comfortable all day.\n\nTap the link in bio.`,
+      `Why does this lip sell out enough to restock every month? 🤔\n\nShort answer: people use it and forget to switch — because it actually lasts and the color is genuinely beautiful.\n\n💎 Matte, smooth, no flaking\n💎 12-hour wear\n💎 Free shipping nationwide\n💎 $9 — 20% off for the first 50\n\nTap the link in bio and DM us`,
+      `The lip-perfection trick influencers don't talk about 💋\n\nIt's not a luxury brand — it's a lip that lasts long enough that you never re-apply mid-day.\n\nThis is the one. $9, now $7 (first 50 only), free shipping.\n\nDM us the code "VIRAL20" for your discount`,
+    ],
+    hooks: [
+      'Stop scrolling if you actually want a lip that lasts 🛑',
+      'Honest 12-hour wear test — color never moved 💄',
+      'Back in stock — last drop sold out in 2 hours 🔥',
+      'Why is everyone talking about this matte lip? 🤫',
+      'Why pay premium when this one beats it? 😱',
+    ],
+    hashtags: [
+      '#lipstick', '#redlip', '#mattelip', '#lipreview',
+      '#longwearlip', '#makeup', '#TikTokShop',
+      '#musthave', '#beautytok', '#freeshipping',
+    ],
+    cta: [
+      'DM us — our team replies fast!',
+      'Order today, 20% off first 50',
+      'Add to cart before it sells out again',
+      'Tap the link in bio for your discount code',
+      'Comment "1" and we\'ll DM you the link',
+    ],
+    angles: [
+      'Emotional: dry lips / color fading fast → this lip fixes every letdown',
+      'Problem Solving: a real 12-hour day → still looks fresh',
+      'Premium Positioning: luxury-level quality at an accessible price',
+      'Social Proof: 2,000+ reviews / Best-Seller / sells out and restocks',
+    ],
+    contentIdeas: [
+      'Unbox/Swatch: show color-texture-scent with ASMR unboxing',
+      'POV: apply in the morning → go to work → check color at night (timelapse)',
+      'Before/After: bare lips vs after 12 hours — a direct comparison',
+      'React to reviews: turn real DMs/comments into a story',
+    ],
   };
 }

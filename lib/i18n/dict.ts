@@ -382,6 +382,7 @@ export const DICT = {
   'wf.platform':          { th: 'แพลตฟอร์ม', en: 'Platform' },
   'wf.tone':              { th: 'โทน', en: 'Tone' },
   'wf.duration':          { th: 'ความยาว', en: 'Duration' },
+  'wf.outlang':           { th: 'ภาษาที่สร้าง', en: 'Output language' },
   'wf.variants':          { th: 'จำนวนแบบที่ต้องการ', en: 'How many variants?' },
   'wf.details':           { th: 'รายละเอียดเพิ่มเติม / โปรโมชั่น (ทางเลือก)',
                             en: 'Additional details / promo (optional)' },

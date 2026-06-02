@@ -18,6 +18,7 @@ const Schema = z.object({
   duration:        z.string().max(20).trim().default('30s'),
   details:         z.string().max(800).trim().default(''),
   variants:        z.number().int().min(1).max(3).default(1),
+  outputLanguage:  z.enum(['th', 'en']).default('th'),
   projectId:       z.string().uuid().optional(),
   brandVoiceId:    z.string().uuid().optional(),
 });
@@ -64,7 +65,7 @@ export async function POST(req: Request) {
             bvContext,
             variantCount > 1 ? i : null,
           );
-          return generateScript(prompt, auth.ctx.plan);
+          return generateScript(prompt, auth.ctx.plan, body.outputLanguage);
         })
       );
 

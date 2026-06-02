@@ -67,6 +67,7 @@ export function StudioShell({ mode, title, description, brandVoices = [], render
       platform:        form.platform,
       details:         form.details || undefined,
       variants:        form.variants,
+      outputLanguage:  form.outputLanguage,
     };
     if (mode !== 'caption') body.duration = form.duration;
     if (projectId)    body.projectId    = projectId;

@@ -7,7 +7,7 @@
  * every script call regardless of product/audience).
  */
 
-import type { ScriptRequest } from '@/types';
+import type { ScriptRequest, OutputLanguage } from '@/types';
 
 const DURATION_BEATS_PRESET: Record<string, { count: number; secondsPerBeat: string }> = {
   '15s':  { count: 3, secondsPerBeat: '~5 seconds each' },
@@ -35,8 +35,8 @@ function beatsFor(duration: string): { count: number; secondsPerBeat: string } {
 const joinOr = (arr?: string[], fallback = 'Not specified') =>
   arr && arr.length > 0 ? arr.join(', ') : fallback;
 
-/** Identical for every script call → OpenAI caches this prefix (50% off). */
-const SYSTEM_PROMPT = `You are an elite Thai short-form video director and scriptwriter. Your job is to write a spoken video script that sells effectively to Thai online buyers.
+/** Identical for every Thai script call → OpenAI caches this prefix (50% off). */
+const SYSTEM_PROMPT_TH = `You are an elite Thai short-form video director and scriptwriter. Your job is to write a spoken video script that sells effectively to Thai online buyers.
 
 ═══════════ CRITICAL LANGUAGE RULES ═══════════
 1. NATURAL THAI: Use conversational, native Thai phrasing — like top Thai TikTok/Reels sellers. Never robotic, never translated-feeling.
@@ -87,6 +87,65 @@ Return STRICTLY this JSON schema (no markdown, no commentary):
 
 WARNING: ONLY the raw JSON. No \`\`\`, no preamble.`;
 
+/** English-output counterpart. Same structure/JSON schema as the Thai prompt
+ *  so downstream parsing is identical — only the WRITTEN language changes. */
+const SYSTEM_PROMPT_EN = `You are an elite short-form video director and scriptwriter for English-speaking online audiences. Your job is to write a spoken video script that sells effectively to online buyers.
+
+═══════════ CRITICAL LANGUAGE RULES ═══════════
+1. NATURAL ENGLISH: Use conversational, native English phrasing — like top TikTok/Reels/Shorts sellers. Never robotic, never stiff or corporate.
+2. MODERN CREATOR VOICE: Punchy, scroll-stopping, social-first. Contractions, rhythm, and casual energy are good.
+3. Reference TONE styles you can mix:
+   - Friendly: warm, approachable, conversational
+   - Professional: clear, authoritative, less slang
+   - Luxury: elegant, premium-positioning, exclusive feel
+   - Viral: high energy, dramatic, sensational hooks
+   - Persuasive: hard-selling, deep triggers, objection handling
+   - Minimal: clean, calm, aesthetic restraint
+   (If the user lists a custom tone, honor it literally.)
+
+═══════════ STRUCTURE ═══════════
+A complete spoken video script broken into timed beats:
+- BEAT 1: HOOK (first 1-3 seconds — must stop the scroll)
+- MIDDLE BEATS: BODY / PROOF / OBJECTION
+- LAST BEAT: CTA (clear next step)
+
+For each beat provide:
+- timecode: "MM:SS" mark when beat starts (00:00, 00:05, 00:18, etc.)
+- role: one word — HOOK | BODY | PROOF | OBJECTION | CTA
+- spoken: the exact English words the creator says (natural, ready to read aloud)
+- broll: optional shot/B-roll cue in English (e.g., "close-up of product", "POV unboxing")
+- onScreenText: optional English text overlay that appears on screen during this beat
+
+Also provide:
+- totalSeconds: integer total estimated duration
+- thumbnailCopy: 1 short English phrase (under 30 chars) for video cover text
+- postingChecklist: array of 3-5 English action items to remember when posting (e.g., "Add link in bio", "Schedule post for 7-9pm")
+
+═══════════ OUTPUT FORMAT ═══════════
+Return STRICTLY this JSON schema (no markdown, no commentary):
+{
+  "beats": [
+    {
+      "timecode": "00:00",
+      "role": "HOOK",
+      "spoken": "...",
+      "broll": "...",
+      "onScreenText": "..."
+    }
+  ],
+  "totalSeconds": 30,
+  "thumbnailCopy": "...",
+  "postingChecklist": ["...", "..."]
+}
+
+WARNING: ONLY the raw JSON. No \`\`\`, no preamble.`;
+
+/** Pre-computed per language at module load → each is a static cacheable prefix. */
+const SYSTEM_PROMPTS: Record<OutputLanguage, string> = {
+  th: SYSTEM_PROMPT_TH,
+  en: SYSTEM_PROMPT_EN,
+};
+
 export interface PromptMessages {
   system: string;
   user: string;
@@ -97,8 +156,10 @@ export function buildScriptPrompt(
   brandVoiceContext = '',
   variantIndex: number | null = null,
 ): PromptMessages {
+  const lang: OutputLanguage = req.outputLanguage === 'en' ? 'en' : 'th';
   const beatSpec = beatsFor(req.duration);
   const tonesText = joinOr(req.tones, 'Friendly');
+  const audienceFallback = lang === 'en' ? 'General online shoppers' : 'General Thai shoppers';
   const variants  = Math.max(1, Math.min(3, req.variants ?? 1));
 
   // When server-side parallel-fanout is used, variantIndex picks a
@@ -113,7 +174,7 @@ export function buildScriptPrompt(
     : '';
 
   const user = `═══════════ THIS REQUEST ═══════════
-Audience:   ${joinOr(req.targetCustomers, 'General Thai shoppers')}
+Audience:   ${joinOr(req.targetCustomers, audienceFallback)}
 Tone blend: ${tonesText}
 
 Product:    ${req.productName}
@@ -125,5 +186,5 @@ ${brandVoiceContext ? `\n═══════════ BRAND VOICE ═══
 
 Generate a complete script with exactly ${beatSpec.count} beats following the structure and output format above.`;
 
-  return { system: SYSTEM_PROMPT, user };
+  return { system: SYSTEM_PROMPTS[lang], user };
 }

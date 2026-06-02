@@ -35,6 +35,12 @@ export const CATEGORY_PRESETS = [
 export const VARIANT_COUNTS = [1, 2, 3] as const;
 export type VariantCount = (typeof VARIANT_COUNTS)[number];
 
+/** Output language for generated content. 'th' = Thai (default), 'en' = English.
+ *  Controls the LANGUAGE THE MODEL WRITES IN — independent of the site UI
+ *  language. Defaults to 'th' everywhere for backward compatibility. */
+export const OUTPUT_LANGUAGES = ['th', 'en'] as const;
+export type OutputLanguage = (typeof OUTPUT_LANGUAGES)[number];
+
 // ═══════════════ CAPTION STUDIO ═══════════════════
 export interface CaptionRequest {
   productName: string;
@@ -45,6 +51,8 @@ export interface CaptionRequest {
   details?: string;
   brandVoiceId?: string;
   variants?: number;                // 1-3, default 1
+  /** Language the generated copy is written in. Default 'th'. */
+  outputLanguage?: OutputLanguage;
 }
 
 export interface CaptionContent {
@@ -68,6 +76,8 @@ export interface ScriptRequest {
   details?: string;
   brandVoiceId?: string;
   variants?: number;
+  /** Language the generated script is written in. Default 'th'. */
+  outputLanguage?: OutputLanguage;
 }
 
 export interface ScriptBeat {
