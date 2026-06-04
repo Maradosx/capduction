@@ -2,8 +2,17 @@ import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import Stripe from 'stripe';
 import { stripe, planFromPriceId } from '@/lib/stripe';
-import { updateBillingStatus, getProfileByCustomerId, hasProcessedStripeEvent } from '@/lib/db/billing';
+import {
+  updateBillingStatus, getProfileByCustomerId, hasProcessedStripeEvent,
+  markStripeEventProcessed,
+} from '@/lib/db/billing';
 import { PLAN_CREDITS } from '@/types';
+
+// Tier ranking so a plan CHANGE only tops up credits on a genuine UPGRADE.
+// A downgrade (e.g. studio→creator) must NOT reset credits to the new tier's
+// full allocation mid-cycle — that could RAISE a spent-down balance. The next
+// `invoice.paid` cycle applies the correct allocation for the new plan.
+const PLAN_RANK: Record<string, number> = { free: 0, creator: 1, studio: 2, agency: 3 };
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -72,26 +81,28 @@ export async function POST(req: Request) {
         let priceId:   string | null = null;
         if (subscriptionId) {
           const sub = await stripe.subscriptions.retrieve(subscriptionId);
-          periodEnd = new Date((sub as any).current_period_end * 1000).toISOString();
+          periodEnd = periodEndISO(sub);
           priceId   = sub.items.data[0]?.price.id ?? null;
         }
 
-        // updateBillingStatus returns {success, error} — log loudly if it
-        // fails so silent DB rejections (CHECK constraints, RLS, bad keys)
-        // surface in Vercel logs instead of being lost to the outer catch.
+        // On ANY failure we THROW → outer catch returns 500 → Stripe retries.
+        // The event is marked processed only at the very end, so the retry
+        // re-runs cleanly (all writes are idempotent absolute sets).
         const billingRes = await updateBillingStatus(userId, {
           plan,
           subscription_status: 'active',
           billing_customer_id: customerId,
           stripe_price_id:     priceId,
           current_period_end:  periodEnd,
-        }, event.id);
+        });
         if (!billingRes.success) {
-          console.error(`[stripe-webhook] DB WRITE FAILED for user=${userId} plan=${plan}: ${billingRes.error}`);
+          throw new Error(`billing write failed for user=${userId} plan=${plan}: ${billingRes.error}`);
         }
 
-        // First-time activation: refresh credits to plan allocation
+        // First-time activation: refresh credits to plan allocation (throws on error)
         await refreshCreditsForPlan(userId, plan);
+
+        await markStripeEventProcessed(userId, `billing_${plan}_active`, event.id, { plan, periodEnd });
         break;
       }
 
@@ -109,7 +120,7 @@ export async function POST(req: Request) {
 
         const priceId   = sub.items.data[0]?.price.id ?? null;
         const newPlan   = priceId ? (planFromPriceId(priceId) ?? 'free') : 'free';
-        const periodEnd = new Date((sub as any).current_period_end * 1000).toISOString();
+        const periodEnd = periodEndISO(sub);
 
         const statusMap: Record<string, string> = {
           active:              'active',
@@ -121,17 +132,24 @@ export async function POST(req: Request) {
           unpaid:              'past_due',
         };
 
-        await updateBillingStatus(profile.id, {
+        const billingRes = await updateBillingStatus(profile.id, {
           plan: newPlan as 'free' | 'creator' | 'studio' | 'agency',
           subscription_status: statusMap[sub.status] ?? 'inactive',
           stripe_price_id: priceId,
           current_period_end: periodEnd,
-        }, event.id);
+        });
+        if (!billingRes.success) {
+          throw new Error(`billing write failed for customer=${customerId}: ${billingRes.error}`);
+        }
 
-        // Plan upgrade: top up credits to new plan allocation
-        if (newPlan !== 'free' && newPlan !== profile.plan) {
+        // Top up credits ONLY on a genuine upgrade (higher tier). A downgrade or
+        // a no-op change (card update, address) must not reset the balance — the
+        // next invoice.paid cycle sets the correct allocation for the new plan.
+        if (newPlan !== 'free' && PLAN_RANK[newPlan] > PLAN_RANK[profile.plan]) {
           await refreshCreditsForPlan(profile.id, newPlan as 'creator' | 'studio' | 'agency');
         }
+
+        await markStripeEventProcessed(profile.id, `billing_${newPlan}_${sub.status}`, event.id, { plan: newPlan, periodEnd });
         break;
       }
 
@@ -144,13 +162,17 @@ export async function POST(req: Request) {
         const profile = await getProfileByCustomerId(customerId);
         if (!profile) break;
 
-        await updateBillingStatus(profile.id, {
+        const billingRes = await updateBillingStatus(profile.id, {
           plan: 'free',
           subscription_status: 'canceled',
           stripe_price_id:     null,
           current_period_end:  null,
-        }, event.id);
-        // Keep remaining credits — they expire on next billing cycle anyway
+        });
+        if (!billingRes.success) {
+          throw new Error(`billing write failed (cancel) for customer=${customerId}: ${billingRes.error}`);
+        }
+        // Keep remaining credits — they apply until the period the user paid for.
+        await markStripeEventProcessed(profile.id, 'billing_free_canceled', event.id, {});
         break;
       }
 
@@ -176,7 +198,7 @@ export async function POST(req: Request) {
         let priceId:   string | null = null;
         if (subscriptionId) {
           const sub = await stripe.subscriptions.retrieve(subscriptionId);
-          periodEnd = new Date((sub as any).current_period_end * 1000).toISOString();
+          periodEnd = periodEndISO(sub);
           priceId   = sub.items.data[0]?.price.id ?? null;
         }
 
@@ -184,15 +206,20 @@ export async function POST(req: Request) {
           ? (planFromPriceId(priceId) ?? (profile.plan as 'free' | 'creator' | 'studio' | 'agency'))
           : (profile.plan as 'free' | 'creator' | 'studio' | 'agency');
 
-        await updateBillingStatus(profile.id, {
+        const billingRes = await updateBillingStatus(profile.id, {
           plan: newPlan,
           subscription_status: 'active',
           stripe_price_id:     priceId,
           current_period_end:  periodEnd,
-        }, event.id);
+        });
+        if (!billingRes.success) {
+          throw new Error(`billing write failed (renewal) for customer=${customerId}: ${billingRes.error}`);
+        }
 
-        // Refill credits for the new month
+        // Refill credits for the new month (idempotent absolute set)
         if (newPlan !== 'free') await refreshCreditsForPlan(profile.id, newPlan as 'creator' | 'studio' | 'agency');
+
+        await markStripeEventProcessed(profile.id, `billing_${newPlan}_renewal`, event.id, { plan: newPlan, periodEnd });
         break;
       }
 
@@ -203,8 +230,14 @@ export async function POST(req: Request) {
     return NextResponse.json({ received: true });
   } catch (error: any) {
     console.error('[stripe-webhook] handler error:', error?.message ?? error);
-    // Return 200 so Stripe doesn't retry-storm; we logged the error for ops
-    return NextResponse.json({ received: true, warning: 'Handler error logged' });
+    // Return 500 so Stripe RETRIES (with backoff). A transient DB error must not
+    // be swallowed as success — otherwise a paying customer is left un-credited
+    // with no recovery. Safe to retry: the event is only marked processed after
+    // every side effect succeeds, and all writes are idempotent absolute sets.
+    return NextResponse.json(
+      { received: false, error: 'Handler error — will retry' },
+      { status: 500 }
+    );
   }
 }
 
@@ -229,9 +262,29 @@ function extractSubscriptionId(invoice: Stripe.Invoice): string | null {
   return null;
 }
 
+/**
+ * Resolve a subscription's current period end to an ISO string, defensively.
+ * Stripe moved `current_period_end` from the top-level Subscription onto each
+ * subscription ITEM in 2025+ API versions. Read the item value first, fall back
+ * to the (pinned 2024-04-10) top-level field, and return null rather than an
+ * `Invalid Date` if neither is a finite number — so a future API-version bump
+ * can't make `.toISOString()` throw and silently break the billing write.
+ */
+function periodEndISO(sub: Stripe.Subscription): string | null {
+  const raw =
+    (sub as any).items?.data?.[0]?.current_period_end ??
+    (sub as any).current_period_end;
+  if (typeof raw !== 'number' || !Number.isFinite(raw)) return null;
+  const d = new Date(raw * 1000);
+  return Number.isNaN(d.getTime()) ? null : d.toISOString();
+}
+
 async function refreshCreditsForPlan(userId: string, plan: 'creator' | 'studio' | 'agency'): Promise<void> {
   const { createAdminClient } = await import('@/lib/supabase/admin');
   const supabase = createAdminClient();
   const credits = PLAN_CREDITS[plan];
-  await supabase.from('profiles').update({ credits_remaining: credits }).eq('id', userId);
+  const { error } = await supabase.from('profiles').update({ credits_remaining: credits }).eq('id', userId);
+  // Throw so the webhook's outer catch returns 500 and Stripe retries — a paid
+  // plan must never be left without its credits because of a transient error.
+  if (error) throw new Error(`refreshCreditsForPlan failed for user=${userId}: ${error.message}`);
 }

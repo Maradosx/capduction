@@ -240,10 +240,16 @@ export async function reserveCredits(
     .rpc('decrement_credit', { p_user_id: ctx.userId, p_amount: amount });
 
   if (rpcErr) {
-    // Fail-open (matches prior posture where the decrement result was ignored)
-    // so a transient RPC hiccup never blocks a paying user from generating.
+    // Fail-CLOSED on the money path. `decrement_credit` is a trivial atomic RPC;
+    // if it errors, that's a real (and rare) backend fault we want surfaced, not
+    // papered over by handing out free GPT-4o runs. Blocking briefly with a
+    // retryable 503 beats giving away paid AI compute (or letting an attacker
+    // farm free generations by inducing RPC errors). The user simply retries.
     console.error('[reserveCredits] decrement_credit rpc error:', rpcErr.message);
-    return null;
+    return NextResponse.json(
+      { success: false, error: 'ระบบไม่ว่างชั่วคราว กรุณาลองใหม่อีกครั้ง' },
+      { status: 503 }
+    );
   }
 
   if (typeof remaining === 'number' && remaining < 0) {
@@ -264,24 +270,42 @@ export async function reserveCredits(
  * `increment_credit` RPC is intentionally NOT granted to the `authenticated`
  * role (otherwise any logged-in user could top up their own credits).
  *
- * Best-effort: a failed refund is logged but never throws, so it can't mask
- * the original generation error. Requires migration 008 (increment_credit) to
- * be applied; until then this logs and the credit stays spent.
+ * Never throws (so it can't mask the original generation error), but it is NOT
+ * fire-and-forget: it retries once, and if the refund still fails it writes a
+ * durable `refund_failed` row to `usage_events` so the owed credit is auditable
+ * and recoverable instead of silently lost. Requires migration 008
+ * (increment_credit) to be applied.
  */
 export async function refundCredits(ctx: AuthContext, amount: number = 1): Promise<void> {
   if (ctx.isDemoMode || !ctx.userId) return;
-  try {
-    const { createAdminClient } = await import('@/lib/supabase/admin');
-    const supabase = createAdminClient();
-    const { error } = await supabase.rpc('increment_credit', {
-      p_user_id: ctx.userId,
-      p_amount: Math.max(1, amount),
-    });
-    if (error) {
-      console.error('[refundCredits] increment_credit failed (apply migration 008?):', error.message);
+  const amt = Math.max(1, amount);
+  const { createAdminClient } = await import('@/lib/supabase/admin');
+  const supabase = createAdminClient();
+
+  // Retry once — most failures here are transient.
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      const { error } = await supabase.rpc('increment_credit', {
+        p_user_id: ctx.userId,
+        p_amount: amt,
+      });
+      if (!error) return; // refunded
+      console.error(`[refundCredits] attempt ${attempt}/2 failed:`, error.message);
+    } catch (e: any) {
+      console.error(`[refundCredits] attempt ${attempt}/2 threw:`, e?.message ?? e);
     }
+  }
+
+  // Both attempts failed → record the debt durably so it isn't silently lost.
+  try {
+    await supabase.from('usage_events').insert({
+      user_id: ctx.userId,
+      event_type: 'refund_failed',
+      metadata: { amount: amt, at: new Date().toISOString() },
+    });
+    console.error(`[refundCredits] DURABLE refund_failed recorded for user=${ctx.userId} amount=${amt}`);
   } catch (e: any) {
-    console.error('[refundCredits] unexpected:', e?.message ?? e);
+    console.error('[refundCredits] could not record refund_failed:', e?.message ?? e);
   }
 }
 

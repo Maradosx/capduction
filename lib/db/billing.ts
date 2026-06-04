@@ -23,30 +23,21 @@ interface BillingUpdate {
  *   - subscription tier upgrade    (e.g. studio → agency)
  * ).
  *
- * Previously this function also reset credits on every webhook call — that
- * leaked free credits when Stripe fired subscription.updated for trivial
- * reasons (card update, address change, status flip).
+ * Does NOT mark the Stripe event processed either — that is done LAST by
+ * `markStripeEventProcessed`, only after EVERY side effect (this write AND the
+ * credit grant) has succeeded. If we marked the event here (mid-flow) and the
+ * subsequent credit grant then failed, the webhook's top-level idempotency
+ * guard would treat the retry as a duplicate and skip it — leaving a paying
+ * user un-credited forever. All writes are absolute (set plan=X, credits=alloc)
+ * so a Stripe retry re-running them is safe.
  *
  * Uses the Supabase service client (bypasses RLS) — webhook context only.
  */
 export async function updateBillingStatus(
   userId: string,
-  updates: BillingUpdate,
-  stripeEventId: string
+  updates: BillingUpdate
 ): Promise<{ success: boolean; error?: string }> {
   const supabase = createAdminClient();
-
-  // Idempotency guard: skip if we've already processed this Stripe event
-  const { data: existing } = await supabase
-    .from('billing_events')
-    .select('id')
-    .eq('stripe_event_id', stripeEventId)
-    .maybeSingle();
-
-  if (existing) {
-    console.log(`[billing] Already processed event ${stripeEventId}, skipping.`);
-    return { success: true };
-  }
 
   // Update profile billing columns (NOT credits — see comment above)
   const { error: profileErr } = await supabase
@@ -66,18 +57,36 @@ export async function updateBillingStatus(
     return { success: false, error: profileErr.message };
   }
 
-  // Log billing event (service role bypasses INSERT policy restriction)
-  await supabase.from('billing_events').insert({
-    user_id: userId,
-    event_type: `billing_${updates.plan}_${updates.subscription_status}`,
-    stripe_event_id: stripeEventId,
-    metadata: {
-      plan: updates.plan,
-      current_period_end: updates.current_period_end,
-    },
-  });
-
   return { success: true };
+}
+
+/**
+ * Record that a Stripe event has been fully processed. MUST be called LAST in a
+ * webhook case — after the billing write AND any credit grant have succeeded —
+ * so the top-level `hasProcessedStripeEvent` guard only short-circuits events
+ * that genuinely completed end to end.
+ *
+ * Tolerant of the unique-constraint violation on `stripe_event_id` (race where
+ * Stripe delivers the same event twice concurrently): the duplicate insert is a
+ * no-op success, since all side effects are idempotent absolute writes.
+ */
+export async function markStripeEventProcessed(
+  userId: string,
+  eventType: string,
+  stripeEventId: string,
+  metadata: Record<string, unknown> = {}
+): Promise<void> {
+  const supabase = createAdminClient();
+  const { error } = await supabase.from('billing_events').insert({
+    user_id: userId,
+    event_type: eventType,
+    stripe_event_id: stripeEventId,
+    metadata,
+  });
+  // 23505 = unique_violation → event already recorded by a concurrent delivery.
+  if (error && (error as { code?: string }).code !== '23505') {
+    console.error('[billing] Failed to record processed event:', error.message);
+  }
 }
 
 /**
