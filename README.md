@@ -3,8 +3,8 @@
 > สตูดิโอ AI สำหรับครีเอเตอร์วิดีโอสั้นไทย — สคริปต์การพูด + แคปชั่นหน้าจอ ครบในไฟล์เดียว
 > AI studio for Thai short-form video creators — spoken scripts + on-screen captions, all in one file.
 
-**Theme:** Mix 1 — Soft Liquid Console (iridescent pastel + frosted glass + chrome orbs)
-**Status:** ✅ Production-ready · 22 pages · 3 studios · billing wired · ~95% complete
+**🌐 Live:** [capduction.com](https://capduction.com) · **🎨 Theme:** Soft Liquid Console (iridescent pastel + frosted glass + chrome orbs)
+**Status:** ✅ Live in production · 29 pages · 3 studios · 4-tier billing · TypeScript strict · ESLint clean
 
 ---
 
@@ -25,7 +25,7 @@ No env required. Every page works. All 3 studios return Thai mock data.
 
 ### Public site
 - `/` Landing — hero · iridescent dashboard preview · 3 studios · bottom CTA
-- `/pricing` — Free / Studio ฿349 / Agency ฿1,290
+- `/pricing` — Free / Creator ฿199 / Studio ฿549 (recommended) / Agency ฿1,890 — supports PromptPay + Thai cards via Stripe Thailand
 - `/login` · `/signup` (email prefill from landing) · `/forgot-password` · `/reset-password`
 - `/privacy` · `/terms` · `/about` · `/contact` · `/docs` · `/changelog` · `/status` · `/careers` · `/api-docs` (stub or full)
 
@@ -64,7 +64,7 @@ All generation APIs auto-fall-back to Thai mock data when OpenAI key absent (dem
 - **Auth + DB:** Supabase (Postgres + RLS + Auth) — graceful demo fallback
 - **AI:** OpenAI GPT-4o (JSON response mode) — graceful mock fallback
 - **Rate limit:** Upstash Redis sliding window (10/min/user) — optional
-- **Billing:** Stripe (Free / Studio / Agency) — graceful demo fallback
+- **Billing:** Stripe (Free / Creator / Studio / Agency · 4-tier) — webhook-idempotent, atomic credit reserve/refund, graceful demo fallback
 - **Cursor:** Custom OS-fast (direct pointermove, no rAF/lerp)
 
 ---
@@ -96,22 +96,35 @@ capduction/
 │   ├── i18n/{dict, context}
 │   ├── db/{generations, projects, brand-voices, profiles, settings, events, billing}
 │   └── supabase/{client, server, middleware}
-├── supabase/migrations/    001 → 004 (run in Supabase SQL editor)
+├── supabase/migrations/    001 → 011 (run in Supabase SQL editor)
 ├── types/index.ts          full type system
-├── docs/                   BUTTON_AUDIT.md · SETUP.md
+├── docs/                   PROJECT_DETAILS.md · SE_PROJECT_REPORT.md · BUTTON_AUDIT.md · SETUP.md
 ├── brand/                  IDENTITY.md
 └── mockup/                 design exploration (HTML)
 ```
 
 ---
 
-## Roadmap — what's left
+## Status & Roadmap
 
-We're at **~95%**. The remaining 5% is launch ops (deploy + custom domain + monitoring). Code-wise the app is complete.
+✅ **Shipped & live** at [capduction.com](https://capduction.com) — Stripe test-mode billing verified end-to-end, all 3 studios serving real Thai output to beta users.
 
-See [docs/BUTTON_AUDIT.md](./docs/BUTTON_AUDIT.md) for the per-page button verification matrix, and [docs/SETUP.md](./docs/SETUP.md) for the deployment checklist.
+**Next up:** flip Stripe to live mode · public testimonials · usage analytics dashboard · mobile app (React Native).
+
+See [docs/CAPDUCTION_PROJECT_DETAILS.md](./docs/CAPDUCTION_PROJECT_DETAILS.md) for the full technical deep-dive, [docs/CAPDUCTION_SE_PROJECT_REPORT.md](./docs/CAPDUCTION_SE_PROJECT_REPORT.md) for the senior-project report, and [docs/SETUP.md](./docs/SETUP.md) for the deployment checklist.
+
+---
+
+## Team
+
+Senior Project · Software Engineering · College of Advanced Manufacturing Innovation (CAMI) · KMITL
+
+- Pissanu Pho-Yu (1660903517)
+- Athit Boonpinit (1660900687)
+- Krit Klinphutson (1660901461)
+- Narintorn Tanvibulya (1660903764)
 
 ---
 
 ## License
-TBD · all rights reserved · built in Bangkok 🇹🇭
+[MIT](./LICENSE) · built in Bangkok 🇹🇭
