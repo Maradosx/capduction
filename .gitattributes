@@ -1,0 +1,15 @@
+# GitHub Linguist overrides — ensure TypeScript is detected as primary language
+# Reference: https://github.com/github-linguist/linguist/blob/main/docs/overrides.md
+
+# Mockup/design exploration folders — vendored, not core source
+mockup/**          linguist-vendored
+brand/**           linguist-vendored
+docs/**            linguist-documentation
+
+# Static HTML/CSS exports — not the application
+*.html             linguist-detectable=false
+
+# Generated files
+package-lock.json  linguist-generated
+*.min.js           linguist-generated
+*.min.css          linguist-generated

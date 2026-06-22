@@ -45,3 +45,13 @@ next-env.d.ts
 
 # claude
 .claude/
+
+# personal reference files (not part of project — exceed GitHub size limits)
+CE08*
+รายละเอียดโครงงาน*
+capduction-conversation.html
+
+# generated docs (keep .md source, ignore binary exports)
+docs/_print.css
+docs/*.pdf
+docs/*.docx
